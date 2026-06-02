@@ -29,10 +29,6 @@
 
   <!-- Contenedor Principal en Formato Dashboard de Dos Columnas -->
   <main class="dashboard-container">
-
-    <!-- ================================================================= -->
-    <!-- 🗂️ COLUMNA IZQUIERDA: CONTROL FINANCIERO Y CATÁLOGOS (SIDEBAR)     -->
-    <!-- ================================================================= -->
     <aside class="sidebar-panel">
 
       <!-- Mini Tarjeta de Tasa de Cambio (Compacta) -->
@@ -81,29 +77,14 @@
             <div class="grupo-input"><label for="est_rango">Rango Referencia:</label><input type="text" id="est_rango"
                 placeholder="Ej. 70 - 100" /></div>
             <div class="grupo-input">
-              <label for="est_tipo">Tipo:</label>
-              <select id="est_tipo">
-                <option value="Individual">Individual</option>
-                <option value="Paquete">Paquete</option>
-              </select>
-            </div>
-            <div class="grupo-input">
               <label for="est_sugerido">Sugerencia:</label>
               <select id="est_sugerido">
                 <option value="Todos">Todos</option>
                 <option value="Hombre">Hombre</option>
                 <option value="Mujer">Mujer</option>
                 <option value="Niño">Niño</option>
-                <option value="Embarazada">Embarazada</option>
               </select>
             </div>
-
-            <!-- Grilla visual para armar paquetes mediante checkboxes -->
-            <div id="adm_bloqueSubExamenes" class="oculto sub-lista-paquete">
-              <label class="lbl-sub">🔬 Seleccione Sub-Exámenes:</label>
-              <div id="adm_listaSubExamenesCheckboxes" class="scroll-sub-box"></div>
-            </div>
-
             <button type="submit" class="btn-primario btn-bloque">Guardar Estudio</button>
           </form>
         </div>
@@ -120,9 +101,6 @@
       </section>
     </aside>
 
-    <!-- ================================================================= -->
-    <!-- 🏢 COLUMNA DERECHA: REGISTRO DE PACIENTES Y CONTROL DE DESPACHO   -->
-    <!-- ================================================================= -->
     <div class="main-content-panel">
 
       <!-- Bloque de Admisión / Registro de Pacientes -->
@@ -132,12 +110,43 @@
 
         <div id="seccionFormPaciente" class="accordion-content">
           <form id="form_registroPaciente" class="grid-paciente-formulario">
-            <!-- MEJORA #1: Campo de cédula con botón de búsqueda para autocompletar datos del paciente -->
-            <div class="grupo-input">
-              <label for="pac_cedula">Cédula:</label>
+            <!-- Checkbox para Menores de Edad -->
+            <div class="grupo-input full-row">
+              <label
+                style="display: flex; gap: 8px; align-items: center; cursor: pointer; text-transform: none; font-size: 0.95rem; background: #e0f2fe; padding: 10px; border-radius: 6px; border: 1px solid #bae6fd;">
+                <input type="checkbox" id="pac_chkEsMenor" style="width: 18px; height: 18px; accent-color: #0ea5e9;" />
+                <span style="color: #0369a1; font-weight: bold;">👶 Registrar Menor de Edad (Sin Cédula Propia)</span>
+              </label>
+            </div>
+
+            <!-- Bloque del Representante (Oculto por defecto) -->
+            <div id="adm_bloqueRepresentante" class="full-row oculto"
+              style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px dashed #cbd5e1; margin-bottom: 10px;">
+              <h4 style="margin-top: 0; margin-bottom: 15px; color: #334155; font-size: 0.9rem;">👨‍👩‍👧 Datos del
+                Representante Legal</h4>
+              <div class="grid-paciente-formulario" style="gap: 10px;">
+                <div class="grupo-input">
+                  <label for="pac_cedulaRep">Cédula Rep.:</label>
+                  <div style="display:flex; gap:6px;">
+                    <input type="text" id="pac_cedulaRep" placeholder="cedula del Representante" style="flex:1" />
+                    <button type="button" id="btn_buscarCedulaRep" class="btn-secundario btn-icon"
+                      title="Buscar representante">🔍</button>
+                  </div>
+                </div>
+                <div class="grupo-input"><label for="pac_nombreRep">Nombre Rep.:</label><input type="text"
+                    id="pac_nombreRep" /></div>
+                <div class="grupo-input"><label for="pac_apellidoRep">Apellido Rep.:</label><input type="text"
+                    id="pac_apellidoRep" /></div>
+              </div>
+            </div>
+
+            <!-- MEJORA #1: Campo de cédula principal (Se oculta si es menor) -->
+            <div class="grupo-input" id="adm_bloqueCedulaPrincipal">
+              <label for="pac_cedula">Cédula Paciente:</label>
               <div style="display:flex; gap:6px;">
-                <input type="text" id="pac_cedula" placeholder="Dejar vacío si es &lt; 9 años" style="flex:1" />
-                <button type="button" id="btn_buscarCedula" class="btn-secundario btn-icon" title="Buscar paciente por cédula">🔍</button>
+                <input type="text" id="pac_cedula" placeholder="Introdusca la cedula del paciente" style="flex:1" />
+                <button type="button" id="btn_buscarCedula" class="btn-secundario btn-icon"
+                  title="Buscar paciente por cédula">🔍</button>
               </div>
             </div>
             <!-- MEJORA #2: Panel de historial de visitas del paciente (oculto hasta que se busque) -->
@@ -172,13 +181,12 @@
                 required /></div>
             <div class="grupo-input full-row"><label for="pac_correo">Correo Electrónico:</label><input type="email"
                 id="pac_correo" required /></div>
-
-            <!-- Grilla de Selección de Exámenes Inteligente con Buscador Integrado -->
+            <!--Grilla de Selección de Exámenes Inteligente con Buscador Integrado-->
             <div class="full-row estudios-selector-box">
               <h3>🔬 Estudios Disponibles para el Paciente <small id="lblSugerenciaBadge"
-                  class="badge-sugerido"></small></h3>
+                  class="badge-sugerido"></small>`</h3>
 
-              <!-- NUEVA BARRA DE BÚSQUEDA CLÍNICA -->
+              <!--BARRA DE BÚSQUEDA CLÍNICA-->
               <div class="buscador-estudios-contenedor"
                 style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center;">
                 <span style="font-size: 1.1rem;">🔍</span>

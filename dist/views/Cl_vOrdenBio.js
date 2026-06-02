@@ -45,13 +45,15 @@ export default class Cl_vBioanalista {
             }
         });
     }
-    // --- GETTERS Y SETTERS ---
+    //obtener id de la orden seleccionada
     get idOrdenSeleccionada() {
         return this.idOrdenActual;
     }
+    //obtener nombre del licenciado
     get nombreLicenciado() {
         return this.inLicenciado.value.trim();
     }
+    //obtener valores de los campos cargados
     getValoresCamposCargados() {
         const inputs = this.panelFormulario.querySelectorAll(".input-resultado");
         const valores = [];
@@ -60,17 +62,17 @@ export default class Cl_vBioanalista {
         });
         return valores;
     }
-    // --- MÉTODOS DE RENDERIZADO EN PANTALLA ---
+    //renderizar pacientes en espera
     renderizarPacientesEnEspera(ordenes) {
         this.listaEspera.innerHTML = ordenes.length === 0
-            ? `<div class="vacio-texto">No hay muestras pendientes en este momento.</div>`
+            ? `<div class="vacio-texto">⏳ No hay muestras pendientes en este momento.</div>`
             : "";
         ordenes.forEach(o => {
             const div = document.createElement("div");
             div.className = "paciente-tarjeta espera";
             div.innerHTML = `
         <div>
-          <strong>Orden #${o.id} - ${o.apellido} ${o.nombre}</strong><br>
+          <strong>📋 Orden #${o.id} - 👤 ${o.apellido} ${o.nombre}</strong><br>
           <small>⏱️ Registro: ${o.fechaRegistro}</small><br>
           <small>🔬 Estudios: ${o.examenesSolicitados}</small>
         </div>
@@ -79,21 +81,22 @@ export default class Cl_vBioanalista {
             this.listaEspera.appendChild(div);
         });
     }
+    //renderizar pacientes atendidos
     renderizarPacientesAtendidos(ordenes) {
         this.listaAtendidos.innerHTML = ordenes.length === 0
-            ? `<li class="vacio-texto">No has procesado órdenes en este turno.</li>`
+            ? `<li class="vacio-texto">✅ No has procesado órdenes en este turno.</li>`
             : "";
         ordenes.forEach(o => {
             const li = document.createElement("li");
             li.className = "item-atendido";
             li.innerHTML = `
-        <span><b>Orden #${o.id}</b> - ${o.cedula} ${o.apellido} (${o.examenesSolicitados})</span>
-        <span class="badge status-listo">ENVIADO</span>
+        <span>📋 <b>Orden #${o.id}</b> - 👤 ${o.cedula} ${o.apellido} (🔬 ${o.examenesSolicitados})</span>
+        <span class="badge status-listo">✔ ENVIADO</span>
       `;
             this.listaAtendidos.appendChild(li);
         });
     }
-    // --- FORMULARIO TÉCNICO DE TRANCRIPCIÓN CLÍNICA ---
+    //mostrar formulario de carga de examenes
     mostrarFormularioCarga(orden) {
         this.idOrdenActual = orden.id;
         this.examenesCargadosLocales = orden.resultados;
@@ -103,12 +106,12 @@ export default class Cl_vBioanalista {
         const contenedorTabla = document.getElementById("bio_tablaInputs");
         contenedorCabecera.innerHTML = `
       <div class="grid-form" style="margin-bottom: 17px;">
-        <p><b>Nro. Orden:</b> #${orden.id}</p>
-        <p><b>Fecha/Hora Registro:</b> ${orden.fechaRegistro}</p>
-        <p><b>Paciente:</b> ${orden.apellido} ${orden.nombre}</p>
-        <p><b>Cédula:</b> ${orden.cedula}</p>
-        <p><b>Edad:</b> ${orden.edad} Años</p>
-        <p><b>Género:</b> ${orden.sexo}</p>
+        <p><b>📋 Nro. Orden:</b> #${orden.id}</p>
+        <p><b>⏱️ Fecha/Hora Registro:</b> ${orden.fechaRegistro}</p>
+        <p><b>👤 Paciente:</b> ${orden.apellido} ${orden.nombre}</p>
+        <p><b>💳 Cédula:</b> ${orden.cedula}</p>
+        <p><b>🎂 Edad:</b> ${orden.edad}</p>
+        <p><b>⚧ Género:</b> ${orden.sexo}</p>
       </div>
       <p class="resultado-busqueda" style="background: #ebf8ff; color: #2b6cb0; font-weight: bold;">
         🔬 Estudios a Procesar: ${orden.examenesSolicitados}
@@ -125,7 +128,7 @@ export default class Cl_vBioanalista {
       </div>
     `).join("");
     }
-    // --- MÉTODOS DE LIMPIEZA Y CALLBACKS ---
+    //limpiar formulario de carga
     limpiarFormularioCarga() {
         this.idOrdenActual = "";
         this.examenesCargadosLocales = [];
@@ -135,16 +138,15 @@ export default class Cl_vBioanalista {
         this.panelFormulario.classList.add("oculto");
         document.getElementById("bio_panelVacio")?.classList.remove("oculto");
     }
+    //callback para seleccionar paciente
     onSeleccionarPaciente(callback) {
         this.manejadorSeleccionarPaciente = callback;
     }
+    //callback para enviar resultados
     onEnviarResultadosALaboratorio(callback) {
         this.btEnviar.onclick = callback;
     }
-    /**
-     * Notificación flotante tipo toast. Mismo comportamiento que en la pantalla de Recepción.
-     * Requiere que el HTML del Bioanalista tenga un div#toast-container.
-     */
+    //mostrar toast
     mostrarToast(mensaje, tipo) {
         const container = document.getElementById("toast-container");
         if (!container)

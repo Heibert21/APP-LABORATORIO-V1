@@ -10,7 +10,6 @@ Gestión de pacientes y exámenes médicos.
 *  además puede ver en el panel los estudios finalizados para imprimir y reportar al paciente.
 */
 
-
 import { I_vOrdenBio } from "../interfaces/I_vOrdenBio.js";
 import Cl_mOrdenBio from "../models/Cl_mOrdenBio.js";
 import Cl_sOrdenBio from "../services/Cl_sOrdenBio.js";
@@ -46,7 +45,6 @@ export default class Cl_cOrdenBio {
       console.error("Error al inicializar la App del Bioanalista:", error);
     }
   }
-
   async procesarSeleccionPaciente(idOrden: string) {
     try {
       const datosPlanos = await Cl_sOrdenBio.buscarOrdenPorId(idOrden);
@@ -67,22 +65,22 @@ export default class Cl_cOrdenBio {
       this.vista.mostrarToast("Introduzca el nombre del Lic. Bioanalista que valida los resultados.", "advertencia");
       return;
     }
-
+    // obtener datos de la orden
     const idOrden = this.vista.idOrdenSeleccionada;
     const camposCargados = this.vista.getValoresCamposCargados();
     const algunoVacio = camposCargados.some(c => c.valor === "");
-
+    // confirmar envio de resultados
     if (algunoVacio && !confirm("Hay casillas de resultados vacías. ¿Desea enviar la orden de todas formas?")) {
       return;
     }
-
+    // enviar resultados al laboratorio
     try {
       const ordenOriginal = await Cl_sOrdenBio.buscarOrdenPorId(idOrden);
       if (!ordenOriginal) {
         this.vista.mostrarToast("Error: No se encontró la orden original en el servidor.", "error");
         return;
       }
-
+      // obtener datos de la orden
       this.modelo.id = ordenOriginal.id;
       this.modelo.cedula = ordenOriginal.cedula;
       this.modelo.nombre = ordenOriginal.nombre;
@@ -97,18 +95,13 @@ export default class Cl_cOrdenBio {
       this.modelo.horaEntregaEstimada = ordenOriginal.horaEntregaEstimada || "";
       this.modelo.examenesSolicitados = ordenOriginal.examenesSolicitados;
       this.modelo.resultados = ordenOriginal.resultados;
-
       camposCargados.forEach(campo => {
         this.modelo.registrarValorResultado(campo.parametro, campo.valor);
       });
-
       this.modelo.licBioanalista = this.vista.nombreLicenciado;
       this.modelo.status = "Listo para Despacho";
-
       const exito = await Cl_sOrdenBio.despacharOCerrarOrden(idOrden, this.modelo.toJSON());
-
       if (exito.ok) {
-        // MEJORA #9: Toast de éxito en lugar de alert
         this.vista.mostrarToast("¡Resultados cargados con éxito!", "exito");
         this.vista.limpiarFormularioCarga();
         this.inicializarApp();

@@ -5,29 +5,35 @@ export default class Cl_mLaboratorio {
     constructor(tasaInicial = 0) {
         this._tasaCambio = tasaInicial;
     }
-    get tasaCambio() { return this._tasaCambio; }
-    set tasaCambio(nuevaTasa) { this._tasaCambio = nuevaTasa; }
-    get ordenes() { return this._ordenes; }
+    get tasaCambio() {
+        return this._tasaCambio;
+    }
+    set tasaCambio(nuevaTasa) {
+        this._tasaCambio = nuevaTasa;
+    }
+    get ordenes() {
+        return this._ordenes;
+    }
     setOrdenes(arrayPlanos) {
         this._ordenes = [];
         arrayPlanos.forEach((o) => {
             this._ordenes.push(new Cl_mOrdenBio(o)); // Rehidrata directamente usando el modelo único
         });
     }
-    determinarSugerenciaMedica(fechaNacimiento, sexo, esEmbarazada) {
+    determinarSugerenciaMedica(fechaNacimiento, sexo) {
         if (!fechaNacimiento)
             return "Todos";
-        const edad = Cl_mOrdenBio.calcularEdadDesdeFecha(fechaNacimiento);
-        if (edad < 12)
+        const edad = Cl_mOrdenBio.calcularEdad(fechaNacimiento);
+        const edadAnios = Cl_mOrdenBio.convertirEdadAAños(edad);
+        if (edadAnios < 12)
             return "Niño";
-        if (sexo === "Femenino" && esEmbarazada)
-            return "Embarazada";
         if (sexo === "Femenino")
             return "Mujer";
         if (sexo === "Masculino")
             return "Hombre";
         return "Todos";
     }
+    // Metodo que permite crear una estructura vacia para los resultados de los examenes
     crearEstructuraResultadosVacios(nombre, unidad, rango) {
         return [{
                 parametro: nombre,
@@ -46,16 +52,34 @@ export default class Cl_mLaboratorio {
      @param apellido Apellido del paciente a registrar.
      @returns `true` si la cédula ya está registrada con un nombre diferente (conflicto).
      */
-    validarDuplicadoPaciente(cedula, nombre, apellido) {
+    validarDuplicadoPaciente(cedula, nombre, apellido, isMenor = false, cedulaRep = "", nombreRep = "", apellidoRep = "") {
         const cedulaNorm = cedula.trim().toLowerCase();
-        // Si la cédula es MENOR, no aplicamos validación de identidad 
-        // (pueden haber muchos niños distintos sin cédula)
-        if (cedulaNorm === "menor")
-            return false;
         const nombreNorm = nombre.trim().toLowerCase();
         const apellidoNorm = apellido.trim().toLowerCase();
-        // Buscar si la cédula ya existe en el sistema con otro nombre
+        const cedulaRepNorm = cedulaRep.trim().toLowerCase();
+        const nombreRepNorm = nombreRep.trim().toLowerCase();
+        const apellidoRepNorm = apellidoRep.trim().toLowerCase();
+        // Si es menor, la validación de identidad se hace sobre el representante
+        if (isMenor && cedulaRepNorm !== "") {
+            return this._ordenes.some(orden => {
+                // Ignoramos órdenes viejas que no tengan cedulaRepresentante
+                if (!orden.cedulaRepresentante)
+                    return false;
+                const mismaCedulaRep = orden.cedulaRepresentante.trim().toLowerCase() === cedulaRepNorm;
+                const mismoNombreRep = orden.nombreRepresentante.trim().toLowerCase() === nombreRepNorm;
+                const mismoApellidoRep = orden.apellidoRepresentante.trim().toLowerCase() === apellidoRepNorm;
+                // Conflicto: misma cédula de representante pero distinto nombre/apellido
+                return mismaCedulaRep && !(mismoNombreRep && mismoApellidoRep);
+            });
+        }
+        // Si no es menor pero tiene cédula "menor" (legacy), lo dejamos pasar
+        if (cedulaNorm === "menor")
+            return false;
+        // Buscar si la cédula del paciente ya existe en el sistema con otro nombre
         return this._ordenes.some(orden => {
+            // Ignoramos si la orden guardada es de un menor
+            if (orden.cedula.trim().toLowerCase() === "menor")
+                return false;
             const mismaCedula = orden.cedula.trim().toLowerCase() === cedulaNorm;
             const mismoNombre = orden.nombre.trim().toLowerCase() === nombreNorm;
             const mismoApellido = orden.apellido.trim().toLowerCase() === apellidoNorm;
@@ -74,6 +98,7 @@ export default class Cl_mLaboratorio {
         // Multiplica dinámicamente el total de dólares por la tasa del día
         return this.calcularMontoTotalUsd() * this._tasaCambio;
     }
+    // Metodo que permite obtener el estudio mas solicitado
     obtenerEstudioMasSolicitado() {
         const conteoGlobal = {};
         this._ordenes.forEach(orden => {
@@ -92,6 +117,7 @@ export default class Cl_mLaboratorio {
         }
         return maxCantidad > 0 ? `${estudioMasVendido} (${maxCantidad} sols)` : "Ninguno";
     }
+    // Metodo que permite calcular la estructura de la factura
     calcularEstructuraFactura(estudiosElegidos) {
         let totalUsd = 0;
         let tiempoMaxHoras = 0;
@@ -112,6 +138,7 @@ export default class Cl_mLaboratorio {
         const totalBs = totalUsd * this._tasaCambio;
         return { totalUsd, totalBs, tiempoMaxHoras, matrizResultados };
     }
+    // Metodo que permite calcular los tiempos de entrega
     calcularTiemposEntrega(horasProcesamiento) {
         const ahora = new Date();
         const horaPrometida = new Date(ahora.getTime() + horasProcesamiento * 60 * 60 * 1000);

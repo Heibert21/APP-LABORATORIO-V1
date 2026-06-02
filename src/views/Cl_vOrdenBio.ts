@@ -7,7 +7,7 @@ export default class Cl_vBioanalista implements I_vOrdenBio {
   private listaAtendidos: HTMLElement;
   private panelFormulario: HTMLElement;
   private inLicenciado: HTMLInputElement;
-  private btEnviar: HTMLButtonElement; 
+  private btEnviar: HTMLButtonElement;
   private idOrdenActual: string = "";
   private examenesCargadosLocales: IResultadoExamen[] = [];
   private manejadorSeleccionarPaciente!: (idOrden: string) => void;
@@ -35,12 +35,11 @@ export default class Cl_vBioanalista implements I_vOrdenBio {
       if (target.classList.contains("input-resultado")) {
         const valor = target.value.trim();
         const fila = target.closest(".fila-medica") as HTMLElement;
-        const rangoTexto = fila.querySelector(".referencia-texto")?.textContent || ""; 
-        
+        const rangoTexto = fila.querySelector(".referencia-texto")?.textContent || "";
         // REGLA DE NEGOCIO DELEGADA: Evaluada por la función estática del Modelo Unificado
         const esInvalido = Cl_mOrdenBio.validarRangoTexto(valor, rangoTexto);
         if (esInvalido) {
-          fila.classList.add("border-pago"); 
+          fila.classList.add("border-pago");
           target.style.color = "red";
           target.style.fontWeight = "bold";
         } else {
@@ -51,16 +50,15 @@ export default class Cl_vBioanalista implements I_vOrdenBio {
       }
     });
   }
-
-  // --- GETTERS Y SETTERS ---
-  public get idOrdenSeleccionada(): string { 
-    return this.idOrdenActual; 
+  //obtener id de la orden seleccionada
+  public get idOrdenSeleccionada(): string {
+    return this.idOrdenActual;
   }
-
-  public get nombreLicenciado(): string { 
-    return this.inLicenciado.value.trim(); 
+  //obtener nombre del licenciado
+  public get nombreLicenciado(): string {
+    return this.inLicenciado.value.trim();
   }
-
+  //obtener valores de los campos cargados
   public getValoresCamposCargados(): { parametro: string; valor: string }[] {
     const inputs = this.panelFormulario.querySelectorAll(".input-resultado") as NodeListOf<HTMLInputElement>;
     const valores: { parametro: string; valor: string }[] = [];
@@ -69,17 +67,17 @@ export default class Cl_vBioanalista implements I_vOrdenBio {
     });
     return valores;
   }
-  // --- MÉTODOS DE RENDERIZADO EN PANTALLA ---
+  //renderizar pacientes en espera
   public renderizarPacientesEnEspera(ordenes: Cl_mOrdenBio[]): void {
     this.listaEspera.innerHTML = ordenes.length === 0
-      ? `<div class="vacio-texto">No hay muestras pendientes en este momento.</div>` 
+      ? `<div class="vacio-texto">⏳ No hay muestras pendientes en este momento.</div>`
       : "";
     ordenes.forEach(o => {
       const div = document.createElement("div");
       div.className = "paciente-tarjeta espera";
       div.innerHTML = `
         <div>
-          <strong>Orden #${o.id} - ${o.apellido} ${o.nombre}</strong><br>
+          <strong>📋 Orden #${o.id} - 👤 ${o.apellido} ${o.nombre}</strong><br>
           <small>⏱️ Registro: ${o.fechaRegistro}</small><br>
           <small>🔬 Estudios: ${o.examenesSolicitados}</small>
         </div>
@@ -88,46 +86,42 @@ export default class Cl_vBioanalista implements I_vOrdenBio {
       this.listaEspera.appendChild(div);
     });
   }
-
+  //renderizar pacientes atendidos
   public renderizarPacientesAtendidos(ordenes: Cl_mOrdenBio[]): void {
     this.listaAtendidos.innerHTML = ordenes.length === 0
-      ? `<li class="vacio-texto">No has procesado órdenes en este turno.</li>` 
+      ? `<li class="vacio-texto">✅ No has procesado órdenes en este turno.</li>`
       : "";
     ordenes.forEach(o => {
       const li = document.createElement("li");
       li.className = "item-atendido";
       li.innerHTML = `
-        <span><b>Orden #${o.id}</b> - ${o.cedula} ${o.apellido} (${o.examenesSolicitados})</span>
-        <span class="badge status-listo">ENVIADO</span>
+        <span>📋 <b>Orden #${o.id}</b> - 👤 ${o.cedula} ${o.apellido} (🔬 ${o.examenesSolicitados})</span>
+        <span class="badge status-listo">✔ ENVIADO</span>
       `;
       this.listaAtendidos.appendChild(li);
     });
   }
-
-  // --- FORMULARIO TÉCNICO DE TRANCRIPCIÓN CLÍNICA ---
+  //mostrar formulario de carga de examenes
   public mostrarFormularioCarga(orden: Cl_mOrdenBio): void {
     this.idOrdenActual = orden.id;
     this.examenesCargadosLocales = orden.resultados;
     this.panelFormulario.classList.remove("oculto");
-    document.getElementById("bio_panelVacio")?.classList.add("oculto"); 
-    
+    document.getElementById("bio_panelVacio")?.classList.add("oculto");
     const contenedorCabecera = document.getElementById("bio_cabeceraPaciente") as HTMLElement;
-    const contenedorTabla = document.getElementById("bio_tablaInputs") as HTMLElement; 
-    
+    const contenedorTabla = document.getElementById("bio_tablaInputs") as HTMLElement;
     contenedorCabecera.innerHTML = `
       <div class="grid-form" style="margin-bottom: 17px;">
-        <p><b>Nro. Orden:</b> #${orden.id}</p>
-        <p><b>Fecha/Hora Registro:</b> ${orden.fechaRegistro}</p>
-        <p><b>Paciente:</b> ${orden.apellido} ${orden.nombre}</p>
-        <p><b>Cédula:</b> ${orden.cedula}</p>
-        <p><b>Edad:</b> ${orden.edad} Años</p>
-        <p><b>Género:</b> ${orden.sexo}</p>
+        <p><b>📋 Nro. Orden:</b> #${orden.id}</p>
+        <p><b>⏱️ Fecha/Hora Registro:</b> ${orden.fechaRegistro}</p>
+        <p><b>👤 Paciente:</b> ${orden.apellido} ${orden.nombre}</p>
+        <p><b>💳 Cédula:</b> ${orden.cedula}</p>
+        <p><b>🎂 Edad:</b> ${orden.edad}</p>
+        <p><b>⚧ Género:</b> ${orden.sexo}</p>
       </div>
       <p class="resultado-busqueda" style="background: #ebf8ff; color: #2b6cb0; font-weight: bold;">
         🔬 Estudios a Procesar: ${orden.examenesSolicitados}
       </p>
     `;
-
     contenedorTabla.innerHTML = orden.resultados.map((res: IResultadoExamen) => `
       <div class="fila-medica">
         <span class="label-medico"><b>${res.parametro}</b></span>
@@ -139,8 +133,7 @@ export default class Cl_vBioanalista implements I_vOrdenBio {
       </div>
     `).join("");
   }
-
-  // --- MÉTODOS DE LIMPIEZA Y CALLBACKS ---
+  //limpiar formulario de carga
   public limpiarFormularioCarga(): void {
     this.idOrdenActual = "";
     this.examenesCargadosLocales = [];
@@ -150,19 +143,15 @@ export default class Cl_vBioanalista implements I_vOrdenBio {
     this.panelFormulario.classList.add("oculto");
     document.getElementById("bio_panelVacio")?.classList.remove("oculto");
   }
-
+  //callback para seleccionar paciente
   public onSeleccionarPaciente(callback: (idOrden: string) => void): void {
     this.manejadorSeleccionarPaciente = callback;
   }
-
-  public onEnviarResultadosALaboratorio(callback: () => void): void { 
-    this.btEnviar.onclick = callback; 
+  //callback para enviar resultados
+  public onEnviarResultadosALaboratorio(callback: () => void): void {
+    this.btEnviar.onclick = callback;
   }
-
-  /**
-   * Notificación flotante tipo toast. Mismo comportamiento que en la pantalla de Recepción.
-   * Requiere que el HTML del Bioanalista tenga un div#toast-container.
-   */
+  //mostrar toast
   public mostrarToast(mensaje: string, tipo: "exito" | "error" | "info" | "advertencia"): void {
     const container = document.getElementById("toast-container");
     if (!container) return;

@@ -1,3 +1,14 @@
+/*🔬5. Laboratorio Clínico
+Gestión de pacientes y exámenes médicos.
+
+* Configuración: El personal carga la lista de estudios de laboratorio.
+* APP de Usuarios (Bioanalista): Visualizan el menú, seleccionan los pacientes
+*  y carga los resultados de los exámenes y una vez cargado marca como finalizado
+*  (listo para imprimir).
+* APP del Personal (Administración): Toma los datos del paciente
+*  e indica los estudios de laboratorio que se realizaran y la cobranza,
+*  además puede ver en el panel los estudios finalizados para imprimir y reportar al paciente.
+*/
 import Cl_mOrdenBio from "../models/Cl_mOrdenBio.js";
 import Cl_sOrdenBio from "../services/Cl_sOrdenBio.js";
 export default class Cl_cOrdenBio {
@@ -47,18 +58,22 @@ export default class Cl_cOrdenBio {
             this.vista.mostrarToast("Introduzca el nombre del Lic. Bioanalista que valida los resultados.", "advertencia");
             return;
         }
+        // obtener datos de la orden
         const idOrden = this.vista.idOrdenSeleccionada;
         const camposCargados = this.vista.getValoresCamposCargados();
         const algunoVacio = camposCargados.some(c => c.valor === "");
+        // confirmar envio de resultados
         if (algunoVacio && !confirm("Hay casillas de resultados vacías. ¿Desea enviar la orden de todas formas?")) {
             return;
         }
+        // enviar resultados al laboratorio
         try {
             const ordenOriginal = await Cl_sOrdenBio.buscarOrdenPorId(idOrden);
             if (!ordenOriginal) {
                 this.vista.mostrarToast("Error: No se encontró la orden original en el servidor.", "error");
                 return;
             }
+            // obtener datos de la orden
             this.modelo.id = ordenOriginal.id;
             this.modelo.cedula = ordenOriginal.cedula;
             this.modelo.nombre = ordenOriginal.nombre;
@@ -80,7 +95,6 @@ export default class Cl_cOrdenBio {
             this.modelo.status = "Listo para Despacho";
             const exito = await Cl_sOrdenBio.despacharOCerrarOrden(idOrden, this.modelo.toJSON());
             if (exito.ok) {
-                // MEJORA #9: Toast de éxito en lugar de alert
                 this.vista.mostrarToast("¡Resultados cargados con éxito!", "exito");
                 this.vista.limpiarFormularioCarga();
                 this.inicializarApp();

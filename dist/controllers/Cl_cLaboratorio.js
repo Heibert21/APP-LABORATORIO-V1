@@ -15,16 +15,12 @@ export default class Cl_cLaboratorio {
         this.vista.onCambioFiltroSugerido(() => this.evaluarEdadYSexoParaSugerencias());
         this.vista.onDespacharOrden((id, metodo) => this.ejecutarDespachoFinalPaciente(id, metodo));
         this.vista.onCambioChecks(() => this.recalcularTotalesEnTiempoReal());
-        // MEJORA #1: Cuando el recepcionista escribe una cédula y pulsa 🔍,
-        // buscamos si ya existe en el historial para autocompletar el formulario.
         this.vista.onBuscarCedulaPaciente((cedula) => this.buscarPacientePorCedula(cedula));
-        // MEJORA #6: El botón "Exportar Cierre" arma los datos y llama a exportarCajaDelDia().
         this.vista.onExportarCaja(() => this.procesarExportarCaja());
         this.vista.onEliminarOrdenEspera((id) => this.procesarEliminarOrdenEspera(id));
         this.vista.onEditarOrdenEspera((id) => this.procesarEditarOrdenEspera(id));
     }
     async cargarConfiguracionesYListas() {
-        // MEJORA #8: Mostramos el spinner mientras cargamos la configuración inicial
         this.vista.mostrarSpinner();
         try {
             const tasa = await Cl_sLaboratorio.obtenerTasaDinamica();
@@ -32,7 +28,6 @@ export default class Cl_cLaboratorio {
             this.vista.setTasaActual(tasa);
             this.catalogoEstudiosCoche = await Cl_sLaboratorio.obtenerEstudios();
             this.vista.renderizarListaCatalogo(this.catalogoEstudiosCoche);
-            this.vista.renderizarSubExamenesParaPaquete(this.catalogoEstudiosCoche);
             this.evaluarEdadYSexoParaSugerencias();
             await this.actualizarMonitorYEstadisticas();
         }
@@ -41,7 +36,6 @@ export default class Cl_cLaboratorio {
             this.vista.mostrarToast("Error de conexión al cargar la configuración.", "error");
         }
         finally {
-            // MEJORA #8: El spinner siempre se oculta, aunque haya error
             this.vista.ocultarSpinner();
         }
     }
@@ -67,8 +61,7 @@ export default class Cl_cLaboratorio {
     evaluarEdadYSexoParaSugerencias() {
         const fechaNac = this.vista.pacFechaNac;
         const sexo = this.vista.pacSexo;
-        const embarazada = this.vista.pacEmbarazada;
-        const clasificacion = this.modeloGlobal.determinarSugerenciaMedica(fechaNac, sexo, embarazada);
+        const clasificacion = this.modeloGlobal.determinarSugerenciaMedica(fechaNac, sexo);
         this.vista.renderizarEstudiosDisponibles(this.catalogoEstudiosCoche, clasificacion);
         this.recalcularTotalesEnTiempoReal();
     }
@@ -83,7 +76,6 @@ export default class Cl_cLaboratorio {
     async procesarCambioTasa() {
         const valorTasa = this.vista.nuevaTasa;
         if (valorTasa <= 0) {
-            // MEJORA #9: Toast en lugar de alert
             this.vista.mostrarToast("Introduzca una tasa válida mayor a cero.", "advertencia");
             return;
         }
@@ -108,43 +100,21 @@ export default class Cl_cLaboratorio {
         const nombre = this.vista.estNombre;
         const precio = this.vista.estPrecio;
         const tiempo = this.vista.estTiempo;
-        const tipo = this.vista.estTipo;
         const sugerido = this.vista.estSugerido;
         const unidad = this.vista.estUnidad || "";
         const rango = this.vista.estRango || "";
         if (!id || !nombre || precio <= 0 || tiempo <= 0) {
-            // MEJORA #3: Validación robusta con toast en lugar de alert
             this.vista.mostrarToast("Rellene todos los campos obligatorios del estudio correctamente.", "advertencia");
             return;
         }
         let parametrosVaciosFinal = [];
-        if (tipo === "Individual") {
-            parametrosVaciosFinal = this.modeloGlobal.crearEstructuraResultadosVacios(nombre, unidad, rango);
-        }
-        else if (tipo === "Paquete") {
-            const codigosMarcados = this.vista.getSubExamenesSeleccionados();
-            if (codigosMarcados.length === 0) {
-                this.vista.mostrarToast("Seleccione al menos un examen para armar el paquete.", "advertencia");
-                return;
-            }
-            codigosMarcados.forEach((codigo) => {
-                const examenEncontrado = this.catalogoEstudiosCoche.find(e => e.id === codigo);
-                if (examenEncontrado && examenEncontrado.parametrosAsociados) {
-                    examenEncontrado.parametrosAsociados.forEach((param) => {
-                        if (!parametrosVaciosFinal.some(p => p.parametro === param.parametro)) {
-                            parametrosVaciosFinal.push({ ...param, resultado: "" });
-                        }
-                    });
-                }
-            });
-        }
+        parametrosVaciosFinal = this.modeloGlobal.crearEstructuraResultadosVacios(nombre, unidad, rango);
         const nuevoEstudioPlano = {
             id: id,
             codigo: id,
             nombre,
             precio,
             tiempoProcesamiento: tiempo,
-            tipo,
             sugeridoPara: sugerido,
             parametrosAsociados: parametrosVaciosFinal
         };
@@ -152,12 +122,10 @@ export default class Cl_cLaboratorio {
         try {
             const respuesta = await Cl_sLaboratorio.registrarEstudioCatalogo(nuevoEstudioPlano);
             if (respuesta.ok) {
-                // MEJORA #9: Toast de éxito en lugar de alert
                 this.vista.mostrarToast(`Estudio [${id}] incorporado exitosamente.`, "exito");
                 this.vista.limpiarFormEstudio();
                 this.catalogoEstudiosCoche = await Cl_sLaboratorio.obtenerEstudios();
                 this.vista.renderizarListaCatalogo(this.catalogoEstudiosCoche);
-                this.vista.renderizarSubExamenesParaPaquete(this.catalogoEstudiosCoche);
                 this.evaluarEdadYSexoParaSugerencias();
             }
         }
@@ -171,7 +139,6 @@ export default class Cl_cLaboratorio {
     async procesarBajaEstudioCatálogo(id) {
         if (!confirm(`¿Está seguro de que desea eliminar el estudio clínico [${id}] del catálogo?`))
             return;
-        // MEJORA #7: Verificar si el estudio tiene órdenes activas antes de eliminar
         const tieneOrdenesActivas = this.modeloGlobal.ordenes.some(o => o.status === "En Espera" && o.examenesSolicitados.toLowerCase().includes(id.toLowerCase()));
         if (tieneOrdenesActivas) {
             this.vista.mostrarToast(`No se puede eliminar [${id}]: tiene órdenes activas en espera.`, "error");
@@ -184,7 +151,6 @@ export default class Cl_cLaboratorio {
                 this.vista.mostrarToast("Estudio removido del catálogo correctamente.", "exito");
                 this.catalogoEstudiosCoche = await Cl_sLaboratorio.obtenerEstudios();
                 this.vista.renderizarListaCatalogo(this.catalogoEstudiosCoche);
-                this.vista.renderizarSubExamenesParaPaquete(this.catalogoEstudiosCoche);
                 this.evaluarEdadYSexoParaSugerencias();
             }
         }
@@ -198,7 +164,6 @@ export default class Cl_cLaboratorio {
     async procesarCierreYFacturacionOrden() {
         const codigosSeleccionados = this.vista.getEstudiosSeleccionados();
         if (codigosSeleccionados.length === 0) {
-            // MEJORA #3: Validación con toast en lugar de alert bloqueante
             this.vista.mostrarToast("Seleccione al menos un estudio de laboratorio para el paciente.", "advertencia");
             return;
         }
@@ -206,34 +171,42 @@ export default class Cl_cLaboratorio {
         const calculosFactura = this.modeloGlobal.calcularEstructuraFactura(estudiosElegidos);
         const tiemposEntrega = this.modeloGlobal.calcularTiemposEntrega(calculosFactura.tiempoMaxHoras);
         const listaNombresExamenes = estudiosElegidos.map(e => e.nombre).join(", ");
-        const edadCalculada = Cl_mOrdenBio.calcularEdadDesdeFecha(this.vista.pacFechaNac);
+        const edadCalculada = Cl_mOrdenBio.calcularEdad(this.vista.pacFechaNac);
+        const edadAnios = Cl_mOrdenBio.convertirEdadAAños(edadCalculada);
         const cedulaEscrita = this.vista.pacCedula.trim();
-        // --- VALIDACIÓN DE CÉDULA SEGÚN EDAD ---
-        if (edadCalculada < 9 && cedulaEscrita !== "") {
-            this.vista.mostrarToast("Un paciente menor de 9 años no puede tener cédula.", "advertencia");
-            return;
+        const esMenor = this.vista.isMenor;
+        const cedulaRep = this.vista.pacCedulaRep.trim();
+        const nombreRep = this.vista.pacNombreRep.trim();
+        const apellidoRep = this.vista.pacApellidoRep.trim();
+        // --- VALIDACIÓN DE CÉDULA SEGÚN SI ES MENOR O NO ---
+        if (esMenor) {
+            if (!cedulaRep || !nombreRep) {
+                this.vista.mostrarToast("Debe ingresar la cédula y nombre del representante legal para un menor.", "advertencia");
+                return;
+            }
         }
-        if (edadCalculada >= 9 && cedulaEscrita === "") {
-            this.vista.mostrarToast("Debe ingresar la cédula para pacientes mayores o iguales a 9 años.", "advertencia");
-            return;
+        else {
+            if (!cedulaEscrita) {
+                this.vista.mostrarToast("Debe ingresar la cédula del paciente.", "advertencia");
+                return;
+            }
         }
-        const cedulaFinal = (edadCalculada < 9) ? "MENOR" : cedulaEscrita;
+        const cedulaFinal = esMenor ? "MENOR" : cedulaEscrita;
         // --- VALIDACIÓN: cédula + nombre únicos por paciente ---
-        // Un paciente puede hacerse exámenes múltiples veces, pero NO se permite
-        // registrar una orden con exactamente la misma cédula Y el mismo nombre completo.
-        const esDuplicado = this.modeloGlobal.validarDuplicadoPaciente(cedulaFinal, this.vista.pacNombre, this.vista.pacApellido);
+        const esDuplicado = this.modeloGlobal.validarDuplicadoPaciente(cedulaFinal, this.vista.pacNombre, this.vista.pacApellido, esMenor, cedulaRep, nombreRep, apellidoRep);
         if (esDuplicado) {
-            // MEJORA #9: Toast de error en lugar de alert bloqueante para conflicto de identidad
             this.vista.mostrarToast(`⚠️ La cédula "${cedulaFinal}" ya existe con otro nombre. Verifique los datos.`, "error");
             return;
         }
         const nuevaOrden = {
             cedula: cedulaFinal,
+            cedulaRepresentante: esMenor ? cedulaRep : "",
+            nombreRepresentante: esMenor ? nombreRep : "",
+            apellidoRepresentante: esMenor ? apellidoRep : "",
             nombre: this.vista.pacNombre,
             apellido: this.vista.pacApellido,
             edad: edadCalculada,
             sexo: this.vista.pacSexo,
-            esEmbarazada: this.vista.pacEmbarazada,
             telefono: this.vista.pacTelefono,
             correo: this.vista.pacCorreo,
             metodoPago: this.vista.pacMetodoPago,
@@ -249,7 +222,6 @@ export default class Cl_cLaboratorio {
         try {
             const respuesta = await Cl_sLaboratorio.registrarNuevaOrden(nuevaOrden);
             if (respuesta.ok) {
-                // MEJORA #9: Toast de éxito con la hora de retiro
                 this.vista.mostrarToast(`¡Orden procesada! Retiro estimado: ${tiemposEntrega.entrega}.`, "exito");
                 this.vista.limpiarFormPaciente();
                 await this.actualizarMonitorYEstadisticas();
@@ -290,6 +262,10 @@ export default class Cl_cLaboratorio {
         const nuevoCorreo = prompt("Ingrese el nuevo correo electrónico:", ordenActual.correo);
         if (nuevoCorreo === null)
             return; // Cancelado
+        if (nuevoTelefono.trim() === "" && nuevoCorreo.trim() === "") {
+            this.vista.mostrarToast("Debe proveer al menos un dato válido de contacto.", "advertencia");
+            return;
+        }
         this.vista.mostrarSpinner();
         try {
             await Cl_sLaboratorio.actualizarOrden(id, { telefono: nuevoTelefono, correo: nuevoCorreo });
@@ -314,7 +290,6 @@ export default class Cl_cLaboratorio {
                 this.vista.imprimirReporteResultadosPDF(orden);
             }
             else if (metodo === "WhatsApp") {
-                // MEJORA #9: Toast informativo en lugar de alert
                 this.vista.mostrarToast(`📱 PDF enviado al número ${orden.telefono}`, "exito");
             }
             else if (metodo === "Correo") {
@@ -329,9 +304,6 @@ export default class Cl_cLaboratorio {
     getCleanEstId() {
         return this.vista.estId;
     }
-    // =================================================================
-    // MEJORA #1: Buscar paciente existente por cédula para autocompletar
-    // =================================================================
     /**
      * Busca en el historial de órdenes si ya existe algún registro con la cédula dada.
      * Si lo encuentra: autocompleta el formulario y muestra el historial de visitas.
@@ -339,22 +311,31 @@ export default class Cl_cLaboratorio {
      */
     buscarPacientePorCedula(cedula) {
         const cedulaNorm = cedula.trim().toLowerCase();
-        // Filtramos todas las órdenes que coincidan con esa cédula
-        const ordenesDelPaciente = this.modeloGlobal.ordenes.filter(o => o.cedula.trim().toLowerCase() === cedulaNorm);
+        // Validación Evitar búsquedas vacías
+        if (!cedulaNorm) {
+            this.vista.mostrarToast("Por favor, ingrese un número de cédula válido para buscar.", "advertencia");
+            return;
+        }
+        // Validación Evitar buscar pacientes con la cédula genérica "MENOR"
+        if (cedulaNorm === "menor") {
+            this.vista.mostrarToast("No se puede autocompletar el historial con la cédula genérica 'MENOR'.", "advertencia");
+            this.vista.mostrarHistorialPaciente([]);
+            return;
+        }
+        // Filtramos todas las órdenes que coincidan con esa cédula principal o con la del representante
+        const ordenesDelPaciente = this.modeloGlobal.ordenes.filter(o => o.cedula.trim().toLowerCase() === cedulaNorm || o.cedulaRepresentante.trim().toLowerCase() === cedulaNorm);
         if (ordenesDelPaciente.length === 0) {
             this.vista.mostrarToast("Cédula no encontrada. Ingrese los datos del paciente manualmente.", "info");
             this.vista.mostrarHistorialPaciente([]);
             return;
         }
         // Tomamos la orden más reciente para autocompletar (la última del array)
+        // Asumiendo que el array mantiene el orden de inserción y el último es el más reciente
         const ordenMasReciente = ordenesDelPaciente[ordenesDelPaciente.length - 1];
         this.vista.autocompletarPaciente(ordenMasReciente);
-        // MEJORA #2: Mostramos todo el historial de visitas del paciente
+        // Mostramos todo el historial de visitas del paciente
         this.vista.mostrarHistorialPaciente(ordenesDelPaciente);
     }
-    // =================================================================
-    // MEJORA #6: Exportar cierre de caja del día
-    // =================================================================
     /**
      * Recopila los datos del modelo (totales, tasa, examen top) y los pasa
      * a la vista para que genere el PDF del cierre de caja del día.

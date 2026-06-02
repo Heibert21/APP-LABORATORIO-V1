@@ -3,11 +3,13 @@ import { IResultadoExamen } from "../interfaces/IResultadoExamen.js";
 export default class Cl_mOrdenBio {
   private _id: string = "";
   private _cedula: string = "";
+  private _cedulaRepresentante: string = "";
+  private _nombreRepresentante: string = "";
+  private _apellidoRepresentante: string = "";
   private _nombre: string = "";
   private _apellido: string = "";
-  private _edad: number = 0;
+  private _edad: string = "";
   private _sexo: string = "";
-  private _esEmbarazada: boolean = false;
   private _telefono: string = "";
   private _correo: string = "";
   private _metodoPago: string = "";
@@ -20,16 +22,28 @@ export default class Cl_mOrdenBio {
   private _resultados: IResultadoExamen[] = [];
 
   constructor({
-    id, cedula, nombre, apellido, edad,esEmbarazada, sexo, telefono = "", correo = "",
-    metodoPago = "", montoTotal$ = 0, fechaRegistro, horaEntregaEstimada = "",
-    examenesSolicitados, status = "En Espera", licBioanalista = "", resultados = []
+    id, cedula,
+    cedulaRepresentante = "", nombreRepresentante = "", apellidoRepresentante = "",
+    nombre, apellido, edad, sexo,
+    telefono = "",
+    correo = "",
+    metodoPago = "",
+    montoTotal$ = 0,
+    fechaRegistro,
+    horaEntregaEstimada = "",
+    examenesSolicitados,
+    status = "En Espera",
+    licBioanalista = "",
+    resultados = []
   }: any) {
     this._id = id;
+    this._cedulaRepresentante = cedulaRepresentante;
+    this._nombreRepresentante = nombreRepresentante;
+    this._apellidoRepresentante = apellidoRepresentante;
     this._nombre = nombre;
     this._apellido = apellido;
-    this._edad = Number(edad);
+    this._edad = typeof edad === "number" ? `${edad} Año(s)` : String(edad || "");
     this._sexo = sexo;
-    this._esEmbarazada = esEmbarazada;
     this._telefono = telefono;
     this._correo = correo;
     this._metodoPago = metodoPago;
@@ -42,85 +56,227 @@ export default class Cl_mOrdenBio {
     this._resultados = resultados;
 
     // Regla de interfaz/modelo compartida
-    this._cedula = (this._edad <= 9 && (!cedula || cedula.trim() === "")) ? "MENOR" : cedula.trim();
+    const edadAnios = Cl_mOrdenBio.convertirEdadAAños(this._edad);
+    this._cedula = (edadAnios <= 9 && (!cedula || cedula.trim() === "")) ? "MENOR" : cedula.trim();
   }
 
-  // --- GETTERS Y SETTERS UNIFICADOS ---
-  public get id(): string { return this._id; }
-  public set id(value: string) { this._id = value; }
+  //GETTERS Y SETTERS
+  public get id(): string {
+    return this._id;
+  }
+  public set id(value: string) {
+    this._id = value;
+  }
 
-  public get cedula(): string { return this._cedula; }
-  public set cedula(value: string) { this._cedula = value; }
+  public get cedula(): string {
+    return this._cedula;
+  }
+  public set cedula(value: string) {
+    this._cedula = value;
+  }
 
-  public get nombre(): string { return this._nombre; }
-  public set nombre(value: string) { this._nombre = value; }
+  public get cedulaRepresentante(): string { return this._cedulaRepresentante; }
+  public set cedulaRepresentante(value: string) { this._cedulaRepresentante = value; }
 
-  public get apellido(): string { return this._apellido; }
-  public set apellido(value: string) { this._apellido = value; }
+  public get nombreRepresentante(): string { return this._nombreRepresentante; }
+  public set nombreRepresentante(value: string) { this._nombreRepresentante = value; }
 
-  public get edad(): number { return this._edad; }
-  public set edad(value: number) { this._edad = value; }
+  public get apellidoRepresentante(): string { return this._apellidoRepresentante; }
+  public set apellidoRepresentante(value: string) { this._apellidoRepresentante = value; }
 
-  public get sexo(): string { return this._sexo; }
-  public set sexo(value: string) { this._sexo = value; }
+  public get nombre(): string {
+    return this._nombre;
+  }
+  public set nombre(value: string) {
+    this._nombre = value;
+  }
 
-  public get esEmbarazada(): boolean { return this._esEmbarazada; }
-  public set esEmbarazada(value: boolean) { this._esEmbarazada = value; }
+  public get apellido(): string {
+    return this._apellido;
+  }
+  public set apellido(value: string) {
+    this._apellido = value;
+  }
 
-  public get telefono(): string { return this._telefono; }
-  public set telefono(value: string) { this._telefono = value; }
+  public get edad(): string {
+    return this._edad;
+  }
+  public set edad(value: string) {
+    this._edad = value;
+  }
 
-  public get correo(): string { return this._correo; }
-  public set correo(value: string) { this._correo = value; }
+  public get sexo(): string {
+    return this._sexo;
+  }
+  public set sexo(value: string) {
+    this._sexo = value;
+  }
+  public get telefono(): string {
+    return this._telefono;
+  }
+  public set telefono(value: string) {
+    this._telefono = value;
+  }
 
-  public get metodoPago(): string { return this._metodoPago; }
-  public set metodoPago(value: string) { this._metodoPago = value; }
+  public get correo(): string {
+    return this._correo;
+  }
+  public set correo(value: string) {
+    this._correo = value;
+  }
 
-  public get montoTotal$(): number { return this._montoTotal$; }
-  public set montoTotal$(value: number) { this._montoTotal$ = value; }
+  public get metodoPago(): string {
+    return this._metodoPago;
+  }
+  public set metodoPago(value: string) {
+    this._metodoPago = value;
+  }
 
-  public get fechaRegistro(): string { return this._fechaRegistro; }
-  public set fechaRegistro(value: string) { this._fechaRegistro = value; }
+  public get montoTotal$(): number {
+    return this._montoTotal$;
+  }
+  public set montoTotal$(value: number) {
+    this._montoTotal$ = value;
+  }
 
-  public get horaEntregaEstimada(): string { return this._horaEntregaEstimada; }
-  public set horaEntregaEstimada(value: string) { this._horaEntregaEstimada = value; }
+  public get fechaRegistro(): string {
+    return this._fechaRegistro;
+  }
+  public set fechaRegistro(value: string) {
+    this._fechaRegistro = value;
+  }
 
-  public get examenesSolicitados(): string { return this._examenesSolicitados; }
-  public set examenesSolicitados(value: string) { this._examenesSolicitados = value; }
+  public get horaEntregaEstimada(): string {
+    return this._horaEntregaEstimada;
+  }
+  public set horaEntregaEstimada(value: string) {
+    this._horaEntregaEstimada = value;
+  }
 
-  public get status(): "En Espera" | "Listo para Despacho" { return this._status; }
-  public set status(value: "En Espera" | "Listo para Despacho") { this._status = value; }
+  public get examenesSolicitados(): string {
+    return this._examenesSolicitados;
+  }
+  public set examenesSolicitados(value: string) {
+    this._examenesSolicitados = value;
+  }
 
-  public get licBioanalista(): string { return this._licBioanalista; }
-  public set licBioanalista(value: string) { this._licBioanalista = value; }
+  public get status(): "En Espera" | "Listo para Despacho" {
+    return this._status;
+  }
+  public set status(value: "En Espera" | "Listo para Despacho") {
+    this._status = value;
+  }
 
-  public get resultados(): IResultadoExamen[] { return this._resultados; }
-  public set resultados(value: IResultadoExamen[]) { this._resultados = value; }
+  public get licBioanalista(): string {
+    return this._licBioanalista;
+  }
+  public set licBioanalista(value: string) {
+    this._licBioanalista = value;
+  }
 
-  // --- LÓGICA COMPARTIDA ---
-  public static calcularEdadDesdeFecha(fechaNacimientoStr: string): number {
-    if (!fechaNacimientoStr) return 0;
+  public get resultados(): IResultadoExamen[] {
+    return this._resultados;
+  }
+  public set resultados(value: IResultadoExamen[]) {
+    this._resultados = value;
+  }
+
+  // --- LÓGICA Para Calcular la Edad de los Pacientes
+  public static calcularEdad(fechaNacimientoStr: string): string {
+    if (!fechaNacimientoStr) return "0 Años";
     const fechaNac = new Date(fechaNacimientoStr);
     const fechaActual = new Date();
-    let edad = fechaActual.getFullYear() - fechaNac.getFullYear();
-    const mesDiferencia = fechaActual.getMonth() - fechaNac.getMonth();
-    if (mesDiferencia < 0 || (mesDiferencia === 0 && fechaActual.getDate() < fechaNac.getDate())) {
-      edad--;
-    }
-    return edad;
-  }
+    // SI LA FECHA DE NACIMIENTO ES MAYOR A LA FECHA ACTUAL, RETORNAR 0 AÑOS
+    if (fechaNac > fechaActual) return "0 Años";
 
+    let anos = fechaActual.getFullYear() - fechaNac.getFullYear();
+    let meses = fechaActual.getMonth() - fechaNac.getMonth();
+    let dias = fechaActual.getDate() - fechaNac.getDate();
+    // Si los dias son negativos, se resta 1 mes y se suma el ultimo dia del mes anterior
+    if (dias < 0) {
+      meses--;
+      const ultimoDiaMesAnterior = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 0).getDate();
+      dias += ultimoDiaMesAnterior;
+    }
+    // Si los meses son negativos, se resta 1 año y se suma 12 meses
+    if (meses < 0) {
+      anos--;
+      meses += 12;
+    }
+    // SI TIENE 1 AÑO O MAS SE MOSTRARAN AÑOS Y MESES
+    if (anos >= 1) {
+      if (meses > 0) {
+        return `${anos} Año${anos > 1 ? "s" : ""} y ${meses} Mes${meses > 1 ? "es" : ""}`;
+      }
+      return `${anos} Año${anos > 1 ? "s" : ""}`;
+    }
+    // Si tiene menos de 1 año pero al menos 1 mes
+    if (meses >= 1) {
+      const semanas = Math.floor(dias / 7);
+      const diasRestantes = dias % 7;
+      let resultado = `${meses} Mes${meses > 1 ? "es" : ""}`;
+      if (semanas > 0) {
+        resultado += ` y ${semanas} Semana${semanas > 1 ? "s" : ""}`;
+      }
+      return resultado;
+    }
+    // Si tiene menos de 1 mes (calculamos semanas y días)
+    const totalDias = dias;
+    const semanas = Math.floor(totalDias / 7);
+    const diasRestantes = totalDias % 7;
+    // SI TIENE 1 SEMANA O MAS SE MOSTRARAN SEMANAS Y DIAS
+    if (semanas >= 1) {
+      if (diasRestantes > 0) {
+        return `${semanas} Semana${semanas > 1 ? "s" : ""} y ${diasRestantes} Día${diasRestantes > 1 ? "s" : ""}`;
+      }
+      return `${semanas} Semana${semanas > 1 ? "s" : ""}`;
+    }
+    // Si tiene menos de 1 semana se mostraran dias
+    return `${totalDias} Día${totalDias !== 1 ? "s" : ""}`;
+  }
+  // metodo para calcular la edad en años
+  public static convertirEdadAAños(edad: string | number): number {
+    if (typeof edad === "number") return edad;
+    if (!edad) return 0;
+    // si la edad esta en años, meses, semanas o dias, se convierte a años
+    const matchAnios = edad.match(/^(\d+(?:\.\d+)?)\s*Año/i);
+    if (matchAnios) {
+      return parseFloat(matchAnios[1]);
+    }
+    // si la edad esta en meses, se convierte a años
+    const matchMeses = edad.match(/^(\d+(?:\.\d+)?)\s*Mes/i);
+    if (matchMeses) {
+      return parseFloat(matchMeses[1]) / 12;
+    }
+    // si la edad esta en semanas, se convierte a años
+    const matchSemanas = edad.match(/^(\d+(?:\.\d+)?)\s*Semana/i);
+    if (matchSemanas) {
+      return parseFloat(matchSemanas[1]) / 52.1786;
+    }
+    // si la edad esta en dias, se convierte a años
+    const matchDias = edad.match(/^(\d+(?:\.\d+)?)\s*Día/i);
+    if (matchDias) {
+      return parseFloat(matchDias[1]) / 365.25;
+    }
+    // si la edad no esta en años, meses, semanas o dias, se convierte a años
+    const num = parseFloat(edad);
+    return isNaN(num) ? 0 : num;
+  }
+  // Metodo que permite desglosar los examenes solicitados
   public desglosarExamenes(): { examen: string; cantidad: number }[] {
     const listado: { examen: string; cantidad: number }[] = [];
-    if (!this._examenesSolicitados) return listado;
+    if (!this._examenesSolicitados) {
+      return listado;
+    }
     const partes = this._examenesSolicitados.split(",");
     partes.forEach(parte => {
       const estudio = parte.trim();
-      if (estudio) listado.push({ examen: estudio, cantidad: 1 });
+      if (estudio) {
+        listado.push({ examen: estudio, cantidad: 1 });
+      }
     });
     return listado;
   }
-
   // Regla del Bioanalista integrada aquí
   public registrarValorResultado(parametro: string, valor: string): void {
     const item = this._resultados.find(r => r.parametro === parametro);
@@ -135,7 +291,7 @@ export default class Cl_mOrdenBio {
       item.resultado = valorLimpio;
     }
   }
-
+  //Metodo que permite validar el rango de referencia de un parametro
   public static validarRangoTexto(valor: string, rangoTexto: string): boolean {
     const rangoLimpio = rangoTexto.replace("Ref:", "").trim();
     const partesRango = rangoLimpio.split("-");
@@ -147,15 +303,17 @@ export default class Cl_mOrdenBio {
     }
     return false;
   }
-
+  //Metodo que permite convertir un objeto a JSON
   public toJSON() {
     return {
       id: this.id,
       cedula: this.cedula,
+      cedulaRepresentante: this.cedulaRepresentante,
+      nombreRepresentante: this.nombreRepresentante,
+      apellidoRepresentante: this.apellidoRepresentante,
       nombre: this.nombre,
       apellido: this.apellido,
       edad: this.edad,
-      esEmbarazada: this.esEmbarazada,
       sexo: this.sexo,
       telefono: this.telefono,
       correo: this.correo,

@@ -1,11 +1,14 @@
 export default class Cl_vLaboratorio {
     // --- Elementos del DOM (Formulario Registro de Pacientes) ---
+    chkEsMenor;
+    inCedulaRep;
+    inNombreRep;
+    inApellidoRep;
     inCedula;
     inNombre;
     inApellido;
     inFechaNac;
     inSexo;
-    inEsEmbarazada;
     inTelefono;
     inCorreo;
     inMetodoPago;
@@ -18,7 +21,6 @@ export default class Cl_vLaboratorio {
     inEstNombre;
     inEstPrecio;
     inEstTiempo;
-    inEstTipo;
     inEstSugerido;
     inEstUnidad;
     inEstRango;
@@ -30,8 +32,6 @@ export default class Cl_vLaboratorio {
     lblTotalUSD;
     lblTotalBs;
     lblHoraEntrega;
-    bloqueSubExamenes;
-    listaSubCheckboxes;
     toastContainer;
     spinnerOverlay;
     manejadorEliminarEstudio;
@@ -41,13 +41,17 @@ export default class Cl_vLaboratorio {
     manejadorEliminarOrdenEspera;
     manejadorEditarOrdenEspera;
     _ordenesEsperaCache = [];
+    _ordenesListasCache = [];
     constructor() {
+        this.chkEsMenor = document.getElementById("pac_chkEsMenor");
+        this.inCedulaRep = document.getElementById("pac_cedulaRep");
+        this.inNombreRep = document.getElementById("pac_nombreRep");
+        this.inApellidoRep = document.getElementById("pac_apellidoRep");
         this.inCedula = document.getElementById("pac_cedula");
         this.inNombre = document.getElementById("pac_nombre");
         this.inApellido = document.getElementById("pac_apellido");
         this.inFechaNac = document.getElementById("pac_fechaNac");
         this.inSexo = document.getElementById("pac_sexo");
-        this.inEsEmbarazada = document.getElementById("pac_chkEmbarazada");
         this.inTelefono = document.getElementById("pac_telefono");
         this.inCorreo = document.getElementById("pac_correo");
         this.inMetodoPago = document.getElementById("pac_metodoPago");
@@ -59,7 +63,6 @@ export default class Cl_vLaboratorio {
         this.inEstNombre = document.getElementById("est_nombre");
         this.inEstPrecio = document.getElementById("est_precio");
         this.inEstTiempo = document.getElementById("est_tiempo");
-        this.inEstTipo = document.getElementById("est_tipo");
         this.inEstSugerido = document.getElementById("est_sugerido");
         this.inEstUnidad = document.getElementById("est_unidad");
         this.inEstRango = document.getElementById("est_rango");
@@ -70,17 +73,33 @@ export default class Cl_vLaboratorio {
         this.lblTotalUSD = document.getElementById("adm_lblTotalUSD");
         this.lblTotalBs = document.getElementById("adm_lblTotalBs");
         this.lblHoraEntrega = document.getElementById("adm_lblHoraEntrega");
-        this.bloqueSubExamenes = document.getElementById("adm_bloqueSubExamenes");
-        this.listaSubCheckboxes = document.getElementById("adm_listaSubExamenesCheckboxes");
         this.toastContainer = document.getElementById("toast-container");
         this.spinnerOverlay = document.getElementById("spinner-overlay");
         this.inCedula.addEventListener("input", () => {
             this.inCedula.value = this.inCedula.value.replace(/\D/g, "");
         });
-        // Mostrar sub-exámenes solo si se selecciona "Paquete"
-        this.inEstTipo.addEventListener("change", () => {
-            this.alternarVisibilidadSubExamenes(this.inEstTipo.value === "Paquete");
+        this.inCedulaRep.addEventListener("input", () => {
+            // Remover caracteres que no sean letras V E o numeros
+            this.inCedulaRep.value = this.inCedulaRep.value.replace(/[^vVeE0-9-]/g, "");
         });
+        // --- Lógica del Checkbox de Menor de Edad ---
+        this.chkEsMenor.addEventListener("change", () => {
+            const bloqueRep = document.getElementById("adm_bloqueRepresentante");
+            const bloqueCedula = document.getElementById("adm_bloqueCedulaPrincipal");
+            if (this.chkEsMenor.checked) {
+                bloqueRep.classList.remove("oculto");
+                bloqueCedula.classList.add("oculto");
+                this.inCedula.value = "";
+            }
+            else {
+                bloqueRep.classList.add("oculto");
+                bloqueCedula.classList.remove("oculto");
+                this.inCedulaRep.value = "";
+                this.inNombreRep.value = "";
+                this.inApellidoRep.value = "";
+            }
+        });
+        //mostrar formulario de estudios disponibles
         const btnToggleEstudio = document.getElementById("btnToggleFormEstudio");
         const seccionFormEstudio = document.getElementById("seccionFormEstudio");
         btnToggleEstudio.onclick = () => {
@@ -89,6 +108,7 @@ export default class Cl_vLaboratorio {
                 ? " Abrir Carga de Estudios"
                 : " Cerrar Carga de Estudios";
         };
+        //mostrar formulario de pacientes
         const btnTogglePaciente = document.getElementById("btnToggleFormPaciente");
         const seccionFormPaciente = document.getElementById("seccionFormPaciente");
         btnTogglePaciente.onclick = () => {
@@ -97,6 +117,7 @@ export default class Cl_vLaboratorio {
                 ? " Abrir Registro de Paciente"
                 : " Cerrar Registro de Paciente";
         };
+        //despachar ordenes
         this.tablaListos.addEventListener("click", (e) => {
             const target = e.target;
             if (target.classList.contains("btn-despacho") && this.manejadorDespacharOrden) {
@@ -105,6 +126,7 @@ export default class Cl_vLaboratorio {
                 this.manejadorDespacharOrden(id, metodo);
             }
         });
+        //eliminar orden de espera y editar orden de espera
         this.tablaEspera.addEventListener("click", (e) => {
             const target = e.target.closest("button");
             if (!target)
@@ -119,10 +141,12 @@ export default class Cl_vLaboratorio {
                 this.manejadorEditarOrdenEspera(id);
             }
         });
+        //cambio de checks en estudios disponibles
         this.contenedorEstudios.addEventListener("change", () => {
             if (this.manejadorCambioChecks)
                 this.manejadorCambioChecks();
         });
+        //cambio de filtro en estudios disponibles
         const btnEspera = document.getElementById("btnVerEspera");
         const btnListos = document.getElementById("btnVerListos");
         btnEspera.onclick = () => {
@@ -137,6 +161,7 @@ export default class Cl_vLaboratorio {
             this.tablaListos.classList.remove("oculto");
             this.tablaEspera.classList.add("oculto");
         };
+        //buscar estudio
         const inputBuscar = document.getElementById("pac_buscarEstudioInput");
         if (inputBuscar) {
             inputBuscar.addEventListener("input", () => {
@@ -147,34 +172,31 @@ export default class Cl_vLaboratorio {
                 });
             });
         }
+        //buscar ordenes en espera
         const inputBandeja = document.getElementById("input_buscarBandeja");
         if (inputBandeja) {
             inputBandeja.addEventListener("input", () => {
                 const texto = inputBandeja.value.trim().toLowerCase();
-                const filtradas = this._ordenesEsperaCache.filter(o => o.nombre.toLowerCase().includes(texto) ||
+                const filtro = (o) => o.nombre.toLowerCase().includes(texto) ||
                     o.apellido.toLowerCase().includes(texto) ||
-                    o.cedula.toLowerCase().includes(texto));
-                this._renderizarTarjetasEspera(filtradas);
+                    o.cedula.toLowerCase().includes(texto) ||
+                    (o.cedulaRepresentante && o.cedulaRepresentante.toLowerCase().includes(texto)) ||
+                    (o.nombreRepresentante && o.nombreRepresentante.toLowerCase().includes(texto)) ||
+                    (o.apellidoRepresentante && o.apellidoRepresentante.toLowerCase().includes(texto));
+                const filtradasEspera = this._ordenesEsperaCache.filter(filtro);
+                this._renderizarTarjetasEspera(filtradasEspera);
+                const filtradasListos = this._ordenesListasCache.filter(filtro);
+                this._renderizarTarjetasListas(filtradasListos);
             });
         }
-        const chkBloque = document.getElementById("adm_bloqueEmbarazada");
+        //cambio de sexo en pacientes
         this.inSexo.addEventListener("change", () => {
-            if (this.inSexo.value === "Femenino") {
-                if (chkBloque)
-                    chkBloque.classList.remove("oculto");
-            }
-            else {
-                if (chkBloque)
-                    chkBloque.classList.add("oculto");
-                const chk = document.getElementById("pac_chkEmbarazada");
-                if (chk)
-                    chk.checked = false;
-            }
             if (this.manejadorCambioChecks)
                 this.manejadorCambioChecks();
             if (this.cbCambioFiltro)
                 this.cbCambioFiltro();
         });
+        //exportar caja
         const btnExportar = document.getElementById("btn_exportarCaja");
         if (btnExportar) {
             btnExportar.addEventListener("click", () => {
@@ -183,62 +205,127 @@ export default class Cl_vLaboratorio {
             });
         }
     }
-    get pacCedula() { return this.inCedula.value.trim(); }
-    get pacNombre() { return this.inNombre.value.trim(); }
-    get pacApellido() { return this.inApellido.value.trim(); }
-    get pacFechaNac() { return this.inFechaNac.value; }
-    get pacSexo() { return this.inSexo.value; }
-    get pacEmbarazada() {
-        const chk = document.getElementById("pac_chkEmbarazada");
-        return chk ? chk.checked : false;
+    get isMenor() {
+        return this.chkEsMenor.checked;
     }
-    get pacTelefono() { return this.inTelefono.value.trim(); }
-    get pacCorreo() { return this.inCorreo.value.trim(); }
-    get pacMetodoPago() { return this.inMetodoPago.value; }
-    get nuevaTasa() { return parseFloat(this.inTasa.value.trim()) || 0; }
-    get estId() { return this.inEstId.value.trim().toUpperCase(); }
-    get estNombre() { return this.inEstNombre.value.trim(); }
-    get estPrecio() { return parseFloat(this.inEstPrecio.value.trim()) || 0; }
-    get estTiempo() { return parseInt(this.inEstTiempo.value.trim(), 10) || 0; }
-    get estTipo() { return this.inEstTipo.value; }
-    get estSugerido() { return this.inEstSugerido.value; }
-    get estUnidad() { return this.inEstUnidad.value.trim(); }
-    get estRango() { return this.inEstRango.value.trim(); }
+    get pacCedulaRep() {
+        this.inCedulaRep.value = this.inCedulaRep.value.trim().toUpperCase();
+        return this.inCedulaRep.value;
+    }
+    get pacNombreRep() {
+        this.inNombreRep.value = this.inNombreRep.value.trim();
+        return this.inNombreRep.value;
+    }
+    get pacApellidoRep() {
+        this.inApellidoRep.value = this.inApellidoRep.value.trim();
+        return this.inApellidoRep.value;
+    }
+    get pacCedula() {
+        this.inCedula.value = this.inCedula.value.trim();
+        return this.inCedula.value;
+    }
+    get pacNombre() {
+        this.inNombre.value = this.inNombre.value.trim();
+        return this.inNombre.value;
+    }
+    get pacApellido() {
+        this.inApellido.value = this.inApellido.value.trim();
+        return this.inApellido.value;
+    }
+    get pacFechaNac() {
+        this.inFechaNac.value = this.inFechaNac.value.trim();
+        return this.inFechaNac.value;
+    }
+    get pacSexo() {
+        this.inSexo.value = this.inSexo.value.trim();
+        return this.inSexo.value;
+    }
+    get pacTelefono() {
+        this.inTelefono.value = this.inTelefono.value.trim();
+        return this.inTelefono.value;
+    }
+    get pacCorreo() {
+        this.inCorreo.value = this.inCorreo.value.trim();
+        return this.inCorreo.value;
+    }
+    get pacMetodoPago() {
+        this.inMetodoPago.value = this.inMetodoPago.value.trim();
+        return this.inMetodoPago.value;
+    }
+    get nuevaTasa() {
+        this.inTasa.value = this.inTasa.value.trim();
+        return parseFloat(this.inTasa.value) || 0;
+    }
+    get estId() {
+        this.inEstId.value = this.inEstId.value.trim().toUpperCase();
+        return this.inEstId.value;
+    }
+    get estNombre() {
+        this.inEstNombre.value = this.inEstNombre.value.trim();
+        return this.inEstNombre.value;
+    }
+    get estPrecio() {
+        this.inEstPrecio.value = this.inEstPrecio.value.trim();
+        return parseFloat(this.inEstPrecio.value) || 0;
+    }
+    get estTiempo() {
+        this.inEstTiempo.value = this.inEstTiempo.value.trim();
+        return parseInt(this.inEstTiempo.value, 10) || 0;
+    }
+    get estSugerido() {
+        this.inEstSugerido.value = this.inEstSugerido.value.trim();
+        return this.inEstSugerido.value;
+    }
+    get estUnidad() {
+        if (this.inEstUnidad.value.trim() !== "") {
+            this.inEstUnidad.value = this.inEstUnidad.value.trim();
+        }
+        return this.inEstUnidad.value.trim();
+    }
+    get estRango() {
+        if (this.inEstRango.value.trim() !== "") {
+            this.inEstRango.value = this.inEstRango.value.trim();
+        }
+        return this.inEstRango.value.trim();
+    }
+    //obtener estudios seleccionados
     getEstudiosSeleccionados() {
         const checkboxes = this.contenedorEstudios.querySelectorAll(".chk-estudio:checked");
         return Array.from(checkboxes).map(chk => chk.value);
     }
-    getSubExamenesSeleccionados() {
-        const checkboxes = this.listaSubCheckboxes.querySelectorAll(".chk-sub-estudio:checked");
-        return Array.from(checkboxes).map(chk => chk.value);
-    }
+    //actualizar tasa
     onActualizarTasa(callback) {
         this.btTasa.onclick = callback;
     }
+    //obtener url originales
     onOriginalesUrl(callback) { callback(); }
+    //agregar estudio
     onAgregarEstudio(callback) {
         this.formEstudio.onsubmit = (e) => { e.preventDefault(); callback(); };
     }
+    //registrar orden
     onRegistrarOrden(callback) {
         this.formPaciente.onsubmit = (e) => { e.preventDefault(); callback(); };
     }
+    //eliminar estudio
     onEliminarEstudio(callback) {
         this.manejadorEliminarEstudio = callback;
     }
+    //despachar orden
     onDespacharOrden(callback) {
         this.manejadorDespacharOrden = callback;
     }
+    //cambio de filtro sugerido
     onCambioFiltroSugerido(callback) {
         this.cbCambioFiltro = callback;
         this.inFechaNac.onchange = callback;
         this.inSexo.onchange = callback;
-        const chkEmbarazada = document.getElementById("pac_chkEmbarazada");
-        if (chkEmbarazada)
-            chkEmbarazada.onchange = callback;
     }
+    //cambio de checks
     onCambioChecks(callback) {
         this.manejadorCambioChecks = callback;
     }
+    //buscar cedula paciente o representante
     onBuscarCedulaPaciente(callback) {
         const btn = document.getElementById("btn_buscarCedula");
         if (btn) {
@@ -251,16 +338,48 @@ export default class Cl_vLaboratorio {
                 callback(cedula);
             };
         }
+        const btnRep = document.getElementById("btn_buscarCedulaRep");
+        if (btnRep) {
+            btnRep.onclick = () => {
+                const cedulaRep = this.inCedulaRep.value.trim();
+                if (!cedulaRep) {
+                    this.mostrarToast("Escriba la Cédula del representante antes de buscar.", "advertencia");
+                    return;
+                }
+                callback(cedulaRep);
+            };
+        }
+        // Permitir buscar con Enter
+        this.inCedula.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                const cedula = this.inCedula.value.trim();
+                if (cedula)
+                    callback(cedula);
+            }
+        });
+        this.inCedulaRep.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                const cedulaRep = this.inCedulaRep.value.trim();
+                if (cedulaRep)
+                    callback(cedulaRep);
+            }
+        });
     }
+    //eliminar orden en espera
     onEliminarOrdenEspera(callback) {
         this.manejadorEliminarOrdenEspera = callback;
     }
+    //editar orden en espera
     onEditarOrdenEspera(callback) {
         this.manejadorEditarOrdenEspera = callback;
     }
+    //exportar caja
     onExportarCaja(callback) {
         this._cbExportarCaja = callback;
     }
+    //establecer tasa actual
     setTasaActual(tasa) {
         if (this.inTasa)
             this.inTasa.value = tasa.toString();
@@ -268,11 +387,13 @@ export default class Cl_vLaboratorio {
         if (lbl)
             lbl.innerText = tasa.toFixed(2);
     }
+    //establecer totales de factura
     setTotalesFactura(totalUsd, totalBs, horaRetiro) {
         this.lblTotalUSD.innerText = totalUsd.toFixed(2);
         this.lblTotalBs.innerText = totalBs.toFixed(2);
         this.lblHoraEntrega.innerText = horaRetiro;
     }
+    //renderizar estudios disponibles
     renderizarEstudiosDisponibles(estudios, sugerencia) {
         this.contenedorEstudios.innerHTML = estudios.length === 0 ? "<div>No hay estudios en catálogo.</div>" : "";
         const badge = document.getElementById("lblSugerenciaBadge");
@@ -291,6 +412,7 @@ export default class Cl_vLaboratorio {
             this.contenedorEstudios.appendChild(div);
         });
     }
+    //renderizar lista de catalogo
     renderizarListaCatalogo(estudios) {
         this.listaCatalogo.innerHTML = estudios.length === 0 ? "<li>Catálogo vacío.</li>" : "";
         estudios.forEach(e => {
@@ -298,32 +420,18 @@ export default class Cl_vLaboratorio {
             li.className = "prod-item";
             li.innerHTML = `
         <span>🔬 <b>${e.codigo || e.id}</b> - ${e.nombre} (${e.precio}$)</span>
-        <button class="btn-del" data-id="${e.id}">X</button>
+        <button class="btn-del" data-id="${e.id}">🗑️</button>
       `;
             this.listaCatalogo.appendChild(li);
             li.querySelector(".btn-del")?.addEventListener("click", () => this.manejadorEliminarEstudio(e.id));
         });
     }
-    renderizarSubExamenesParaPaquete(estudios) {
-        const individuales = estudios.filter(e => e.tipo === "Individual");
-        this.listaSubCheckboxes.innerHTML = individuales.length === 0
-            ? "<div>Debe registrar exámenes individuales en el catálogo primero.</div>"
-            : "";
-        individuales.forEach(e => {
-            const div = document.createElement("div");
-            div.innerHTML = `
-        <label style="display:flex;gap:6px;align-items:center;font-size:0.85rem;cursor:pointer;padding:4px 0;">
-          <input type="checkbox" class="chk-sub-estudio" value="${e.id}">
-          <span><b>${e.id}</b> - ${e.nombre}</span>
-        </label>
-      `;
-            this.listaSubCheckboxes.appendChild(div);
-        });
-    }
+    //renderizar ordenes en espera
     renderizarOrdenesEspera(ordenes) {
         this._ordenesEsperaCache = ordenes;
         this._renderizarTarjetasEspera(ordenes);
     }
+    //renderizar tarjetas de espera
     _renderizarTarjetasEspera(ordenes) {
         this.tablaEspera.innerHTML = ordenes.length === 0 ? "No hay órdenes en espera." : "";
         ordenes.forEach(o => {
@@ -337,6 +445,7 @@ export default class Cl_vLaboratorio {
                     badgeEspera = `<span class="badge-espera ${esUrgente ? "urgente" : ""}">⏱️ ${textoTiempo}</span>`;
                 }
             }
+            //crear div para cada orden en espera
             const div = document.createElement("div");
             div.className = "resultado-busqueda";
             div.innerHTML = `
@@ -354,11 +463,22 @@ export default class Cl_vLaboratorio {
       `;
             this.tablaEspera.appendChild(div);
         });
+        //eventos de botones de editar y eliminar orden en espera
+        this.tablaEspera.querySelectorAll(".btn-editar-orden").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const id = btn.dataset.id;
+                this.manejadorEditarOrdenEspera(id);
+            });
+        });
+        this.tablaEspera.querySelectorAll(".btn-eliminar-orden").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const id = btn.dataset.id;
+                this.manejadorEliminarOrdenEspera(id);
+            });
+        });
     }
-    /**
-     * Convierte el campo fechaRegistro ("d/m/yyyy, HH:MM:SS" o "dd/mm/yyyy HH:MM")
-     * a minutos transcurridos desde ese momento hasta ahora.
-     */
+    //Convierte el campo fechaRegistro ("d/m/yyyy, HH:MM:SS" o "dd/mm/yyyy HH:MM")
+    //a minutos transcurridos desde ese momento hasta ahora.
     _calcularMinutosEspera(fechaRegistro) {
         try {
             // toLocaleDateString() puede generar "1/6/2026, 10:30:00" (con coma) o "01/06/2026 10:30"
@@ -367,6 +487,7 @@ export default class Cl_vLaboratorio {
             const partes = normalizado.split(" ");
             if (partes.length < 2)
                 return -1;
+            //dividir fecha y hora
             const [fechaParte, horaParte] = partes;
             const segmentosFecha = fechaParte.split("/");
             if (segmentosFecha.length < 3)
@@ -385,7 +506,13 @@ export default class Cl_vLaboratorio {
             return -1;
         }
     }
+    //renderizar ordenes listas
     renderizarOrdenesListas(ordenes) {
+        this._ordenesListasCache = ordenes;
+        this._renderizarTarjetasListas(ordenes);
+    }
+    //renderizar tarjetas listas
+    _renderizarTarjetasListas(ordenes) {
         this.tablaListos.innerHTML = ordenes.length === 0 ? "<p class='vacio-texto'>No hay resultados listos.</p>" : "";
         ordenes.forEach(o => {
             const cedulaAPintar = (!o.cedula || o.cedula.trim() === "") ? "MENOR" : o.cedula;
@@ -410,13 +537,23 @@ export default class Cl_vLaboratorio {
       `;
             this.tablaListos.appendChild(div);
         });
+        //eventos de botones de despacho de orden
+        this.tablaListos.querySelectorAll(".btn-despacho").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const id = btn.dataset.id;
+                const metodo = btn.dataset.metodo;
+                this.manejadorDespacharOrden(id, metodo);
+            });
+        });
     }
+    //renderizar estadisticas
     renderizarEstadisticas(datos) {
         document.getElementById("rep_totalPacientes").innerText = datos.totalPacientes.toString();
         document.getElementById("rep_totalUSD").innerText = `${datos.totalUsd.toFixed(2)} $`;
         document.getElementById("rep_totalBs").innerText = `${datos.totalBs.toFixed(2)} Bs`;
         document.getElementById("rep_estudioTop").innerText = datos.estudioMasSolicitado;
     }
+    //mostrar toast
     mostrarToast(mensaje, tipo) {
         const iconos = { exito: "✓", error: "✗", info: "i", advertencia: "!" };
         const toast = document.createElement("div");
@@ -429,24 +566,50 @@ export default class Cl_vLaboratorio {
             toast.addEventListener("transitionend", () => toast.remove());
         }, 3500);
     }
-    /** Muestra el overlay de carga con spinner animado. Llama antes de peticiones a la API. */
+    //mostrar spinner
     mostrarSpinner() {
         this.spinnerOverlay.classList.remove("oculto");
     }
-    /** Oculta el overlay de carga. Llama siempre después de que termine una petición a la API. */
+    //ocultar spinner
     ocultarSpinner() {
         this.spinnerOverlay.classList.add("oculto");
     }
+    //autocompletar paciente
     autocompletarPaciente(orden) {
-        this.inNombre.value = orden.nombre;
-        this.inApellido.value = orden.apellido;
+        // Si la orden viene de un representante
+        if (orden.cedula === "MENOR" && orden.cedulaRepresentante) {
+            this.chkEsMenor.checked = true;
+            document.getElementById("adm_bloqueRepresentante")?.classList.remove("oculto");
+            document.getElementById("adm_bloqueCedulaPrincipal")?.classList.add("oculto");
+            this.inCedulaRep.value = orden.cedulaRepresentante;
+            this.inNombreRep.value = orden.nombreRepresentante;
+            this.inApellidoRep.value = orden.apellidoRepresentante;
+            this.inCedula.value = "";
+            this.inNombre.value = ""; // Dejar en blanco para el nuevo hijo
+            this.inApellido.value = orden.apellido; // Asumir mismo apellido
+            this.inFechaNac.value = ""; // Dejar en blanco para el nuevo hijo
+        }
+        else {
+            this.chkEsMenor.checked = false;
+            document.getElementById("adm_bloqueRepresentante")?.classList.add("oculto");
+            document.getElementById("adm_bloqueCedulaPrincipal")?.classList.remove("oculto");
+            this.inCedulaRep.value = "";
+            this.inNombreRep.value = "";
+            this.inApellidoRep.value = "";
+            this.inCedula.value = orden.cedula;
+            this.inNombre.value = orden.nombre;
+            this.inApellido.value = orden.apellido;
+            // Convertir formato de fecha si es necesario
+            this.inFechaNac.value = orden.fechaRegistro ? orden.fechaRegistro.split(" ")[0].split("/").reverse().join("-") : "";
+        }
+        // Autocompletar datos de contacto compartidos
+        this.inSexo.value = orden.sexo;
         this.inTelefono.value = orden.telefono;
         this.inCorreo.value = orden.correo;
-        // Restauramos fecha de nacimiento calculando desde la edad (no ideal, pero funcional)
-        // Si el sistema guardara fecha de nac., sería mejor usarla directamente.
-        this.inSexo.value = orden.sexo;
-        this.mostrarToast(`Paciente encontrado: ${orden.nombre} ${orden.apellido}. Datos autocargados.`, "info");
+        this.inMetodoPago.value = orden.metodoPago;
+        this.mostrarToast("Datos autocompletados. Por favor, verifique y complete la información faltante.", "info");
     }
+    //mostrar historial del paciente
     mostrarHistorialPaciente(ordenes) {
         const panel = document.getElementById("panel-historial-paciente");
         if (!panel)
@@ -455,6 +618,7 @@ export default class Cl_vLaboratorio {
             panel.classList.add("oculto");
             return;
         }
+        //mostrar historial
         panel.classList.remove("oculto");
         panel.innerHTML = `<h4>📋 Historial del paciente (${ordenes.length} visita${ordenes.length > 1 ? "s" : ""})</h4>`;
         ordenes.forEach(o => {
@@ -468,12 +632,14 @@ export default class Cl_vLaboratorio {
             panel.appendChild(item);
         });
     }
+    //exportar caja del dia
     exportarCajaDelDia(datos) {
         const ventana = window.open("", "_blank");
         if (!ventana)
             return;
         const fecha = new Date().toLocaleDateString();
         const hora = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        // @ts-ignore: document.write is deprecated but required by current logic
         ventana.document.write(`
 <!DOCTYPE html>
 <html lang="es">
@@ -517,9 +683,7 @@ export default class Cl_vLaboratorio {
         ventana.print();
         setTimeout(() => ventana.close(), 500);
     }
-    alternarVisibilidadSubExamenes(mostrar) {
-        this.bloqueSubExamenes.classList.toggle("oculto", !mostrar);
-    }
+    //limpiar formulario paciente
     limpiarFormPaciente() {
         this.formPaciente.reset();
         this.setTotalesFactura(0, 0, "");
@@ -527,15 +691,17 @@ export default class Cl_vLaboratorio {
         if (panel)
             panel.classList.add("oculto");
     }
+    //limpiar formulario estudio
     limpiarFormEstudio() {
         this.formEstudio.reset();
-        this.alternarVisibilidadSubExamenes(false);
     }
+    //filtrar estudios busqueda
     onFiltrarEstudiosBusqueda(callback) {
         const inputBuscar = document.getElementById("pac_buscarEstudioInput");
         if (inputBuscar)
             inputBuscar.oninput = () => callback(inputBuscar.value.trim());
     }
+    //imprimir reporte de resultados pdf
     imprimirReporteResultadosPDF(orden) {
         const ventanaImpresion = window.open("", "_blank");
         if (!ventanaImpresion)
@@ -583,7 +749,7 @@ export default class Cl_vLaboratorio {
 </div>
 <div class="datos-paciente-grid">
   <div>Paciente: &nbsp; ${orden.apellido.toUpperCase()} ${orden.nombre.toUpperCase()}</div>
-  <div>Edad: &nbsp; ${orden.edad} Año(s)</div>
+  <div>Edad: &nbsp; ${orden.edad}</div>
   <div>C.I: &nbsp; ${cedulaFormateada}</div>
 </div>
 <div class="datos-paciente-grid" style="margin-top:0px;margin-bottom:10px;">

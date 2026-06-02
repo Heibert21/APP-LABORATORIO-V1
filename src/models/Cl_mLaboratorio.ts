@@ -9,9 +9,15 @@ export default class Cl_mLaboratorio {
     this._tasaCambio = tasaInicial;
   }
 
-  public get tasaCambio(): number { return this._tasaCambio; }
-  public set tasaCambio(nuevaTasa: number) { this._tasaCambio = nuevaTasa; }
-  public get ordenes(): Cl_mOrdenBio[] { return this._ordenes; }
+  public get tasaCambio(): number {
+    return this._tasaCambio;
+  }
+  public set tasaCambio(nuevaTasa: number) {
+    this._tasaCambio = nuevaTasa;
+  }
+  public get ordenes(): Cl_mOrdenBio[] {
+    return this._ordenes;
+  }
 
   public setOrdenes(arrayPlanos: any[]) {
     this._ordenes = [];
@@ -20,17 +26,18 @@ export default class Cl_mLaboratorio {
     });
   }
 
-  public determinarSugerenciaMedica(fechaNacimiento: string, sexo: string, esEmbarazada: boolean): "Todos" | "Hombre" | "Mujer" | "Niño" | "Embarazada" {
+  public determinarSugerenciaMedica(fechaNacimiento: string, sexo: string): "Todos" | "Hombre" | "Mujer" | "Niño" {
     if (!fechaNacimiento) return "Todos";
-    const edad = Cl_mOrdenBio.calcularEdadDesdeFecha(fechaNacimiento);
-    if (edad < 12) return "Niño";
-    if (sexo === "Femenino" && esEmbarazada) return "Embarazada";
+    const edad = Cl_mOrdenBio.calcularEdad(fechaNacimiento);
+    const edadAnios = Cl_mOrdenBio.convertirEdadAAños(edad);
+    if (edadAnios < 12) return "Niño";
+
     if (sexo === "Femenino") return "Mujer";
     if (sexo === "Masculino") return "Hombre";
 
     return "Todos";
   }
-
+  // Metodo que permite crear una estructura vacia para los resultados de los examenes
   public crearEstructuraResultadosVacios(nombre: string, unidad: string, rango: string): IResultadoExamen[] {
     return [{
       parametro: nombre,
@@ -49,18 +56,34 @@ export default class Cl_mLaboratorio {
    @param apellido Apellido del paciente a registrar.
    @returns `true` si la cédula ya está registrada con un nombre diferente (conflicto).
    */
-  public validarDuplicadoPaciente(cedula: string, nombre: string, apellido: string): boolean {
+  public validarDuplicadoPaciente(cedula: string, nombre: string, apellido: string, isMenor: boolean = false, cedulaRep: string = "", nombreRep: string = "", apellidoRep: string = ""): boolean {
     const cedulaNorm = cedula.trim().toLowerCase();
-    
-    // Si la cédula es MENOR, no aplicamos validación de identidad 
-    // (pueden haber muchos niños distintos sin cédula)
-    if (cedulaNorm === "menor") return false;
-
     const nombreNorm = nombre.trim().toLowerCase();
     const apellidoNorm = apellido.trim().toLowerCase();
+    const cedulaRepNorm = cedulaRep.trim().toLowerCase();
+    const nombreRepNorm = nombreRep.trim().toLowerCase();
+    const apellidoRepNorm = apellidoRep.trim().toLowerCase();
 
-    // Buscar si la cédula ya existe en el sistema con otro nombre
+    // Si es menor, la validación de identidad se hace sobre el representante
+    if (isMenor && cedulaRepNorm !== "") {
+      return this._ordenes.some(orden => {
+        // Ignoramos órdenes viejas que no tengan cedulaRepresentante
+        if (!orden.cedulaRepresentante) return false;
+        const mismaCedulaRep = orden.cedulaRepresentante.trim().toLowerCase() === cedulaRepNorm;
+        const mismoNombreRep = orden.nombreRepresentante.trim().toLowerCase() === nombreRepNorm;
+        const mismoApellidoRep = orden.apellidoRepresentante.trim().toLowerCase() === apellidoRepNorm;
+        // Conflicto: misma cédula de representante pero distinto nombre/apellido
+        return mismaCedulaRep && !(mismoNombreRep && mismoApellidoRep);
+      });
+    }
+
+    // Si no es menor pero tiene cédula "menor" (legacy), lo dejamos pasar
+    if (cedulaNorm === "menor") return false;
+
+    // Buscar si la cédula del paciente ya existe en el sistema con otro nombre
     return this._ordenes.some(orden => {
+      // Ignoramos si la orden guardada es de un menor
+      if (orden.cedula.trim().toLowerCase() === "menor") return false;
       const mismaCedula = orden.cedula.trim().toLowerCase() === cedulaNorm;
       const mismoNombre = orden.nombre.trim().toLowerCase() === nombreNorm;
       const mismoApellido = orden.apellido.trim().toLowerCase() === apellidoNorm;
@@ -82,7 +105,7 @@ export default class Cl_mLaboratorio {
     // Multiplica dinámicamente el total de dólares por la tasa del día
     return this.calcularMontoTotalUsd() * this._tasaCambio;
   }
-
+  // Metodo que permite obtener el estudio mas solicitado
   public obtenerEstudioMasSolicitado(): string {
     const conteoGlobal: { [key: string]: number } = {};
     this._ordenes.forEach(orden => {
@@ -101,8 +124,13 @@ export default class Cl_mLaboratorio {
     }
     return maxCantidad > 0 ? `${estudioMasVendido} (${maxCantidad} sols)` : "Ninguno";
   }
-
-  public calcularEstructuraFactura(estudiosElegidos: any[]): { totalUsd: number, totalBs: number, tiempoMaxHoras: number, matrizResultados: any[] } {
+  // Metodo que permite calcular la estructura de la factura
+  public calcularEstructuraFactura(estudiosElegidos: any[]): {
+    totalUsd: number,
+    totalBs: number,
+    tiempoMaxHoras: number,
+    matrizResultados: any[]
+  } {
     let totalUsd = 0;
     let tiempoMaxHoras = 0;
     let matrizResultados: any[] = [];
@@ -122,7 +150,7 @@ export default class Cl_mLaboratorio {
     const totalBs = totalUsd * this._tasaCambio;
     return { totalUsd, totalBs, tiempoMaxHoras, matrizResultados };
   }
-
+  // Metodo que permite calcular los tiempos de entrega
   public calcularTiemposEntrega(horasProcesamiento: number): { registro: string, entrega: string } {
     const ahora = new Date();
     const horaPrometida = new Date(ahora.getTime() + horasProcesamiento * 60 * 60 * 1000);
