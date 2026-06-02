@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab GitForce - Panel Administrativo</title>
+  <link rel="stylesheet" href="style-Laboratorio.css" />
+</head>
+
+<body>
+
+  <!-- MEJORA #8: Contenedor de toasts flotantes. Se inyectan dinámicamente desde la vista. -->
+  <div id="toast-container"></div>
+
+  <!-- MEJORA #8: Overlay de carga (spinner). Se muestra/oculta desde el controlador durante peticiones a la API. -->
+  <div id="spinner-overlay" class="oculto">
+    <div class="spinner-caja">
+      <div class="spinner-rueda"></div>
+      <span class="spinner-texto">Procesando...</span>
+    </div>
+  </div>
+
+  <!-- Encabezado Clínico Corporativo -->
+  <header class="header-app">
+    <h1>🏢 Lab GitForce <small>| Recepción y Control</small></h1>
+    <p>Gestión Integral de Facturación, Catálogos y Despacho Inmediato</p>
+  </header>
+
+  <!-- Contenedor Principal en Formato Dashboard de Dos Columnas -->
+  <main class="dashboard-container">
+
+    <!-- ================================================================= -->
+    <!-- 🗂️ COLUMNA IZQUIERDA: CONTROL FINANCIERO Y CATÁLOGOS (SIDEBAR)     -->
+    <!-- ================================================================= -->
+    <aside class="sidebar-panel">
+
+      <!-- Mini Tarjeta de Tasa de Cambio (Compacta) -->
+      <section class="tarjeta-modulo mini-card">
+        <h3>💵 Tasa del Dia</h3>
+        <div class="formulario-linea compact-row">
+          <input type="number" id="adm_inTasa" step="0.01" value="40.50" />
+          <button id="adm_btnActualizarTasa" class="btn-secundario btn-icon">💾</button>
+        </div>
+      </section>
+
+      <!-- Resumen Estadístico Global (Cierre de Caja) -->
+      <section class="tarjeta-modulo">
+        <div class="modulo-cabecera-simple">
+          <h3>📊 Cierre de Caja Global</h3>
+        </div>
+        <div class="indicadores-caja">
+          <div class="indicador-item"><span>Pacientes Atendidos:</span> <strong id="rep_totalPacientes">0</strong></div>
+          <div class="indicador-item"><span>Examen mas Solicitado:</span> <strong id="rep_estudioTop"
+              class="badge-sugerido">Ninguno</strong></div>
+          <div class="indicador-item"><span>Total de $:</span> <strong id="rep_totalUSD" class="txt-exito">0.00
+              $</strong></div>
+          <div class="indicador-item"><span>Total de Bs:</span> <strong id="rep_totalBs" class="txt-primario">0.00
+              Bs</strong></div>
+        </div>
+        <!-- MEJORA #6: Botón para imprimir el resumen financiero del día en PDF -->
+        <button id="btn_exportarCaja" class="btn-exportar-caja">📄 Exportar Cierre del Día</button>
+      </section>
+
+      <!-- Sección Colapsable para Cargar Nuevos Estudios -->
+      <section class="tarjeta-modulo">
+        <button type="button" id="btnToggleFormEstudio" class="btn-toggle-accordion">➕ Abrir Carga de Estudios</button>
+
+        <div id="seccionFormEstudio" class="oculto accordion-content">
+          <form id="form_nuevoEstudio" class="formulario-vertical">
+            <div class="grupo-input"><label for="est_id">Código:</label><input type="text" id="est_id"
+                placeholder="Ej. PERF20" required /></div>
+            <div class="grupo-input"><label for="est_nombre">Nombre Examen:</label><input type="text" id="est_nombre"
+                placeholder="Ej. Perfil 20" required /></div>
+            <div class="grupo-input"><label for="est_precio">Precio ($):</label><input type="number" id="est_precio"
+                step="0.01" required /></div>
+            <div class="grupo-input"><label for="est_tiempo">Tiempo (Horas):</label><input type="number" id="est_tiempo"
+                required /></div>
+            <div class="grupo-input"><label for="est_unidad">Unidad de Medida:</label><input type="text" id="est_unidad"
+                placeholder="Ej. mg/dL" /></div>
+            <div class="grupo-input"><label for="est_rango">Rango Referencia:</label><input type="text" id="est_rango"
+                placeholder="Ej. 70 - 100" /></div>
+            <div class="grupo-input">
+              <label for="est_tipo">Tipo:</label>
+              <select id="est_tipo">
+                <option value="Individual">Individual</option>
+                <option value="Paquete">Paquete</option>
+              </select>
+            </div>
+            <div class="grupo-input">
+              <label for="est_sugerido">Sugerencia:</label>
+              <select id="est_sugerido">
+                <option value="Todos">Todos</option>
+                <option value="Hombre">Hombre</option>
+                <option value="Mujer">Mujer</option>
+                <option value="Niño">Niño</option>
+                <option value="Embarazada">Embarazada</option>
+              </select>
+            </div>
+
+            <!-- Grilla visual para armar paquetes mediante checkboxes -->
+            <div id="adm_bloqueSubExamenes" class="oculto sub-lista-paquete">
+              <label class="lbl-sub">🔬 Seleccione Sub-Exámenes:</label>
+              <div id="adm_listaSubExamenesCheckboxes" class="scroll-sub-box"></div>
+            </div>
+
+            <button type="submit" class="btn-primario btn-bloque">Guardar Estudio</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Lista Scrollable de Catálogo Activo -->
+      <section class="tarjeta-modulo">
+        <div class="modulo-cabecera-simple">
+          <h3>🔬 Estudios Disponibles</h3>
+        </div>
+        <ul id="adm_listaEstudiosCatalogo" class="lista-catalogo-scroll">
+          <!-- Inyectado dinámicamente -->
+        </ul>
+      </section>
+    </aside>
+
+    <!-- ================================================================= -->
+    <!-- 🏢 COLUMNA DERECHA: REGISTRO DE PACIENTES Y CONTROL DE DESPACHO   -->
+    <!-- ================================================================= -->
+    <div class="main-content-panel">
+
+      <!-- Bloque de Admisión / Registro de Pacientes -->
+      <section class="tarjeta-modulo">
+        <button type="button" id="btnToggleFormPaciente" class="btn-toggle-accordion active-btn">➖ Cerrar Registro de
+          Paciente</button>
+
+        <div id="seccionFormPaciente" class="accordion-content">
+          <form id="form_registroPaciente" class="grid-paciente-formulario">
+            <!-- MEJORA #1: Campo de cédula con botón de búsqueda para autocompletar datos del paciente -->
+            <div class="grupo-input">
+              <label for="pac_cedula">Cédula:</label>
+              <div style="display:flex; gap:6px;">
+                <input type="text" id="pac_cedula" placeholder="Dejar vacío si es &lt; 9 años" style="flex:1" />
+                <button type="button" id="btn_buscarCedula" class="btn-secundario btn-icon" title="Buscar paciente por cédula">🔍</button>
+              </div>
+            </div>
+            <!-- MEJORA #2: Panel de historial de visitas del paciente (oculto hasta que se busque) -->
+            <div id="panel-historial-paciente" class="oculto"></div>
+
+            <div class="grupo-input"><label for="pac_nombre">Nombre:</label><input type="text" id="pac_nombre"
+                required /></div>
+            <div class="grupo-input"><label for="pac_apellido">Apellido:</label><input type="text" id="pac_apellido"
+                required /></div>
+            <div class="grupo-input"><label for="pac_fechaNac">F. Nacimiento:</label><input type="date"
+                id="pac_fechaNac" required /></div>
+
+            <div class="grupo-input">
+              <label for="pac_sexo">Sexo Biológico:</label>
+              <select id="pac_sexo" required>
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+              </select>
+            </div>
+
+            <!-- NUEVA CASILLA SUTIL DE GESTACIÓN -->
+            <div id="adm_bloqueEmbarazada" class="grupo-input oculto"
+              style="justify-content: center; padding-top: 20px;">
+              <label
+                style="display: flex; gap: 8px; align-items: center; cursor: pointer; text-transform: none; font-size: 0.9rem;">
+                <input type="checkbox" id="pac_chkEmbarazada" style="width: 16px; height: 16px;" />
+                <span>🤰 Paciente en estado de gestación</span>
+              </label>
+            </div>
+
+            <div class="grupo-input"><label for="pac_telefono">Teléfono:</label><input type="text" id="pac_telefono"
+                required /></div>
+            <div class="grupo-input full-row"><label for="pac_correo">Correo Electrónico:</label><input type="email"
+                id="pac_correo" required /></div>
+
+            <!-- Grilla de Selección de Exámenes Inteligente con Buscador Integrado -->
+            <div class="full-row estudios-selector-box">
+              <h3>🔬 Estudios Disponibles para el Paciente <small id="lblSugerenciaBadge"
+                  class="badge-sugerido"></small></h3>
+
+              <!-- NUEVA BARRA DE BÚSQUEDA CLÍNICA -->
+              <div class="buscador-estudios-contenedor"
+                style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center;">
+                <span style="font-size: 1.1rem;">🔍</span>
+                <input type="text" id="pac_buscarEstudioInput"
+                  placeholder="Buscar examen por código o nombre (Ej: GLI o Perfil)..."
+                  style="width: 100%; padding: 8px 12px; font-size: 0.9rem;" />
+              </div>
+
+              <div id="adm_contenedorEstudiosDisponibles" class="grid-checkboxes-resultados">
+                <!-- Inyectado dinámicamente -->
+              </div>
+            </div>
+
+
+            <!-- Bloque de Cierre Presupuestario (Pre-Pago Integrado) -->
+            <div class="full-row factura-pre-pago">
+              <div class="factura-header">
+                <h3>🛒 Desglose del Presupuesto (Pre-Pago)</h3>
+                <div class="tasa-badge">Tasa Oficial: <strong id="pedido_lblTasa">0.00</strong> Bs</div>
+              </div>
+              <div class="factura-totales">
+                <div class="total-box"><span>Total Dólares:</span> <strong id="adm_lblTotalUSD">0.00 $</strong></div>
+                <div class="total-box text-blue"><span>Total Bolívares:</span> <strong id="adm_lblTotalBs">0.00
+                    Bs</strong></div>
+                <div class="total-box text-orange"><span>⏱️ Retiro Estimado:</span> <strong
+                    id="adm_lblHoraEntrega">--:-- --</strong></div>
+              </div>
+              <div class="grupo-input-row">
+                <label for="pac_metodoPago">Forma de Pago:</label>
+                <select id="pac_metodoPago">
+                  <option value="Efectivo">Efectivo ($ / Bs)</option>
+                  <option value="Punto de Venta">Punto de Venta</option>
+                  <option value="Pago Móvil">Pago Móvil</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-exito btn-bloque full-row" style="margin-top: 15px;">💳 Confirmar
+              Facturación y Procesar Orden</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Monitor Operativo de Control de Órdenes (Bandejas de Flujo) -->
+      <section class="tarjeta-modulo">
+        <div class="modulo-cabecera">
+          <h2>📥 Monitor Operativo y Despacho Médico</h2>
+          <div class="filtro-tabs">
+            <button type="button" id="btnVerEspera" class="tab-link active">En Espera Técnico</button>
+            <button type="button" id="btnVerListos" class="tab-link">Resultados Listos</button>
+          </div>
+        </div>
+
+        <!-- MEJORA #4: Buscador dentro de la bandeja de espera para localizar pacientes rápidamente -->
+        <div class="buscador-bandeja">
+          <span>🔍</span>
+          <input type="text" id="input_buscarBandeja" placeholder="Buscar por nombre o cédula..." />
+        </div>
+        <div id="adm_listaEspera" class="bandeja-scroll-monitor">
+          <!-- Inyectado dinámicamente -->
+        </div>
+
+        <div id="adm_listaListos" class="bandeja-scroll-monitor oculto">
+          <!-- Inyectado dinámicamente -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Créditos Institucionales (Misma Identidad del Grupo Git Force) -->
+  <footer class="footer-creditos">
+    <p>© 2026 UCLA DCyT - Proyecto Final</p>
+    <p class="autor-info">Designe By <strong>Git Force</strong> | Todos los derechos reservados © 2026</p>
+  </footer>
+
+  <!-- SCRIPT DE ACOPLAMIENTO MODULAR COMPLETO CON TU VISTA ADMINISTRATIVA -->
+  <script type="module">
+    // 1. Importamos las tres capas necesarias
+    import Cl_mLaboratorio from "./dist/models/Cl_mLaboratorio.js";
+    import Cl_vLaboratorio from "./dist/views/Cl_vLaboratorio.js";
+    import Cl_cLaboratorio from "./dist/controllers/Cl_cLaboratorio.js";
+
+    // 2. Instanciamos el Modelo Global contenedor (arranca con tasa 0) y la Vista Administrativa
+    const modelo = new Cl_mLaboratorio(0);
+    const vista = new Cl_vLaboratorio();
+
+    // 3. Los inyectamos empaquetados en un objeto, tal cual como el ejemplo del profesor: { modelo, vista }
+    new Cl_cLaboratorio({ modelo, vista });
+  </script>
+
+</body>
+
+</html>

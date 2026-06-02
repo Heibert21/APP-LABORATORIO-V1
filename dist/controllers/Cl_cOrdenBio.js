@@ -1,0 +1,98 @@
+import Cl_mOrdenBio from "../models/Cl_mOrdenBio.js";
+import Cl_sOrdenBio from "../services/Cl_sOrdenBio.js";
+export default class Cl_cOrdenBio {
+    modelo;
+    vista;
+    constructor({ modelo, vista }) {
+        this.modelo = modelo;
+        this.vista = vista;
+        this.vista.onSeleccionarPaciente((idOrden) => this.procesarSeleccionPaciente(idOrden));
+        this.vista.onEnviarResultadosALaboratorio(() => this.procesarEnvioResultados());
+        this.inicializarApp();
+    }
+    async inicializarApp() {
+        try {
+            const todasLasOrdenesPlanas = await Cl_sOrdenBio.obtenerOrdenes();
+            const todasLasOrdenes = todasLasOrdenesPlanas.map((o) => new Cl_mOrdenBio(o));
+            const pendientes = todasLasOrdenes
+                .filter((o) => o.status === "En Espera")
+                .sort((a, b) => new Date(a.fechaRegistro).getTime() - new Date(b.fechaRegistro).getTime());
+            const atendidos = todasLasOrdenes.filter((o) => o.status === "Listo para Despacho");
+            this.vista.renderizarPacientesEnEspera(pendientes);
+            this.vista.renderizarPacientesAtendidos(atendidos);
+        }
+        catch (error) {
+            console.error("Error al inicializar la App del Bioanalista:", error);
+        }
+    }
+    async procesarSeleccionPaciente(idOrden) {
+        try {
+            const datosPlanos = await Cl_sOrdenBio.buscarOrdenPorId(idOrden);
+            if (datosPlanos) {
+                const ordenInstancia = new Cl_mOrdenBio(datosPlanos);
+                this.vista.mostrarFormularioCarga(ordenInstancia);
+            }
+            else {
+                // MEJORA #9: Toast de error en lugar de alert
+                this.vista.mostrarToast("No se pudo cargar la información de la orden seleccionada.", "error");
+            }
+        }
+        catch (error) {
+            console.error("Error al seleccionar paciente:", error);
+        }
+    }
+    async procesarEnvioResultados() {
+        if (!this.vista.nombreLicenciado) {
+            // MEJORA #3: Validación con toast en lugar de alert bloqueante
+            this.vista.mostrarToast("Introduzca el nombre del Lic. Bioanalista que valida los resultados.", "advertencia");
+            return;
+        }
+        const idOrden = this.vista.idOrdenSeleccionada;
+        const camposCargados = this.vista.getValoresCamposCargados();
+        const algunoVacio = camposCargados.some(c => c.valor === "");
+        if (algunoVacio && !confirm("Hay casillas de resultados vacías. ¿Desea enviar la orden de todas formas?")) {
+            return;
+        }
+        try {
+            const ordenOriginal = await Cl_sOrdenBio.buscarOrdenPorId(idOrden);
+            if (!ordenOriginal) {
+                this.vista.mostrarToast("Error: No se encontró la orden original en el servidor.", "error");
+                return;
+            }
+            this.modelo.id = ordenOriginal.id;
+            this.modelo.cedula = ordenOriginal.cedula;
+            this.modelo.nombre = ordenOriginal.nombre;
+            this.modelo.apellido = ordenOriginal.apellido;
+            this.modelo.edad = ordenOriginal.edad;
+            this.modelo.sexo = ordenOriginal.sexo;
+            this.modelo.telefono = ordenOriginal.telefono || "";
+            this.modelo.correo = ordenOriginal.correo || "";
+            this.modelo.metodoPago = ordenOriginal.metodoPago || "";
+            this.modelo.montoTotal$ = ordenOriginal.montoTotal$ || 0;
+            this.modelo.fechaRegistro = ordenOriginal.fechaRegistro;
+            this.modelo.horaEntregaEstimada = ordenOriginal.horaEntregaEstimada || "";
+            this.modelo.examenesSolicitados = ordenOriginal.examenesSolicitados;
+            this.modelo.resultados = ordenOriginal.resultados;
+            camposCargados.forEach(campo => {
+                this.modelo.registrarValorResultado(campo.parametro, campo.valor);
+            });
+            this.modelo.licBioanalista = this.vista.nombreLicenciado;
+            this.modelo.status = "Listo para Despacho";
+            const exito = await Cl_sOrdenBio.despacharOCerrarOrden(idOrden, this.modelo.toJSON());
+            if (exito.ok) {
+                // MEJORA #9: Toast de éxito en lugar de alert
+                this.vista.mostrarToast("¡Resultados cargados con éxito!", "exito");
+                this.vista.limpiarFormularioCarga();
+                this.inicializarApp();
+            }
+            else {
+                this.vista.mostrarToast("Error al guardar los resultados. Intente nuevamente.", "error");
+            }
+        }
+        catch (error) {
+            console.error("Error al procesar el envío de resultados:", error);
+            this.vista.mostrarToast("Error de red al conectar con el servidor.", "error");
+        }
+    }
+}
+//# sourceMappingURL=Cl_cOrdenBio.js.map
