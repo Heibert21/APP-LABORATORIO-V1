@@ -1,3 +1,16 @@
+/*🔬5. Laboratorio Clínico
+Gestión de pacientes y exámenes médicos.
+
+* Configuración: El personal carga la lista de estudios de laboratorio.
+* APP de Usuarios (Bioanalista): Visualizan el menú, seleccionan los pacientes
+*  y carga los resultados de los exámenes y una vez cargado marca como finalizado
+*  (listo para imprimir).
+* APP del Personal (Administración): Toma los datos del paciente
+*  e indica los estudios de laboratorio que se realizaran y la cobranza,
+*  además puede ver en el panel los estudios finalizados para imprimir y reportar al paciente.
+*/
+
+
 import { I_vOrdenBio } from "../interfaces/I_vOrdenBio.js";
 import Cl_mOrdenBio from "../models/Cl_mOrdenBio.js";
 import Cl_sOrdenBio from "../services/Cl_sOrdenBio.js";
@@ -8,10 +21,10 @@ export default class Cl_cOrdenBio {
 
   constructor({ modelo, vista }: { modelo: Cl_mOrdenBio; vista: I_vOrdenBio }) {
     this.modelo = modelo;
-    this.vista = vista; 
+    this.vista = vista;
 
     this.vista.onSeleccionarPaciente((idOrden) => this.procesarSeleccionPaciente(idOrden));
-    this.vista.onEnviarResultadosALaboratorio(() => this.procesarEnvioResultados()); 
+    this.vista.onEnviarResultadosALaboratorio(() => this.procesarEnvioResultados());
 
     this.inicializarApp();
   }
@@ -93,7 +106,7 @@ export default class Cl_cOrdenBio {
       this.modelo.status = "Listo para Despacho";
 
       const exito = await Cl_sOrdenBio.despacharOCerrarOrden(idOrden, this.modelo.toJSON());
-      
+
       if (exito.ok) {
         // MEJORA #9: Toast de éxito en lugar de alert
         this.vista.mostrarToast("¡Resultados cargados con éxito!", "exito");
