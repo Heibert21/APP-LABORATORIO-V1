@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación de Laboratorio</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+        .links-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .btn {
+            display: inline-block;
+            text-decoration: none;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-laboratorio {
+            background-color: #3498db;
+        }
+        .btn-laboratorio:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.4);
+        }
+        .btn-bioanalista {
+            background-color: #2ecc71;
+        }
+        .btn-bioanalista:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bienvenido al Sistema</h1>
+        <p style="margin-bottom: 30px; color: #7f8c8d;">Selecciona el módulo al que deseas ingresar:</p>
+        <div class="links-container">
+            <a href="index-Laboratorio.html" class="btn btn-laboratorio">Módulo Laboratorio</a>
+            <a href="index-Bioanalista.html" class="btn btn-bioanalista">Módulo Bioanalista</a>
+        </div>
+    </div>
+</body>
+</html>
