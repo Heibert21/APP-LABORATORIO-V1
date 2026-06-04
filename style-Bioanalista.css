@@ -2,39 +2,67 @@
 /* 🎨 CONFIGURACIÓN GENERAL Y PALETA CLÍNICA PREMIUM                  */
 /* ================================================================= */
 :root {
-  --bg-app: #f4f7fa;            /* Gris hospitalario suave */
-  --blanco: #ffffff;            
-  --texto-oscuro: #0f172a;      /* Azul pizarra corporativo */
-  --texto-mutado: #64748b;      
-  --color-borde: #cbd5e1;       
-  --color-foco: #3b82f6;        
-  
+  --bg-app: #f4f7fa;
+  /* Gris hospitalario suave */
+  --blanco: #ffffff;
+  --texto-oscuro: #0f172a;
+  /* Azul pizarra corporativo */
+  --texto-mutado: #64748b;
+  --color-borde: #cbd5e1;
+  --color-foco: #3b82f6;
+
   /* Identidad de Marca Unificada GitForce */
-  --primario: #0284c7;          /* Azul Clínico / Celeste Claro */
+  --primario: #0284c7;
+  /* Azul Clínico / Celeste Claro */
   --primario-hover: #0369a1;
-  --secundario: #475569;        
-  --exito: #10b981;             
+  --secundario: #475569;
+  --exito: #10b981;
   --exito-hover: #059669;
-  
+
   /* NUEVO: Bloques de Firma y Alertas en Tonos Cálidos Profesionales */
-  --pago-bg: #0f172a;           /* Azul Marino Profundo */
+  --pago-bg: #0f172a;
+  /* Azul Marino Profundo */
   --pago-borde: #1e293b;
-  --alerta-calida-bg: #fff7ed;   /* Naranja/Crema Pastel Sutil (Fuera de Rango) */
-  --alerta-calida-texto: #c2410c;/* Texto Óxido de alto contraste */
+  --alerta-calida-bg: #fff7ed;
+  /* Naranja/Crema Pastel Sutil (Fuera de Rango) */
+  --alerta-calida-texto: #c2410c;
+  /* Texto Óxido de alto contraste */
   --alerta-calida-borde: #ffedd5;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-body { background-color: var(--bg-app); color: var(--texto-oscuro); line-height: 1.5; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--texto-oscuro);
+  line-height: 1.5;
+}
 
 /* Header Premium */
 .header-app {
   background: linear-gradient(135deg, #0b1528 0%, #1e3a8a 100%);
-  color: var(--blanco); text-align: center; padding: 30px 20px;
-  border-bottom: 4px solid var(--primario); box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  color: var(--blanco);
+  text-align: center;
+  padding: 30px 20px;
+  border-bottom: 4px solid var(--primario);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 }
-.header-app h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
-.header-app p { color: #bae6fd; font-size: 0.95rem; }
+
+.header-app h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.header-app p {
+  color: #bae6fd;
+  font-size: 0.95rem;
+}
 
 /* ================================================================= */
 /* 🗂️ MAQUETACIÓN DASHBOARD SIDEBAR + MAIN CONTENT                  */
@@ -42,73 +70,203 @@ body { background-color: var(--bg-app); color: var(--texto-oscuro); line-height:
 .dashboard-container {
   display: grid;
   grid-template-columns: 340px 1fr;
-  gap: 25px; max-width: 1400px; margin: 30px auto; padding: 0 20px;
+  gap: 25px;
+  max-width: 1400px;
+  margin: 30px auto;
+  padding: 0 20px;
   align-items: start;
 }
 
 .tarjeta-modulo {
-  background-color: var(--blanco); border-radius: 12px; padding: 20px;
-  border: 1px solid var(--color-borde); box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+  background-color: var(--blanco);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid var(--color-borde);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
   margin-bottom: 20px;
 }
 
-.sidebar-panel { display: flex; flex-direction: column; }
-.modulo-cabecera-simple h3 { font-size: 0.95rem; font-weight: 700; color: #0369a1; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-.instruccion { font-size: 0.85rem; color: var(--texto-mutado); margin-bottom: 12px; }
-.divisor-dashed { margin: 20px 0; border: 0; border-top: 2px dashed #e2e8f0; }
+.sidebar-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.modulo-cabecera-simple h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0369a1;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.instruccion {
+  font-size: 0.85rem;
+  color: var(--texto-mutado);
+  margin-bottom: 12px;
+}
+
+.divisor-dashed {
+  margin: 20px 0;
+  border: 0;
+  border-top: 2px dashed #e2e8f0;
+}
 
 /* Lista de Muestras en Espera Técnico */
-.bandeja-scroll-monitor { max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-.paciente-tarjeta {
-  background-color: #f8fafc; border: 1px solid var(--color-borde);
-  border-left: 5px solid #f97316; padding: 12px; border-radius: 8px;
-  display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;
+.bandeja-scroll-monitor {
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
-.paciente-tarjeta strong { color: var(--texto-oscuro); font-size: 0.9rem; }
-.paciente-tarjeta small { color: var(--texto-mutado); }
+
+.paciente-tarjeta {
+  background-color: #f8fafc;
+  border: 1px solid var(--color-borde);
+  border-left: 5px solid #f97316;
+  padding: 12px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.paciente-tarjeta strong {
+  color: var(--texto-oscuro);
+  font-size: 0.9rem;
+}
+
+.paciente-tarjeta small {
+  color: var(--texto-mutado);
+}
 
 .btn-atender {
-  padding: 6px 12px; background-color: var(--primario); color: white;
-  border: none; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 0.8rem;
+  padding: 6px 12px;
+  background-color: var(--primario);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.8rem;
 }
-.btn-atender:hover { background-color: var(--primario-hover); }
 
-.lista-catalogo-scroll { max-height: 160px; overflow-y: auto; list-style: none; font-size: 0.85rem; }
-.item-atendido { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--color-borde); }
-.status-listo { background-color: #dcfce7; color: #15803d; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
+.btn-atender:hover {
+  background-color: var(--primario-hover);
+}
+
+.lista-catalogo-scroll {
+  max-height: 160px;
+  overflow-y: auto;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.item-atendido {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--color-borde);
+}
+
+.status-listo {
+  background-color: #dcfce7;
+  color: #15803d;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
 
 /* ================================================================= */
 /* 🔬 COLUMNA MATRIZ MÉDICA (FILAS EN COLUMNAS ALINEADAS PERFECTAS)  */
 /* ================================================================= */
-.main-content-panel { display: flex; flex-direction: column; }
+.main-content-panel {
+  display: flex;
+  flex-direction: column;
+}
 
 /* Cabecera Demográfica */
 .grid-form {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
-  background-color: #f1f5f9; padding: 15px; border-radius: 8px; font-size: 0.9rem; border: 1px solid #e2e8f0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  background-color: #f1f5f9;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  border: 1px solid #e2e8f0;
 }
-.resultado-busqueda { padding: 10px 14px; border-radius: 6px; font-size: 0.9rem; }
 
-.contenedor-filas-medicas { display: flex; flex-direction: column; gap: 6px; margin-top: 15px; }
+.resultado-busqueda {
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.contenedor-filas-medicas {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 15px;
+}
 
 /* Fila médica estructurada en 3 columnas rígidas alineadas de forma impecable */
 .fila-medica {
-  display: grid; grid-template-columns: 1fr 160px 140px;
-  align-items: center; gap: 20px; padding: 10px 15px;
-  border-bottom: 1px solid var(--color-borde); border-radius: 6px;
-  background-color: #f8fafc; transition: all 0.2s ease;
+  display: grid;
+  grid-template-columns: 1fr 160px 140px;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 15px;
+  border-bottom: 1px solid var(--color-borde);
+  border-radius: 6px;
+  background-color: #f8fafc;
+  transition: all 0.2s ease;
 }
 
-.label-medico { font-size: 0.95rem; font-weight: 600; color: var(--texto-oscuro); }
-.input-unificado { display: flex; align-items: center; gap: 8px; }
+.label-medico {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--texto-oscuro);
+}
+
+.input-unificado {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
 .input-unificado input {
-  width: 85px; padding: 7px; border: 1px solid var(--color-borde);
-  border-radius: 6px; text-align: center; font-size: 0.95rem; font-weight: 700; outline: none;
+  width: 85px;
+  padding: 7px;
+  border: 1px solid var(--color-borde);
+  border-radius: 6px;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  outline: none;
 }
-.input-unificado input:focus { border-color: var(--color-foco); }
-.unidad-texto { font-size: 0.85rem; color: var(--texto-mutado); font-weight: 700; width: 60px; }
-.referencia-texto { font-size: 0.85rem; color: var(--texto-mutado); text-align: right; font-weight: 600; }
+
+.input-unificado input:focus {
+  border-color: var(--color-foco);
+}
+
+.unidad-texto {
+  font-size: 0.85rem;
+  color: var(--texto-mutado);
+  font-weight: 700;
+  width: 60px;
+}
+
+.referencia-texto {
+  font-size: 0.85rem;
+  color: var(--texto-mutado);
+  text-align: right;
+  font-weight: 600;
+}
 
 /* ================================================================= */
 /* 🚨 REQUERIMIENTO CLAVE: RESALTADO CÁLIDO PASTEL FUERA DE RANGO    */
@@ -116,36 +274,165 @@ body { background-color: var(--bg-app); color: var(--texto-oscuro); line-height:
 .border-pago {
   background-color: var(--alerta-calida-bg) !important;
   border: 1px solid var(--alerta-calida-borde) !important;
-  border-left: 6px solid var(--alerta-border) !important; /* Resaltado naranja clínico */
+  border-left: 6px solid var(--alerta-border) !important;
+  /* Resaltado naranja clínico */
 }
-.border-pago .label-medico { color: #9a3412; }
-.border-pago .referencia-texto { color: var(--alerta-calida-texto); }
+
+.border-pago .label-medico {
+  color: #9a3412;
+}
+
+.border-pago .referencia-texto {
+  color: var(--alerta-calida-texto);
+}
 
 /* ================================================================= */
 /* ✍️ PANEL DE VALIDACIÓN Y FIRMA (AZUL MARINO IGUAL AL LAB)         */
 /* ================================================================= */
 .area-firma-profesional {
-  background-color: var(--pago-bg) !important; border: 1px solid var(--pago-borde) !important;
-  border-left: 6px solid var(--primario) !important; padding: 15px; border-radius: 10px; margin-top: 25px;
+  background-color: var(--pago-bg) !important;
+  border: 1px solid var(--pago-borde) !important;
+  border-left: 6px solid var(--primario) !important;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 25px;
 }
-.factura-header h3 { font-size: 1rem; color: var(--blanco); font-weight: 600; padding-bottom: 6px; border-bottom: 1px solid #1e293b; }
 
-.grupo-input { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
-.grupo-input label { font-size: 0.8rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; }
-.grupo-input input { padding: 9px 12px; border: 1px solid #334155; border-radius: 8px; outline: none; font-size: 0.95rem; background-color: #1e293b; color: white; }
-.grupo-input input:focus { border-color: var(--primario); }
+.factura-header h3 {
+  font-size: 1rem;
+  color: var(--blanco);
+  font-weight: 600;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #1e293b;
+}
+
+.grupo-input {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.grupo-input label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.grupo-input input {
+  padding: 9px 12px;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  outline: none;
+  font-size: 0.95rem;
+  background-color: #1e293b;
+  color: white;
+}
+
+.grupo-input input:focus {
+  border-color: var(--primario);
+}
 
 /* Estado Vacio */
-.estado-vacio-panel { text-align: center; padding: 50px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.icono-vacio { font-size: 3.5rem; margin-bottom: 12px; }
-.estado-vacio-panel h3 { font-size: 1.2rem; color: var(--texto-oscuro); margin-bottom: 6px; }
-.estado-vacio-panel p { color: var(--texto-mutado); font-size: 0.95rem; max-width: 400px; }
+.estado-vacio-panel {
+  text-align: center;
+  padding: 50px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.icono-vacio {
+  font-size: 3.5rem;
+  margin-bottom: 12px;
+}
+
+.estado-vacio-panel h3 {
+  font-size: 1.2rem;
+  color: var(--texto-oscuro);
+  margin-bottom: 6px;
+}
+
+.estado-vacio-panel p {
+  color: var(--texto-mutado);
+  font-size: 0.95rem;
+  max-width: 400px;
+}
 
 /* Botonería */
-.btn-bloque { width: 100%; padding: 12px; border: none; border-radius: 8px; color: white; font-weight: 700; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
-.btn-exito { background-color: var(--exito); } .btn-exito:hover { background-color: var(--exito-hover); }
+.btn-bloque {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
 
-.vacio-texto { text-align: center; color: var(--texto-mutado); font-style: italic; font-size: 0.9rem; padding: 15px 0; }
-.footer-creditos { background-color: #020617; color: #64748b; text-align: center; padding: 20px; margin-top: 40px; font-size: 0.85rem; border-top: 4px solid var(--primario); }
-.autor-info { margin-top: 4px; color: #94a3b8; }
-.oculto { display: none !important; }
+.btn-exito {
+  background-color: var(--exito);
+}
+
+.btn-exito:hover {
+  background-color: var(--exito-hover);
+}
+
+.vacio-texto {
+  text-align: center;
+  color: var(--texto-mutado);
+  font-style: italic;
+  font-size: 0.9rem;
+  padding: 15px 0;
+}
+
+.footer-creditos {
+  background-color: #020617;
+  color: #64748b;
+  text-align: center;
+  padding: 20px;
+  margin-top: 40px;
+  font-size: 0.85rem;
+  border-top: 4px solid var(--primario);
+}
+
+.autor-info {
+  margin-top: 4px;
+  color: #94a3b8;
+}
+
+.oculto {
+  display: none !important;
+}
+
+/* ================================================================= */
+/* 📱 le agregamos el RESPONSIVE DESIGN para las vistas de celulares y tabletas                          */
+/* ================================================================= */
+@media (max-width: 992px) {
+  .dashboard-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-form {
+    grid-template-columns: 1fr;
+  }
+
+  .fila-medica {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .input-unificado {
+    justify-content: flex-start;
+  }
+
+  .referencia-texto {
+    text-align: left;
+  }
+}

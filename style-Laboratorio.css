@@ -2,75 +2,89 @@
 /* 🎨 PALETA DE COLORES CLÍNICA PREMIUM (AZULES, GRISES Y BLANCO)    */
 /* ================================================================= */
 :root {
-  --bg-app: #f4f7fa;            /* Gris clínico muy claro */
-  --blanco: #ffffff;            /* Blanco puro */
-  --texto-oscuro: #0f172a;      /* Azul pizarra casi negro */
-  --texto-mutado: #64748b;      /* Gris intermedio para leyendas */
-  --color-borde: #cbd5e1;       /* Gris suave para separadores */
-  --color-foco: #3b82f6;        /* Azul brillante para foco */
-  
+  --bg-app: #f4f7fa;
+  /* Gris clínico muy claro */
+  --blanco: #ffffff;
+  /* Blanco puro */
+  --texto-oscuro: #0f172a;
+  /* Azul pizarra casi negro */
+  --texto-mutado: #64748b;
+  /* Gris intermedio para leyendas */
+  --color-borde: #cbd5e1;
+  /* Gris suave para separadores */
+  --color-foco: #3b82f6;
+  /* Azul brillante para foco */
+
   /* Identidad del Laboratorio */
-  --primario: #0284c7;          /* Azul Clínico Claro / Celeste Médico */
+  --primario: #0284c7;
+  /* Azul Clínico Claro / Celeste Médico */
   --primario-hover: #0369a1;
-  --secundario: #475569;        /* Gris Neutro Profesional */
-  --exito: #10b981;             /* Verde Esmeralda Suave */
+  --secundario: #475569;
+  /* Gris Neutro Profesional */
+  --exito: #10b981;
+  /* Verde Esmeralda Suave */
   --exito-hover: #059669;
-  
+
   /* NUEVO: Contenedor de Pago en Azul Oscuro Profundo */
-  --pago-bg: #0f172a;           /* Azul Marino Profundo (Fondo) */
-  --pago-borde: #1e293b;        /* Borde unificado */
-  --pago-texto-resaltado: #38bdf8; /* Celeste neón para los totales */
+  --pago-bg: #0f172a;
+  /* Azul Marino Profundo (Fondo) */
+  --pago-borde: #1e293b;
+  /* Borde unificado */
+  --pago-texto-resaltado: #38bdf8;
+  /* Celeste neón para los totales */
 }
 
-* { 
-  box-sizing: border-box; 
-  margin: 0; 
-  padding: 0; 
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
-body { 
-  background-color: var(--bg-app); 
-  color: var(--texto-oscuro); 
-  line-height: 1.5; 
+body {
+  background-color: var(--bg-app);
+  color: var(--texto-oscuro);
+  line-height: 1.5;
 }
 
 /* ================================================================= */
 /* 🏢 ENCABEZADO Y PIE DE PÁGINA (IDENTIDAD DEL GRUPO)               */
 /* ================================================================= */
 .header-app {
-  background: linear-gradient(135deg, #0b1528 0%, #1e3a8a 100%); /* Degradado de azul marino a azul profundo */
-  color: var(--blanco); 
-  text-align: center; 
+  background: linear-gradient(135deg, #0b1528 0%, #1e3a8a 100%);
+  /* Degradado de azul marino a azul profundo */
+  color: var(--blanco);
+  text-align: center;
   padding: 30px 20px;
-  border-bottom: 4px solid var(--primario); 
-  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  border-bottom: 4px solid var(--primario);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 }
 
-.header-app h1 { 
-  font-size: 1.8rem; 
-  font-weight: 700; 
-  margin-bottom: 4px; 
+.header-app h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
-.header-app p { 
-  color: #bae6fd; /* Texto en azul celeste claro legible */
-  font-size: 0.95rem; 
+.header-app p {
+  color: #bae6fd;
+  /* Texto en azul celeste claro legible */
+  font-size: 0.95rem;
 }
 
-.footer-creditos { 
-  background-color: #0b1528; 
-  color: #64748b; 
-  text-align: center; 
-  padding: 20px; 
-  margin-top: 40px; 
-  font-size: 0.85rem; 
-  border-top: 4px solid var(--primario); 
+.footer-creditos {
+  background-color: #0b1528;
+  color: #64748b;
+  text-align: center;
+  padding: 20px;
+  margin-top: 40px;
+  font-size: 0.85rem;
+  border-top: 4px solid var(--primario);
 }
 
-.autor-info { 
-  margin-top: 4px; 
-  color: #94a3b8; 
+.autor-info {
+  margin-top: 4px;
+  color: #94a3b8;
 }
 
 /* ================================================================= */
@@ -79,265 +93,287 @@ body {
 .dashboard-container {
   display: grid;
   grid-template-columns: 320px 1fr;
-  gap: 25px; 
-  max-width: 1400px; 
-  margin: 30px auto; 
+  gap: 25px;
+  max-width: 1400px;
+  margin: 30px auto;
   padding: 0 20px;
   align-items: start;
 }
 
 .tarjeta-modulo {
-  background-color: var(--blanco); 
-  border-radius: 12px; 
+  background-color: var(--blanco);
+  border-radius: 12px;
   padding: 20px;
-  border: 1px solid var(--color-borde); 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+  border: 1px solid var(--color-borde);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
   margin-bottom: 20px;
 }
 
 /* Panel Lateral Izquierdo (Sidebar) */
-.sidebar-panel { 
-  display: flex; 
-  flex-direction: column; 
+.sidebar-panel {
+  display: flex;
+  flex-direction: column;
 }
 
-.mini-card { 
-  padding: 15px; 
-  background-color: #f1f5f9; /* Gris suave de fondo */
+.mini-card {
+  padding: 15px;
+  background-color: #f1f5f9;
+  /* Gris suave de fondo */
 }
 
-.mini-card h3 { 
-  font-size: 0.85rem; 
-  text-transform: uppercase; 
-  color: var(--texto-mutado); 
-  margin-bottom: 8px; 
+.mini-card h3 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: var(--texto-mutado);
+  margin-bottom: 8px;
 }
 
-.compact-row { 
-  display: flex; 
-  gap: 10px; 
+.compact-row {
+  display: flex;
+  gap: 10px;
 }
 
-.compact-row input { 
-  flex: 1; 
-  padding: 6px 10px; 
-  font-size: 1rem; 
-  text-align: center; 
-  font-weight: 700; 
+.compact-row input {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 1rem;
+  text-align: center;
+  font-weight: 700;
   background-color: var(--blanco);
 }
 
-.btn-icon { 
-  padding: 6px 12px !important; 
+.btn-icon {
+  padding: 6px 12px !important;
 }
+
 /* ================================================================= */
 /* 📊 CONTADORES DE CIERRE DE CAJA Y LISTADOS DEL SIDEBAR            */
 /* ================================================================= */
-.modulo-cabecera-simple h3 { 
-  font-size: 0.95rem; 
-  font-weight: 700; 
-  color: #0369a1; /* Azul intermedio médico */
-  margin-bottom: 12px; 
-  text-transform: uppercase; 
+.modulo-cabecera-simple h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0369a1;
+  /* Azul intermedio médico */
+  margin-bottom: 12px;
+  text-transform: uppercase;
 }
 
-.indicadores-caja { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 8px; 
+.indicadores-caja {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.indicador-item { 
-  display: flex; 
-  justify-content: space-between; 
-  font-size: 0.9rem; 
-  font-weight: 500; 
-  border-bottom: 1px dashed var(--color-borde); 
-  padding-bottom: 4px; 
+.indicador-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-bottom: 1px dashed var(--color-borde);
+  padding-bottom: 4px;
 }
 
-.txt-exito { color: var(--exito); font-weight: 700; }
-.txt-primario { color: var(--primario); font-weight: 700; }
-
-.lista-catalogo-scroll { 
-  max-height: 180px; 
-  overflow-y: auto; 
-  list-style: none; 
-  font-size: 0.85rem; 
+.txt-exito {
+  color: var(--exito);
+  font-weight: 700;
 }
 
-.formulario-vertical { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 10px; 
+.txt-primario {
+  color: var(--primario);
+  font-weight: 700;
+}
+
+.lista-catalogo-scroll {
+  max-height: 180px;
+  overflow-y: auto;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.formulario-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 /* ================================================================= */
 /* 📝 REJILLAS Y COMPONENTES FORMULARIO PACIENTE (MAIN PANEL)        */
 /* ================================================================= */
-.main-content-panel { 
-  display: flex; 
-  flex-direction: column; 
+.main-content-panel {
+  display: flex;
+  flex-direction: column;
 }
 
-.grid-paciente-formulario { 
-  display: grid; 
-  grid-template-columns: repeat(3, 1fr); 
-  gap: 15px; 
+.grid-paciente-formulario {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
 }
 
-.full-row { 
-  grid-column: span 3; 
+.full-row {
+  grid-column: span 3;
 }
 
-.grupo-input { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 4px; 
+.grupo-input {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.grupo-input label { 
-  font-size: 0.8rem; 
-  font-weight: 700; 
-  color: #475569; 
-  text-transform: uppercase; 
+.grupo-input label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
 }
 
-input, select { 
-  padding: 9px 12px; 
-  border: 1px solid var(--color-borde); 
-  border-radius: 8px; 
-  outline: none; 
-  font-size: 0.95rem; 
-  transition: all 0.2s; 
+input,
+select {
+  padding: 9px 12px;
+  border: 1px solid var(--color-borde);
+  border-radius: 8px;
+  outline: none;
+  font-size: 0.95rem;
+  transition: all 0.2s;
 }
 
-input:focus, select:focus { 
-  border-color: var(--color-foco); 
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); 
+input:focus,
+select:focus {
+  border-color: var(--color-foco);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 /* Checkboxes de Selección de Estudios (Tonos Celeste Médico) */
 .grid-checkboxes-resultados {
-  display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 10px;
-  background: #f8fafc; 
-  padding: 15px; 
-  border-radius: 8px; 
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 8px;
   border: 1px dashed var(--color-borde);
-  max-height: 160px; 
+  max-height: 160px;
   overflow-y: auto;
 }
 
-.chk-wrapper { 
-  display: flex; 
-  align-items: center; 
-  padding: 8px 12px; 
-  border: 1px solid var(--color-borde); 
-  border-radius: 6px; 
-  background: var(--blanco); 
-  font-size: 0.85rem; 
+.chk-wrapper {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid var(--color-borde);
+  border-radius: 6px;
+  background: var(--blanco);
+  font-size: 0.85rem;
 }
 
-.chk-wrapper label { 
-  display: flex; 
-  gap: 8px; 
-  align-items: center; 
-  cursor: pointer; 
-  width: 100%; 
+.chk-wrapper label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+  width: 100%;
 }
 
-.sugerido-resaltado { 
-  background-color: #f0f9ff; /* Celeste muy suave */
-  border-color: #bae6fd; 
-  color: #0369a1; 
-  font-weight: bold; 
+.sugerido-resaltado {
+  background-color: #f0f9ff;
+  /* Celeste muy suave */
+  border-color: #bae6fd;
+  color: #0369a1;
+  font-weight: bold;
 }
 
 /* ================================================================= */
 /* 💳 NUEVO: DISEÑO DE FACTURACIÓN EN AZUL MARINO PROFUNDOO          */
 /* ================================================================= */
 .factura-pre-pago {
-  background-color: var(--pago-bg) !important; 
-  border: 1px solid var(--pago-borde) !important; 
-  border-left: 6px solid var(--primario) !important; /* Detalle en celeste */
-  padding: 18px; 
-  border-radius: 10px; 
+  background-color: var(--pago-bg) !important;
+  border: 1px solid var(--pago-borde) !important;
+  border-left: 6px solid var(--primario) !important;
+  /* Detalle en celeste */
+  padding: 18px;
+  border-radius: 10px;
   margin-top: 10px;
   box-shadow: 0 4px 15px rgba(15, 23, 42, 0.15);
 }
 
-.factura-header { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  margin-bottom: 14px; 
-  border-bottom: 1px solid #1e293b; 
-  padding-bottom: 8px; 
+.factura-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #1e293b;
+  padding-bottom: 8px;
 }
 
-.factura-header h3 { 
-  font-size: 1rem; 
-  color: var(--blanco); /* Texto blanco para resaltar */
+.factura-header h3 {
+  font-size: 1rem;
+  color: var(--blanco);
+  /* Texto blanco para resaltar */
   font-weight: 600;
 }
 
-.tasa-badge { 
-  font-size: 0.85rem; 
-  font-weight: 600; 
-  color: #94a3b8; 
+.tasa-badge {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94a3b8;
 }
+
 .tasa-badge strong {
   color: var(--pago-texto-resaltado);
 }
 
-.factura-totales { 
-  display: grid; 
-  grid-template-columns: repeat(3, 1fr); 
-  gap: 15px; 
-  margin-bottom: 14px; 
+.factura-totales {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 14px;
 }
 
-.total-box { 
-  display: flex; 
-  flex-direction: column; 
-  background: #1e293b; /* Cajas internas grisáceas oscuras */
-  padding: 10px; 
-  border-radius: 8px; 
-  border: 1px solid #334155; 
-  text-align: center; 
-  font-size: 0.9rem; 
+.total-box {
+  display: flex;
+  flex-direction: column;
+  background: #1e293b;
+  /* Cajas internas grisáceas oscuras */
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  text-align: center;
+  font-size: 0.9rem;
 }
 
-.total-box span { 
-  font-size: 0.75rem; 
-  color: #94a3b8; 
-  font-weight: 600; 
+.total-box span {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 600;
 }
 
-.total-box strong { 
-  font-size: 1.15rem; 
-  color: var(--blanco); 
-  margin-top: 4px; 
+.total-box strong {
+  font-size: 1.15rem;
+  color: var(--blanco);
+  margin-top: 4px;
 }
 
 /* Resaltado de cifras en celeste neón e indicadores claros */
-.text-blue strong { color: var(--pago-texto-resaltado) !important; }
-.text-orange strong { color: #38bdf8 !important; }
+.text-blue strong {
+  color: var(--pago-texto-resaltado) !important;
+}
 
-.grupo-input-row { 
-  display: flex; 
-  align-items: center; 
-  gap: 15px; 
-  font-size: 0.9rem; 
-  font-weight: 600; 
+.text-orange strong {
+  color: #38bdf8 !important;
+}
+
+.grupo-input-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 0.9rem;
+  font-weight: 600;
   color: var(--blanco);
 }
 
-.grupo-input-row select { 
-  width: 200px; 
-  padding: 6px; 
+.grupo-input-row select {
+  width: 200px;
+  padding: 6px;
   background-color: #1e293b;
   color: var(--blanco);
   border-color: #334155;
@@ -346,119 +382,136 @@ input:focus, select:focus {
 /* ================================================================= */
 /* 📥 MONITOR DE BANDAS Y BOTONES ACORDEÓN                           */
 /* ================================================================= */
-.modulo-cabecera { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  border-bottom: 2px solid #f1f5f9; 
-  padding-bottom: 10px; 
-  margin-bottom: 15px; 
+.modulo-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
 }
 
-.filtro-tabs { 
-  display: flex; 
-  gap: 5px; 
+.filtro-tabs {
+  display: flex;
+  gap: 5px;
 }
 
-.tab-link { 
-  padding: 6px 12px; 
-  border: none; 
-  background: #e2e8f0; 
-  border-radius: 6px; 
-  font-size: 0.85rem; 
-  font-weight: 600; 
-  cursor: pointer; 
+.tab-link {
+  padding: 6px 12px;
+  border: none;
+  background: #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
   color: var(--texto-oscuro);
 }
 
-.tab-link.active { 
-  background-color: var(--pago-bg); 
-  color: var(--blanco); 
+.tab-link.active {
+  background-color: var(--pago-bg);
+  color: var(--blanco);
 }
 
-.bandeja-scroll-monitor { 
-  max-height: 250px; 
-  overflow-y: auto; 
-  display: flex; 
-  flex-direction: column; 
-  gap: 10px; 
+.bandeja-scroll-monitor {
+  max-height: 250px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.resultado-busqueda { 
-  background-color: #f8fafc; 
-  padding: 12px; 
-  border-radius: 8px; 
-  border: 1px solid var(--color-borde); 
-  font-size: 0.9rem; 
+.resultado-busqueda {
+  background-color: #f8fafc;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-borde);
+  font-size: 0.9rem;
 }
 
-.border-pago { 
-  border-left: 5px solid var(--exito); 
-  background-color: #f0fdf4; 
+.border-pago {
+  border-left: 5px solid var(--exito);
+  background-color: #f0fdf4;
 }
 
-.grupo-botones-despacho { 
-  display: flex; 
-  gap: 6px; 
-  margin-top: 8px; 
+.grupo-botones-despacho {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
 }
 
-.grupo-botones-despacho button { 
-  padding: 5px 10px; 
-  font-size: 0.8rem; 
-  font-weight: 700; 
-  border: none; 
-  border-radius: 4px; 
-  cursor: pointer; 
-  color: white; 
+.grupo-botones-despacho button {
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  color: white;
 }
 
-.btn-exito { background-color: var(--exito); } 
-.btn-exito:hover { background-color: var(--exito-hover); }
-.btn-whatsapp { background-color: #25d366; }
+.btn-exito {
+  background-color: var(--exito);
+}
+
+.btn-exito:hover {
+  background-color: var(--exito-hover);
+}
+
+.btn-whatsapp {
+  background-color: #25d366;
+}
 
 /* Acordeones */
-.btn-toggle-accordion { 
-  width: 100%; 
-  padding: 10px; 
-  border: none; 
-  border-radius: 8px; 
-  background: #e2e8f0; 
-  color: var(--secundario); 
-  font-weight: 700; 
-  cursor: pointer; 
-  text-align: left; 
-  font-size: 0.9rem; 
-  transition: background 0.2s; 
+.btn-toggle-accordion {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #e2e8f0;
+  color: var(--secundario);
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.9rem;
+  transition: background 0.2s;
 }
 
-.btn-toggle-accordion:hover { background: #cbd5e1; }
-.active-btn { background-color: var(--pago-bg) !important; color: white; }
-.accordion-content { margin-top: 15px; }
+.btn-toggle-accordion:hover {
+  background: #cbd5e1;
+}
+
+.active-btn {
+  background-color: var(--pago-bg) !important;
+  color: white;
+}
+
+.accordion-content {
+  margin-top: 15px;
+}
 
 /* Sub-lista visual de paquetes */
-.sub-lista-paquete { 
-  background: #f1f5f9; 
-  padding: 10px; 
-  border-radius: 6px; 
-  border: 1px dashed var(--color-borde); 
+.sub-lista-paquete {
+  background: #f1f5f9;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px dashed var(--color-borde);
 }
 
-.lbl-sub { 
-  font-size: 0.75rem; 
-  font-weight: 700; 
-  text-transform: uppercase; 
-  color: var(--texto-mutado); 
-  display: block; 
-  margin-bottom: 5px; 
+.lbl-sub {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--texto-mutado);
+  display: block;
+  margin-bottom: 5px;
 }
 
-.scroll-sub-box { 
-  max-height: 100px; 
-  overflow-y: auto; 
-  display: grid; 
-  grid-template-columns: 1fr 1fr; 
-  gap: 5px; 
+.scroll-sub-box {
+  max-height: 100px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
 }
 
 .prod-item {
@@ -476,12 +529,37 @@ input:focus, select:focus {
 }
 
 /* Utilidades */
-.btn-bloque { width: 100%; padding: 10px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; }
-.btn-primario { background-color: var(--pago-bg); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-.badge-sugerido { background-color: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; }
+.btn-bloque {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-.oculto { 
-  display: none !important; 
+.btn-primario {
+  background-color: var(--pago-bg);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.badge-sugerido {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.oculto {
+  display: none !important;
 }
 
 /* ================================================================= */
@@ -506,7 +584,7 @@ input:focus, select:focus {
   font-size: 0.9rem;
   font-weight: 600;
   color: white;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
   opacity: 0;
   transform: translateX(40px);
   transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -521,10 +599,25 @@ input:focus, select:focus {
   transform: translateX(0);
 }
 
-.toast.exito   { background: linear-gradient(135deg, #059669, #10b981); border-left: 5px solid #d1fae5; }
-.toast.error   { background: linear-gradient(135deg, #b91c1c, #dc2626); border-left: 5px solid #fee2e2; }
-.toast.info    { background: linear-gradient(135deg, #0369a1, #0284c7); border-left: 5px solid #bae6fd; }
-.toast.advertencia { background: linear-gradient(135deg, #b45309, #d97706); border-left: 5px solid #fef3c7; }
+.toast.exito {
+  background: linear-gradient(135deg, #059669, #10b981);
+  border-left: 5px solid #d1fae5;
+}
+
+.toast.error {
+  background: linear-gradient(135deg, #b91c1c, #dc2626);
+  border-left: 5px solid #fee2e2;
+}
+
+.toast.info {
+  background: linear-gradient(135deg, #0369a1, #0284c7);
+  border-left: 5px solid #bae6fd;
+}
+
+.toast.advertencia {
+  background: linear-gradient(135deg, #b45309, #d97706);
+  border-left: 5px solid #fef3c7;
+}
 
 /* ================================================================= */
 /* ⏳ SPINNER de Carga Global                                         */
@@ -548,7 +641,7 @@ input:focus, select:focus {
   flex-direction: column;
   align-items: center;
   gap: 14px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
 }
 
 .spinner-rueda {
@@ -561,7 +654,9 @@ input:focus, select:focus {
 }
 
 @keyframes girar {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .spinner-texto {
@@ -629,8 +724,15 @@ input:focus, select:focus {
 }
 
 @keyframes parpadeo {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.5; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* ================================================================= */
@@ -668,7 +770,9 @@ input:focus, select:focus {
   transition: opacity 0.2s;
 }
 
-.btn-exportar-caja:hover { opacity: 0.85; }
+.btn-exportar-caja:hover {
+  opacity: 0.85;
+}
 
 .tarjeta-paciente-lista {
   background: #f8fafc;
@@ -680,7 +784,9 @@ input:focus, select:focus {
   gap: 8px;
 }
 
-.paciente-info-bloque { flex: 1; }
+.paciente-info-bloque {
+  flex: 1;
+}
 
 .paciente-cabecera-linea {
   display: flex;
@@ -691,9 +797,18 @@ input:focus, select:focus {
   flex-wrap: wrap;
 }
 
-.orden-check { font-size: 1rem; }
-.orden-numero { color: var(--texto-mutado); font-size: 0.82rem; }
-.paciente-nombre { color: var(--texto-oscuro); }
+.orden-check {
+  font-size: 1rem;
+}
+
+.orden-numero {
+  color: var(--texto-mutado);
+  font-size: 0.82rem;
+}
+
+.paciente-nombre {
+  color: var(--texto-oscuro);
+}
 
 .paciente-estudios-linea {
   font-size: 0.83rem;
@@ -718,10 +833,79 @@ input:focus, select:focus {
   transition: opacity 0.2s;
 }
 
-.btn-despacho:hover { opacity: 0.85; }
-.btn-pdf-medico   { background-color: #0369a1; }
-.btn-ws-medico    { background-color: #16a34a; }
-.btn-email-medico { background-color: #7c3aed; }
+.btn-despacho:hover {
+  opacity: 0.85;
+}
 
-.btn-secundario { background-color: var(--secundario); color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-.estudio-atenuado { opacity: 0.55; }
+.btn-pdf-medico {
+  background-color: #0369a1;
+}
+
+.btn-ws-medico {
+  background-color: #16a34a;
+}
+
+.btn-email-medico {
+  background-color: #7c3aed;
+}
+
+.btn-secundario {
+  background-color: var(--secundario);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.estudio-atenuado {
+  opacity: 0.55;
+}
+
+/* ================================================================= */
+/* 📱 Le agregamos el RESPONSIVE DESIGN para las vistas de celulares y tabletas */
+/* ================================================================= */
+@media (max-width: 992px) {
+  .dashboard-container {
+    grid-template-columns: 1fr;
+    /* Colapsa a una sola columna */
+  }
+}
+
+@media (max-width: 768px) {
+
+  .grid-paciente-formulario,
+  .factura-totales {
+    grid-template-columns: 1fr;
+    /* Colapsa grillas a 1 columna */
+  }
+
+  .full-row {
+    grid-column: span 1;
+  }
+
+  .grupo-input-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .grupo-input-row select {
+    width: 100%;
+  }
+
+  .grid-checkboxes-resultados {
+    grid-template-columns: 1fr;
+  }
+
+  .paciente-cabecera-linea {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .factura-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
