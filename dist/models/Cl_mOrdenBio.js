@@ -54,12 +54,24 @@ export default class Cl_mOrdenBio {
     set cedula(value) {
         this._cedula = value;
     }
-    get cedulaRepresentante() { return this._cedulaRepresentante; }
-    set cedulaRepresentante(value) { this._cedulaRepresentante = value; }
-    get nombreRepresentante() { return this._nombreRepresentante; }
-    set nombreRepresentante(value) { this._nombreRepresentante = value; }
-    get apellidoRepresentante() { return this._apellidoRepresentante; }
-    set apellidoRepresentante(value) { this._apellidoRepresentante = value; }
+    get cedulaRepresentante() {
+        return this._cedulaRepresentante;
+    }
+    set cedulaRepresentante(value) {
+        this._cedulaRepresentante = value;
+    }
+    get nombreRepresentante() {
+        return this._nombreRepresentante;
+    }
+    set nombreRepresentante(value) {
+        this._nombreRepresentante = value;
+    }
+    get apellidoRepresentante() {
+        return this._apellidoRepresentante;
+    }
+    set apellidoRepresentante(value) {
+        this._apellidoRepresentante = value;
+    }
     get nombre() {
         return this._nombre;
     }

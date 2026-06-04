@@ -28,6 +28,7 @@ export default class Cl_cLaboratorio {
 
     this.vista.onEliminarOrdenEspera((id) => this.procesarEliminarOrdenEspera(id));
     this.vista.onEditarOrdenEspera((id) => this.procesarEditarOrdenEspera(id));
+    this.vista.onCambioFiltrosReporteExamen((nombre, fecha) => this.procesarCambioFiltrosExamen(nombre, fecha));
   }
 
   private async cargarConfiguracionesYListas() {
@@ -67,9 +68,24 @@ export default class Cl_cLaboratorio {
         totalBs: this.modeloGlobal.calcularMontoTotalBs(),
         estudioMasSolicitado: this.modeloGlobal.obtenerEstudioMasSolicitado(),
       });
+      this.procesarCambioFiltrosExamen(this.vista.nombreReporteExamen, this.vista.fechaReporteExamen);
     } catch (error) {
       console.error("Error al actualizar monitores del laboratorio:", error);
     }
+  }
+
+  /**
+   * Método que captura el cambio de filtros (nombre de examen o fecha),
+   * consulta el modelo con ambos datos y actualiza la cantidad en la interfaz.
+   * Pertenece a la funcionalidad de Reporte Dinámico de Exámenes.
+   */
+  private procesarCambioFiltrosExamen(nombre: string, fecha: string) {
+    if (!fecha || !nombre) {
+      this.vista.setCantidadExamen(0);
+      return;
+    }
+    const cantidad = this.modeloGlobal.contarExamenesPorFecha(nombre, fecha);
+    this.vista.setCantidadExamen(cantidad);
   }
 
   private evaluarEdadYSexoParaSugerencias() {

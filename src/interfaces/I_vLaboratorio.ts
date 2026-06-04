@@ -28,6 +28,15 @@ export interface I_vLaboratorio {
   // --- Lectura de selecciones ---
   getEstudiosSeleccionados(): string[];
 
+  // --- Reportes Específicos (Búsqueda Dinámica por Examen) ---
+  // Obtiene la fecha (yyyy-mm-dd) y el texto de búsqueda del examen del UI
+  get fechaReporteExamen(): string;
+  get nombreReporteExamen(): string;
+  // Registra el evento que se dispara al escribir un nombre o cambiar la fecha
+  onCambioFiltrosReporteExamen(callback: (nombre: string, fecha: string) => void): void;
+  // Actualiza el contador visual con la cantidad de estudios coincidentes
+  setCantidadExamen(cantidad: number): void;
+
   // --- Suscripción a eventos ---
   onActualizarTasa(callback: () => void): void;
   onAgregarEstudio(callback: () => void): void;

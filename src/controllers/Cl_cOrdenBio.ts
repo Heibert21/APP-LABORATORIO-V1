@@ -21,13 +21,10 @@ export default class Cl_cOrdenBio {
   constructor({ modelo, vista }: { modelo: Cl_mOrdenBio; vista: I_vOrdenBio }) {
     this.modelo = modelo;
     this.vista = vista;
-
     this.vista.onSeleccionarPaciente((idOrden) => this.procesarSeleccionPaciente(idOrden));
     this.vista.onEnviarResultadosALaboratorio(() => this.procesarEnvioResultados());
-
     this.inicializarApp();
   }
-
   async inicializarApp() {
     try {
       const todasLasOrdenesPlanas = await Cl_sOrdenBio.obtenerOrdenes();
@@ -36,9 +33,7 @@ export default class Cl_cOrdenBio {
       const pendientes = todasLasOrdenes
         .filter((o: Cl_mOrdenBio) => o.status === "En Espera")
         .sort((a: Cl_mOrdenBio, b: Cl_mOrdenBio) => new Date(a.fechaRegistro).getTime() - new Date(b.fechaRegistro).getTime());
-
       const atendidos = todasLasOrdenes.filter((o: Cl_mOrdenBio) => o.status === "Listo para Despacho");
-
       this.vista.renderizarPacientesEnEspera(pendientes);
       this.vista.renderizarPacientesAtendidos(atendidos);
     } catch (error) {

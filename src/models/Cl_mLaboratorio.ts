@@ -8,7 +8,6 @@ export default class Cl_mLaboratorio {
   constructor(tasaInicial: number = 0) {
     this._tasaCambio = tasaInicial;
   }
-
   public get tasaCambio(): number {
     return this._tasaCambio;
   }
@@ -18,23 +17,19 @@ export default class Cl_mLaboratorio {
   public get ordenes(): Cl_mOrdenBio[] {
     return this._ordenes;
   }
-
   public setOrdenes(arrayPlanos: any[]) {
     this._ordenes = [];
     arrayPlanos.forEach((o) => {
       this._ordenes.push(new Cl_mOrdenBio(o)); // Rehidrata directamente usando el modelo único
     });
   }
-
   public determinarSugerenciaMedica(fechaNacimiento: string, sexo: string): "Todos" | "Hombre" | "Mujer" | "Niño" {
     if (!fechaNacimiento) return "Todos";
     const edad = Cl_mOrdenBio.calcularEdad(fechaNacimiento);
     const edadAnios = Cl_mOrdenBio.convertirEdadAAños(edad);
     if (edadAnios < 12) return "Niño";
-
     if (sexo === "Femenino") return "Mujer";
     if (sexo === "Masculino") return "Hombre";
-
     return "Todos";
   }
   // Metodo que permite crear una estructura vacia para los resultados de los examenes
@@ -63,7 +58,6 @@ export default class Cl_mLaboratorio {
     const cedulaRepNorm = cedulaRep.trim().toLowerCase();
     const nombreRepNorm = nombreRep.trim().toLowerCase();
     const apellidoRepNorm = apellidoRep.trim().toLowerCase();
-
     // Si es menor, la validación de identidad se hace sobre el representante
     if (isMenor && cedulaRepNorm !== "") {
       return this._ordenes.some(orden => {
@@ -76,10 +70,8 @@ export default class Cl_mLaboratorio {
         return mismaCedulaRep && !(mismoNombreRep && mismoApellidoRep);
       });
     }
-
     // Si no es menor pero tiene cédula "menor" (legacy), lo dejamos pasar
     if (cedulaNorm === "menor") return false;
-
     // Buscar si la cédula del paciente ya existe en el sistema con otro nombre
     return this._ordenes.some(orden => {
       // Ignoramos si la orden guardada es de un menor
@@ -91,16 +83,13 @@ export default class Cl_mLaboratorio {
       return mismaCedula && !(mismoNombre && mismoApellido);
     });
   }
-
   // --- ACUMULADORES DE CAJA CORREGIDOS ---
   public calcularTotalPacientesAtendidos(): number {
     return this._ordenes.length;
   }
-
   public calcularMontoTotalUsd(): number {
     return this._ordenes.reduce((acum, o) => acum + o.montoTotal$, 0);
   }
-
   public calcularMontoTotalBs(): number {
     // Multiplica dinámicamente el total de dólares por la tasa del día
     return this.calcularMontoTotalUsd() * this._tasaCambio;
@@ -149,6 +138,42 @@ export default class Cl_mLaboratorio {
     });
     const totalBs = totalUsd * this._tasaCambio;
     return { totalUsd, totalBs, tiempoMaxHoras, matrizResultados };
+  }
+  /**
+   * Método que contabiliza la cantidad de veces que un examen específico fue solicitado
+   * durante un día particular (utilizado para el Reporte Dinámico en UI).
+   * @param nombreExamen Texto libre a buscar en la lista de exámenes (Ej: "Creatinina", "Glucosa")
+   * @param fechaFiltroYMD Fecha seleccionada en el selector (formato "yyyy-mm-dd")
+   * @returns El número total de incidencias encontradas
+   */
+
+  // Metodo que permite contar la cantidad de veces que un examen especifico fue solicitado durante un dia particular
+  public contarExamenesPorFecha(nombreExamen: string, fechaFiltroYMD: string): number {
+    if (!fechaFiltroYMD) return 0;
+    let conteo = 0;
+    const nombreNormalizado = nombreExamen.trim().toLowerCase();
+
+    this._ordenes.forEach(orden => {
+      if (!orden.fechaRegistro) return;
+      const partesEspacio = orden.fechaRegistro.replace(",", "").trim().split(" ");
+      if (partesEspacio.length < 1) return;
+
+      const segmentosFecha = partesEspacio[0].split("/");
+      if (segmentosFecha.length === 3) {
+        const dia = segmentosFecha[0].padStart(2, "0");
+        const mes = segmentosFecha[1].padStart(2, "0");
+        const anio = segmentosFecha[2];
+        const fechaOrdenYMD = `${anio}-${mes}-${dia}`;
+        if (fechaOrdenYMD === fechaFiltroYMD) {
+          const desgloses = orden.desglosarExamenes();
+          const tieneExamen = desgloses.some(item => item.examen.trim().toLowerCase().includes(nombreNormalizado));
+          if (tieneExamen) {
+            conteo++;
+          }
+        }
+      }
+    });
+    return conteo;
   }
   // Metodo que permite calcular los tiempos de entrega
   public calcularTiemposEntrega(horasProcesamiento: number): { registro: string, entrega: string } {

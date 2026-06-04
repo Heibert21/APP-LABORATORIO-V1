@@ -138,6 +138,41 @@ export default class Cl_mLaboratorio {
         const totalBs = totalUsd * this._tasaCambio;
         return { totalUsd, totalBs, tiempoMaxHoras, matrizResultados };
     }
+    /**
+     * Método que contabiliza la cantidad de veces que un examen específico fue solicitado
+     * durante un día particular (utilizado para el Reporte Dinámico en UI).
+     * @param nombreExamen Texto libre a buscar en la lista de exámenes (Ej: "Creatinina", "Glucosa")
+     * @param fechaFiltroYMD Fecha seleccionada en el selector (formato "yyyy-mm-dd")
+     * @returns El número total de incidencias encontradas
+     */
+    contarExamenesPorFecha(nombreExamen, fechaFiltroYMD) {
+        if (!fechaFiltroYMD)
+            return 0;
+        let conteo = 0;
+        const nombreNormalizado = nombreExamen.trim().toLowerCase();
+        this._ordenes.forEach(orden => {
+            if (!orden.fechaRegistro)
+                return;
+            const partesEspacio = orden.fechaRegistro.replace(",", "").trim().split(" ");
+            if (partesEspacio.length < 1)
+                return;
+            const segmentosFecha = partesEspacio[0].split("/");
+            if (segmentosFecha.length === 3) {
+                const dia = segmentosFecha[0].padStart(2, "0");
+                const mes = segmentosFecha[1].padStart(2, "0");
+                const anio = segmentosFecha[2];
+                const fechaOrdenYMD = `${anio}-${mes}-${dia}`;
+                if (fechaOrdenYMD === fechaFiltroYMD) {
+                    const desgloses = orden.desglosarExamenes();
+                    const tieneExamen = desgloses.some(item => item.examen.trim().toLowerCase().includes(nombreNormalizado));
+                    if (tieneExamen) {
+                        conteo++;
+                    }
+                }
+            }
+        });
+        return conteo;
+    }
     // Metodo que permite calcular los tiempos de entrega
     calcularTiemposEntrega(horasProcesamiento) {
         const ahora = new Date();

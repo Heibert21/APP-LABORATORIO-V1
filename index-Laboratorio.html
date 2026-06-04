@@ -53,6 +53,17 @@
               $</strong></div>
           <div class="indicador-item"><span>Total de Bs:</span> <strong id="rep_totalBs" class="txt-primario">0.00
               Bs</strong></div>
+          <div class="indicador-item">
+            <!-- NUEVO: Sección de Reporte Dinámico de Exámenes (permite escribir un nombre y elegir fecha para ver la cantidad) -->
+            <span style="display: flex; flex-direction: column; gap: 4px;">
+              Reporte Específico:
+              <div style="display:flex; gap:4px; align-items:center;">
+                <input type="text" id="rep_nombre_examen" placeholder="Ej. Creatinina" style="padding: 2px 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; outline: none; width:90px;" title="Nombre del Examen">
+                <input type="date" id="rep_fecha_examen" style="padding: 2px 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; outline: none;" title="Fecha del Examen">
+              </div>
+            </span> 
+            <strong id="rep_cantidad_examen" style="font-size: 1.2rem; color: #0ea5e9;">0</strong>
+          </div>
         </div>
         <!-- MEJORA #6: Botón para imprimir el resumen financiero del día en PDF -->
         <button id="btn_exportarCaja" class="btn-exportar-caja">📄 Exportar Cierre del Día</button>

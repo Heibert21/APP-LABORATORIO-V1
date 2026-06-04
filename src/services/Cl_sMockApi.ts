@@ -8,7 +8,6 @@ export default class Cl_sMockApi {
       return [];
     }
   }
-
   // Método universal para registrar nuevos datos (POST)
   protected static async post(url: string, data: any): Promise<{ ok: boolean; mensaje: string }> {
     try {
@@ -24,7 +23,6 @@ export default class Cl_sMockApi {
       return { ok: false, mensaje: "Error de red: " + error.message };
     }
   }
-
   // Método universal para actualizar registros existentes (PUT)
   protected static async put(url: string, data: any): Promise<{ ok: boolean; mensaje: string }> {
     try {

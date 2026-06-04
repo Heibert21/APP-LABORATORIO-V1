@@ -20,7 +20,6 @@ export default class Cl_mOrdenBio {
   private _status: "En Espera" | "Listo para Despacho" = "En Espera";
   private _licBioanalista: string = "";
   private _resultados: IResultadoExamen[] = [];
-
   constructor({
     id, cedula,
     cedulaRepresentante = "", nombreRepresentante = "", apellidoRepresentante = "",
@@ -54,12 +53,10 @@ export default class Cl_mOrdenBio {
     this._status = status;
     this._licBioanalista = licBioanalista;
     this._resultados = resultados;
-
     // Regla de interfaz/modelo compartida
     const edadAnios = Cl_mOrdenBio.convertirEdadAAños(this._edad);
     this._cedula = (edadAnios <= 9 && (!cedula || cedula.trim() === "")) ? "MENOR" : cedula.trim();
   }
-
   //GETTERS Y SETTERS
   public get id(): string {
     return this._id;
@@ -74,37 +71,42 @@ export default class Cl_mOrdenBio {
   public set cedula(value: string) {
     this._cedula = value;
   }
-
-  public get cedulaRepresentante(): string { return this._cedulaRepresentante; }
-  public set cedulaRepresentante(value: string) { this._cedulaRepresentante = value; }
-
-  public get nombreRepresentante(): string { return this._nombreRepresentante; }
-  public set nombreRepresentante(value: string) { this._nombreRepresentante = value; }
-
-  public get apellidoRepresentante(): string { return this._apellidoRepresentante; }
-  public set apellidoRepresentante(value: string) { this._apellidoRepresentante = value; }
-
+  public get cedulaRepresentante(): string {
+     return this._cedulaRepresentante; 
+    }
+  public set cedulaRepresentante(value: string) {
+     this._cedulaRepresentante = value; 
+    }
+  public get nombreRepresentante(): string {
+     return this._nombreRepresentante; 
+    }
+  public set nombreRepresentante(value: string) {
+     this._nombreRepresentante = value; 
+    }
+  public get apellidoRepresentante(): string {
+     return this._apellidoRepresentante; 
+    }
+  public set apellidoRepresentante(value: string) {
+     this._apellidoRepresentante = value; 
+    }
   public get nombre(): string {
     return this._nombre;
   }
   public set nombre(value: string) {
     this._nombre = value;
   }
-
   public get apellido(): string {
     return this._apellido;
   }
   public set apellido(value: string) {
     this._apellido = value;
   }
-
   public get edad(): string {
     return this._edad;
   }
   public set edad(value: string) {
     this._edad = value;
   }
-
   public get sexo(): string {
     return this._sexo;
   }
@@ -117,70 +119,60 @@ export default class Cl_mOrdenBio {
   public set telefono(value: string) {
     this._telefono = value;
   }
-
   public get correo(): string {
     return this._correo;
   }
   public set correo(value: string) {
     this._correo = value;
   }
-
   public get metodoPago(): string {
     return this._metodoPago;
   }
   public set metodoPago(value: string) {
     this._metodoPago = value;
   }
-
   public get montoTotal$(): number {
     return this._montoTotal$;
   }
   public set montoTotal$(value: number) {
     this._montoTotal$ = value;
   }
-
   public get fechaRegistro(): string {
     return this._fechaRegistro;
   }
   public set fechaRegistro(value: string) {
     this._fechaRegistro = value;
   }
-
   public get horaEntregaEstimada(): string {
     return this._horaEntregaEstimada;
   }
   public set horaEntregaEstimada(value: string) {
     this._horaEntregaEstimada = value;
   }
-
   public get examenesSolicitados(): string {
     return this._examenesSolicitados;
   }
   public set examenesSolicitados(value: string) {
     this._examenesSolicitados = value;
   }
-
   public get status(): "En Espera" | "Listo para Despacho" {
     return this._status;
   }
   public set status(value: "En Espera" | "Listo para Despacho") {
     this._status = value;
   }
-
   public get licBioanalista(): string {
     return this._licBioanalista;
   }
   public set licBioanalista(value: string) {
     this._licBioanalista = value;
   }
-
   public get resultados(): IResultadoExamen[] {
     return this._resultados;
   }
   public set resultados(value: IResultadoExamen[]) {
     this._resultados = value;
   }
-
   // --- LÓGICA Para Calcular la Edad de los Pacientes
   public static calcularEdad(fechaNacimientoStr: string): string {
     if (!fechaNacimientoStr) return "0 Años";
@@ -188,7 +180,6 @@ export default class Cl_mOrdenBio {
     const fechaActual = new Date();
     // SI LA FECHA DE NACIMIENTO ES MAYOR A LA FECHA ACTUAL, RETORNAR 0 AÑOS
     if (fechaNac > fechaActual) return "0 Años";
-
     let anos = fechaActual.getFullYear() - fechaNac.getFullYear();
     let meses = fechaActual.getMonth() - fechaNac.getMonth();
     let dias = fechaActual.getDate() - fechaNac.getDate();

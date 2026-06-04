@@ -38,6 +38,12 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
   private toastContainer: HTMLElement;
   private spinnerOverlay: HTMLElement;
 
+  // --- Elementos del DOM (Reportes Específicos Dinámicos) ---
+  // Inputs para nombre y fecha del examen, y etiqueta de resultado numérico
+  private inFechaReporteExamen: HTMLInputElement;
+  private inNombreReporteExamen: HTMLInputElement;
+  private lblCantidadExamen: HTMLElement;
+
   private manejadorEliminarEstudio!: (id: string) => void;
   private manejadorDespacharOrden!: (id: string, metodo: "Impreso" | "WhatsApp" | "Correo") => void;
   private manejadorCambioChecks!: () => void;
@@ -81,6 +87,18 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
     this.lblHoraEntrega = document.getElementById("adm_lblHoraEntrega") as HTMLElement;
     this.toastContainer = document.getElementById("toast-container") as HTMLElement;
     this.spinnerOverlay = document.getElementById("spinner-overlay") as HTMLElement;
+    this.inFechaReporteExamen = document.getElementById("rep_fecha_examen") as HTMLInputElement;
+    this.inNombreReporteExamen = document.getElementById("rep_nombre_examen") as HTMLInputElement;
+    this.lblCantidadExamen = document.getElementById("rep_cantidad_examen") as HTMLElement;
+
+    // Set default date to today for the report
+    if (this.inFechaReporteExamen) {
+      const today = new Date();
+      const offset = today.getTimezoneOffset() * 60000;
+      const localISOTime = (new Date(today.getTime() - offset)).toISOString().split('T')[0];
+      this.inFechaReporteExamen.value = localISOTime;
+    }
+
     this.inCedula.addEventListener("input", () => {
       this.inCedula.value = this.inCedula.value.replace(/\D/g, "");
     });
@@ -293,6 +311,33 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
     }
     return this.inEstRango.value.trim();
   }
+
+  // --- Reportes Específicos ---
+  // Getter de la fecha del selector (formato yyyy-mm-dd)
+  get fechaReporteExamen(): string {
+    return this.inFechaReporteExamen ? this.inFechaReporteExamen.value : "";
+  }
+  // Getter del texto ingresado para buscar el examen (insensible a mayúsculas/minúsculas en el modelo)
+  get nombreReporteExamen(): string {
+    return this.inNombreReporteExamen ? this.inNombreReporteExamen.value : "";
+  }
+  // Listener que se detona tanto si se tipea el nombre del examen ("input") como si se cambia la fecha ("change")
+  public onCambioFiltrosReporteExamen(callback: (nombre: string, fecha: string) => void): void {
+    const handler = () => callback(this.nombreReporteExamen, this.fechaReporteExamen);
+    if (this.inFechaReporteExamen) {
+      this.inFechaReporteExamen.addEventListener("change", handler);
+    }
+    if (this.inNombreReporteExamen) {
+      this.inNombreReporteExamen.addEventListener("input", handler);
+    }
+  }
+  // Función para re-escribir el contador numérico en el cuadro estadístico
+  public setCantidadExamen(cantidad: number): void {
+    if (this.lblCantidadExamen) {
+      this.lblCantidadExamen.innerText = cantidad.toString();
+    }
+  }
+
   //obtener estudios seleccionados
   public getEstudiosSeleccionados(): string[] {
     const checkboxes = this.contenedorEstudios.querySelectorAll(".chk-estudio:checked") as NodeListOf<HTMLInputElement>;

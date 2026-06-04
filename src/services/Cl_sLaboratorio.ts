@@ -8,7 +8,6 @@ export default class Cl_sLaboratorio extends Cl_sMockApi {
   static async obtenerEstudios(): Promise<any[]> {
     return await this.get(this.urlEstudios);
   }
-
   static async registrarEstudioCatalogo(nuevoEstudio: any): Promise<{ ok: boolean; mensaje: string }> {
     return await this.post(this.urlEstudios, nuevoEstudio);
   }
