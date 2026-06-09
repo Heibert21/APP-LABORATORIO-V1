@@ -35,7 +35,7 @@ export default class Cl_mOrdenBio {
     licBioanalista = "",
     resultados = []
   }: any) {
-    this._id = id;
+    this._id = String(id ?? "");
     this._cedulaRepresentante = cedulaRepresentante;
     this._nombreRepresentante = nombreRepresentante;
     this._apellidoRepresentante = apellidoRepresentante;

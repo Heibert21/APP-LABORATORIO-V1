@@ -144,7 +144,19 @@ body {
 
 .btn-icon {
   padding: 6px 12px !important;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
+.btn-icon:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.15);
+}
+.btn-icon:active { transform: translateY(1px); }
 
 /* ================================================================= */
 /* 📊 CONTADORES DE CIERRE DE CAJA Y LISTADOS DEL SIDEBAR            */
@@ -440,26 +452,78 @@ select:focus {
 }
 
 .grupo-botones-despacho button {
-  padding: 5px 10px;
+  padding: 6px 12px;
   font-size: 0.8rem;
   font-weight: 700;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   color: white;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
+.grupo-botones-despacho button::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0) 100%);
+  transform: skewX(-25deg);
+  transition: left 0.6s ease;
+}
+.grupo-botones-despacho button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.15);
+}
+.grupo-botones-despacho button:hover::after { left: 200%; }
+.grupo-botones-despacho button:active { transform: translateY(1px); }
 
 .btn-exito {
-  background-color: var(--exito);
+  background: linear-gradient(135deg, var(--exito) 0%, #047857 100%);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(16, 185, 129, 0.25);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
-
+.btn-exito::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0) 100%);
+  transform: skewX(-25deg);
+  transition: left 0.7s ease;
+}
 .btn-exito:hover {
-  background-color: var(--exito-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
 }
+.btn-exito:hover::after { left: 200%; }
+.btn-exito:active { transform: translateY(1px); }
 
 .btn-whatsapp {
-  background-color: #25d366;
+  background: linear-gradient(135deg, #25d366 0%, #128c4e 100%);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(37, 211, 102, 0.25);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
+.btn-whatsapp:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+}
+.btn-whatsapp:active { transform: translateY(1px); }
 
 /* Acordeones */
 .btn-toggle-accordion {
@@ -473,11 +537,13 @@ select:focus {
   cursor: pointer;
   text-align: left;
   font-size: 0.9rem;
-  transition: background 0.2s;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
 }
-
 .btn-toggle-accordion:hover {
   background: #cbd5e1;
+  transform: translateX(3px);
 }
 
 .active-btn {
@@ -533,21 +599,72 @@ select:focus {
   width: 100%;
   padding: 10px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   color: white;
   font-weight: bold;
   cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
 }
+.btn-bloque:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.btn-bloque:active { transform: translateY(1px); }
 
 .btn-primario {
-  background-color: var(--pago-bg);
+  background: linear-gradient(135deg, #1e40af 0%, var(--pago-bg) 100%);
   color: white;
   border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-weight: bold;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
+.btn-primario::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+  transform: skewX(-25deg);
+  transition: left 0.7s ease;
+}
+.btn-primario:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.35);
+}
+.btn-primario:hover::after { left: 200%; }
+.btn-primario:active { transform: translateY(1px); }
+
+.btn-secundario {
+  background: linear-gradient(135deg, #475569 0%, #334155 100%);
+  color: white;
+  border: none;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(71, 85, 105, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.btn-secundario::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+  transform: skewX(-25deg);
+  transition: left 0.7s ease;
+}
+.btn-secundario:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(71, 85, 105, 0.35);
+}
+.btn-secundario:hover::after { left: 200%; }
+.btn-secundario:active { transform: translateY(1px); }
 
 .badge-sugerido {
   background-color: #e0f2fe;
@@ -758,21 +875,34 @@ select:focus {
 /* ================================================================= */
 .btn-exportar-caja {
   width: 100%;
-  padding: 9px;
+  padding: 10px;
   border: none;
   border-radius: 8px;
-  background: linear-gradient(135deg, #1e3a8a, #0284c7);
+  background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%);
   color: white;
   font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
   margin-top: 10px;
-  transition: opacity 0.2s;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
-
+.btn-exportar-caja::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0) 100%);
+  transform: skewX(-25deg);
+  transition: left 0.7s ease;
+}
 .btn-exportar-caja:hover {
-  opacity: 0.85;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.45);
 }
+.btn-exportar-caja:hover::after { left: 200%; }
+.btn-exportar-caja:active { transform: translateY(1px); }
 
 .tarjeta-paciente-lista {
   background: #f8fafc;
@@ -820,6 +950,7 @@ select:focus {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .btn-despacho {
@@ -908,4 +1039,107 @@ select:focus {
     align-items: flex-start;
     gap: 10px;
   }
+}
+
+/* ================================================================= */
+/* 💳 GRUPO DE BOTONES DE PAGO / GUARDAR / CANCELAR                  */
+/* ================================================================= */
+.grupo-botones-pago {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.grupo-botones-pago .btn-procesar-pago,
+.grupo-botones-pago .btn-cancelar-edicion {
+  flex: 0 1 auto;
+  min-width: 180px;
+  max-width: 300px;
+  text-align: center;
+}
+
+/* ================================================================= */
+/* ✨ BOTONES PREMIUM ANIMADOS                                        */
+/* ================================================================= */
+.btn-procesar-pago {
+  background: linear-gradient(135deg, var(--exito) 0%, #047857 100%);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-procesar-pago:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.45);
+}
+
+.btn-procesar-pago:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+}
+
+/* Brillo interior */
+.btn-procesar-pago::after, .btn-cancelar-edicion::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+  transform: skewX(-25deg);
+  transition: all 0.75s ease;
+}
+
+.btn-procesar-pago:hover::after, .btn-cancelar-edicion:hover::after {
+  left: 200%;
+  transition: all 0.75s ease;
+}
+
+/* Estado cuando está en modo edición (Azul igual que cancelar) */
+.btn-procesar-pago.modo-edicion {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  flex: unset !important;
+  width: auto;
+}
+.btn-procesar-pago.modo-edicion:hover {
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.45);
+}
+
+/* Botón Cancelar Edición */
+.btn-cancelar-edicion {
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.btn-cancelar-edicion:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.45);
+}
+.btn-cancelar-edicion:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(239, 68, 68, 0.3);
 }

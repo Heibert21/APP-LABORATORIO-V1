@@ -14,6 +14,8 @@ export default class Cl_vLaboratorio {
     inMetodoPago;
     contenedorEstudios;
     formPaciente;
+    btnProcesarOrden;
+    btnCancelarEdicion;
     // --- Elementos del DOM (Configuración y Catálogo de Exámenes) ---
     inTasa;
     btTasa;
@@ -21,7 +23,6 @@ export default class Cl_vLaboratorio {
     inEstNombre;
     inEstPrecio;
     inEstTiempo;
-    inEstSugerido;
     inEstUnidad;
     inEstRango;
     formEstudio;
@@ -62,13 +63,14 @@ export default class Cl_vLaboratorio {
         this.inMetodoPago = document.getElementById("pac_metodoPago");
         this.contenedorEstudios = document.getElementById("adm_contenedorEstudiosDisponibles");
         this.formPaciente = document.getElementById("form_registroPaciente");
-        this.inTasa = document.getElementById("adm_inTasa");
+        this.btnProcesarOrden = document.getElementById("btn_procesarOrden");
+        this.btnCancelarEdicion = document.getElementById("btn_cancelarEdicion");
+        this.inTasa = document.getElementById("conf_tasa");
         this.btTasa = document.getElementById("adm_btnActualizarTasa");
         this.inEstId = document.getElementById("est_id");
         this.inEstNombre = document.getElementById("est_nombre");
         this.inEstPrecio = document.getElementById("est_precio");
         this.inEstTiempo = document.getElementById("est_tiempo");
-        this.inEstSugerido = document.getElementById("est_sugerido");
         this.inEstUnidad = document.getElementById("est_unidad");
         this.inEstRango = document.getElementById("est_rango");
         this.formEstudio = document.getElementById("form_nuevoEstudio");
@@ -192,7 +194,8 @@ export default class Cl_vLaboratorio {
         if (inputBandeja) {
             inputBandeja.addEventListener("input", () => {
                 const texto = inputBandeja.value.trim().toLowerCase();
-                const filtro = (o) => o.nombre.toLowerCase().includes(texto) ||
+                const filtro = (o) => String(o.id).toLowerCase().includes(texto) ||
+                    o.nombre.toLowerCase().includes(texto) ||
                     o.apellido.toLowerCase().includes(texto) ||
                     o.cedula.toLowerCase().includes(texto) ||
                     (o.cedulaRepresentante && o.cedulaRepresentante.toLowerCase().includes(texto)) ||
@@ -287,10 +290,6 @@ export default class Cl_vLaboratorio {
         this.inEstTiempo.value = this.inEstTiempo.value.trim();
         return parseInt(this.inEstTiempo.value, 10) || 0;
     }
-    get estSugerido() {
-        this.inEstSugerido.value = this.inEstSugerido.value.trim();
-        return this.inEstSugerido.value;
-    }
     get estUnidad() {
         if (this.inEstUnidad.value.trim() !== "") {
             this.inEstUnidad.value = this.inEstUnidad.value.trim();
@@ -355,12 +354,6 @@ export default class Cl_vLaboratorio {
     onDespacharOrden(callback) {
         this.manejadorDespacharOrden = callback;
     }
-    //cambio de filtro sugerido
-    onCambioFiltroSugerido(callback) {
-        this.cbCambioFiltro = callback;
-        this.inFechaNac.onchange = callback;
-        this.inSexo.onchange = callback;
-    }
     //cambio de checks
     onCambioChecks(callback) {
         this.manejadorCambioChecks = callback;
@@ -415,6 +408,9 @@ export default class Cl_vLaboratorio {
     onEditarOrdenEspera(callback) {
         this.manejadorEditarOrdenEspera = callback;
     }
+    onCancelarEdicion(callback) {
+        this.btnCancelarEdicion.addEventListener("click", callback);
+    }
     //exportar caja
     onExportarCaja(callback) {
         this._cbExportarCaja = callback;
@@ -434,15 +430,11 @@ export default class Cl_vLaboratorio {
         this.lblHoraEntrega.innerText = horaRetiro;
     }
     //renderizar estudios disponibles
-    renderizarEstudiosDisponibles(estudios, sugerencia) {
+    renderizarEstudiosDisponibles(estudios) {
         this.contenedorEstudios.innerHTML = estudios.length === 0 ? "<div>No hay estudios en catálogo.</div>" : "";
-        const badge = document.getElementById("lblSugerenciaBadge");
-        if (badge)
-            badge.innerText = `Sugerencias: ${sugerencia}`;
         estudios.forEach(e => {
-            const esSugerido = (e.sugeridoPara === sugerencia || e.sugeridoPara === "Todos");
             const div = document.createElement("div");
-            div.className = `chk-wrapper ${esSugerido ? "sugerido-resaltado" : "estudio-atenuado"}`;
+            div.className = `chk-wrapper`;
             div.innerHTML = `
         <label>
           <input type="checkbox" class="chk-estudio" value="${e.id}" data-precio="${e.precio}" data-tiempo="${e.tiempoProcesamiento}">
@@ -616,8 +608,8 @@ export default class Cl_vLaboratorio {
     }
     //autocompletar paciente
     autocompletarPaciente(orden) {
-        // Si la orden viene de un representante
-        if (orden.cedula === "MENOR" && orden.cedulaRepresentante) {
+        // Si la orden viene de un representante (Cédula empieza por CR o es MENOR)
+        if ((orden.cedula === "MENOR" || orden.cedula.startsWith("CR")) && orden.cedulaRepresentante) {
             this.chkEsMenor.checked = true;
             document.getElementById("adm_bloqueRepresentante")?.classList.remove("oculto");
             document.getElementById("adm_bloqueCedulaPrincipal")?.classList.add("oculto");
@@ -647,7 +639,54 @@ export default class Cl_vLaboratorio {
         this.inTelefono.value = orden.telefono;
         this.inCorreo.value = orden.correo;
         this.inMetodoPago.value = orden.metodoPago;
-        this.mostrarToast("Datos autocompletados. Por favor, verifique y complete la información faltante.", "info");
+    }
+    // --- Método privado para bloquear/desbloquear datos del paciente ---
+    bloquearInputsPaciente(bloquear) {
+        this.chkEsMenor.disabled = bloquear;
+        this.inCedula.disabled = bloquear;
+        this.inCedulaRep.disabled = bloquear;
+        this.inNombre.disabled = bloquear;
+        this.inNombreRep.disabled = bloquear;
+        this.inApellido.disabled = bloquear;
+        this.inApellidoRep.disabled = bloquear;
+        this.inFechaNac.disabled = bloquear;
+        this.inSexo.disabled = bloquear;
+        this.inTelefono.disabled = bloquear;
+        this.inCorreo.disabled = bloquear;
+        this.inMetodoPago.disabled = bloquear;
+        const btnBuscar = document.getElementById("btn_buscarCedula");
+        if (btnBuscar)
+            btnBuscar.disabled = bloquear;
+        const btnBuscarRep = document.getElementById("btn_buscarCedulaRep");
+        if (btnBuscarRep)
+            btnBuscarRep.disabled = bloquear;
+    }
+    // Preparar la orden para su edición exclusiva de exámenes
+    prepararEdicionOrden(orden) {
+        // 1. Llenar todos los datos personales usando el historial
+        this.autocompletarPaciente(orden);
+        // 2. Bloquear inputs para que solo se editen los exámenes
+        this.bloquearInputsPaciente(true);
+        // 3. Marcar los checkboxes correspondientes a los exámenes actuales
+        const examenesSolicitadosArray = orden.examenesSolicitados.split(", ").map(e => e.trim().toLowerCase());
+        const checkboxes = this.contenedorEstudios.querySelectorAll(".chk-estudio");
+        checkboxes.forEach(chk => {
+            const nombreExamenSpan = chk.nextElementSibling?.textContent?.toLowerCase() || "";
+            // Verificamos si el nombre del examen está en el array de exámenes de la orden
+            const debeEstarMarcado = examenesSolicitadosArray.some(ex => nombreExamenSpan.includes(ex));
+            chk.checked = debeEstarMarcado;
+        });
+        // Forzamos el recalculo de totales simulando que se cambiaron los checks
+        if (this.manejadorCambioChecks) {
+            this.manejadorCambioChecks();
+        }
+        // 4. Cambiar botones al modo edición (azul)
+        this.btnProcesarOrden.innerText = "💾 Guardar Cambios";
+        this.btnProcesarOrden.classList.add("modo-edicion");
+        this.btnCancelarEdicion.classList.remove("oculto");
+        // 5. Hacer scroll hacia arriba al formulario
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        this.mostrarToast(`Modo edición activado para la Orden #${orden.id}`, "info");
     }
     //mostrar historial del paciente
     mostrarHistorialPaciente(ordenes) {
@@ -730,6 +769,22 @@ export default class Cl_vLaboratorio {
         const panel = document.getElementById("panel-historial-paciente");
         if (panel)
             panel.classList.add("oculto");
+        document.getElementById("adm_bloqueRepresentante")?.classList.add("oculto");
+        document.getElementById("adm_bloqueCedulaPrincipal")?.classList.remove("oculto");
+        const checkboxes = this.contenedorEstudios.querySelectorAll(".chk-estudio");
+        checkboxes.forEach(chk => {
+            chk.checked = false;
+        });
+        // Desbloquear inputs (por si veníamos de una edición)
+        this.bloquearInputsPaciente(false);
+        // Restaurar botones a modo creación
+        if (this.btnProcesarOrden) {
+            this.btnProcesarOrden.innerText = "💳 Confirmar Facturación y Procesar Orden";
+            this.btnProcesarOrden.classList.remove("modo-edicion"); // Restaurar color verde
+        }
+        if (this.btnCancelarEdicion) {
+            this.btnCancelarEdicion.classList.add("oculto");
+        }
     }
     //limpiar formulario estudio
     limpiarFormEstudio() {
@@ -747,7 +802,7 @@ export default class Cl_vLaboratorio {
         if (!ventanaImpresion)
             return;
         let cedulaFormateada = orden.cedula;
-        if (cedulaFormateada !== "MENOR" && !cedulaFormateada.startsWith("V-")) {
+        if (cedulaFormateada !== "MENOR" && !cedulaFormateada.startsWith("V-") && !cedulaFormateada.startsWith("CR")) {
             cedulaFormateada = "V-" + cedulaFormateada;
         }
         ventanaImpresion.document.write(`

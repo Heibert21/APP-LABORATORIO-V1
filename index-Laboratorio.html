@@ -58,14 +58,17 @@
             <span style="display: flex; flex-direction: column; gap: 4px;">
               Reporte Específico:
               <div style="display:flex; gap:4px; align-items:center;">
-                <input type="text" id="rep_nombre_examen" placeholder="Ej. Creatinina" style="padding: 2px 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; outline: none; width:90px;" title="Nombre del Examen">
-                <input type="date" id="rep_fecha_examen" style="padding: 2px 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; outline: none;" title="Fecha del Examen">
+                <input type="text" id="rep_nombre_examen" placeholder="Ej. Creatinina"
+                  style="padding: 2px 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; outline: none; width:90px;"
+                  title="Nombre del Examen">
+                <input type="date" id="rep_fecha_examen"
+                  style="padding: 2px 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; outline: none;"
+                  title="Fecha del Examen">
               </div>
-            </span> 
+            </span>
             <strong id="rep_cantidad_examen" style="font-size: 1.2rem; color: #0ea5e9;">0</strong>
           </div>
         </div>
-        <!-- MEJORA #6: Botón para imprimir el resumen financiero del día en PDF -->
         <button id="btn_exportarCaja" class="btn-exportar-caja">📄 Exportar Cierre del Día</button>
       </section>
 
@@ -87,15 +90,7 @@
                 placeholder="Ej. mg/dL" /></div>
             <div class="grupo-input"><label for="est_rango">Rango Referencia:</label><input type="text" id="est_rango"
                 placeholder="Ej. 70 - 100" /></div>
-            <div class="grupo-input">
-              <label for="est_sugerido">Sugerencia:</label>
-              <select id="est_sugerido">
-                <option value="Todos">Todos</option>
-                <option value="Hombre">Hombre</option>
-                <option value="Mujer">Mujer</option>
-                <option value="Niño">Niño</option>
-              </select>
-            </div>
+
             <button type="submit" class="btn-primario btn-bloque">Guardar Estudio</button>
           </form>
         </div>
@@ -144,48 +139,38 @@
                       title="Buscar representante">🔍</button>
                   </div>
                 </div>
-                <div class="grupo-input"><label for="pac_nombreRep">Nombre Rep.:</label><input type="text"
-                    id="pac_nombreRep" /></div>
-                <div class="grupo-input"><label for="pac_apellidoRep">Apellido Rep.:</label><input type="text"
-                    id="pac_apellidoRep" /></div>
+                <div class="grupo-input"><label for="pac_nombreRep">Nombres:</label><input type="text"
+                    id="pac_nombreRep" placeholder="Nombres del Representante" /></div>
+                <div class="grupo-input"><label for="pac_apellidoRep">Apellidos:</label><input type="text"
+                    id="pac_apellidoRep" placeholder="Apellidos del Representante" /></div>
               </div>
             </div>
 
-            <!-- MEJORA #1: Campo de cédula principal (Se oculta si es menor) -->
+            <!-- Campo de cédula principal (Se oculta si es menor) -->
             <div class="grupo-input" id="adm_bloqueCedulaPrincipal">
               <label for="pac_cedula">Cédula Paciente:</label>
-              <div style="display:flex; gap:6px;">
+              <div style="display:flex; gap:4px;">
                 <input type="text" id="pac_cedula" placeholder="Introdusca la cedula del paciente" style="flex:1" />
                 <button type="button" id="btn_buscarCedula" class="btn-secundario btn-icon"
                   title="Buscar paciente por cédula">🔍</button>
               </div>
             </div>
-            <!-- MEJORA #2: Panel de historial de visitas del paciente (oculto hasta que se busque) -->
+            <!--  Panel de historial de visitas del paciente (oculto hasta que se busque) -->
             <div id="panel-historial-paciente" class="oculto"></div>
 
             <div class="grupo-input"><label for="pac_nombre">Nombre:</label><input type="text" id="pac_nombre"
-                required /></div>
+                placeholder="Nombre del paciente" /></div>
             <div class="grupo-input"><label for="pac_apellido">Apellido:</label><input type="text" id="pac_apellido"
-                required /></div>
-            <div class="grupo-input"><label for="pac_fechaNac">F. Nacimiento:</label><input type="date"
-                id="pac_fechaNac" required /></div>
+                placeholder="Apellido del paciente" /></div>
+            <div class="grupo-input"><label for="pac_fechaNac">Fecha de Nacimiento:</label><input type="date"
+                id="pac_fechaNac" placeholder="Fecha de Nacimiento" /></div>
 
             <div class="grupo-input">
-              <label for="pac_sexo">Sexo Biológico:</label>
+              <label for="pac_sexo">Sexo:</label>
               <select id="pac_sexo" required>
                 <option value="Masculino">Masculino</option>
                 <option value="Femenino">Femenino</option>
               </select>
-            </div>
-
-            <!-- NUEVA CASILLA SUTIL DE GESTACIÓN -->
-            <div id="adm_bloqueEmbarazada" class="grupo-input oculto"
-              style="justify-content: center; padding-top: 20px;">
-              <label
-                style="display: flex; gap: 8px; align-items: center; cursor: pointer; text-transform: none; font-size: 0.9rem;">
-                <input type="checkbox" id="pac_chkEmbarazada" style="width: 16px; height: 16px;" />
-                <span>🤰 Paciente en estado de gestación</span>
-              </label>
             </div>
 
             <div class="grupo-input"><label for="pac_telefono">Teléfono:</label><input type="text" id="pac_telefono"
@@ -194,8 +179,7 @@
                 id="pac_correo" required /></div>
             <!--Grilla de Selección de Exámenes Inteligente con Buscador Integrado-->
             <div class="full-row estudios-selector-box">
-              <h3>🔬 Estudios Disponibles para el Paciente <small id="lblSugerenciaBadge"
-                  class="badge-sugerido"></small>`</h3>
+              <h3>🔬 Estudios Disponibles para el Paciente</h3>
 
               <!--BARRA DE BÚSQUEDA CLÍNICA-->
               <div class="buscador-estudios-contenedor"
@@ -228,15 +212,19 @@
               <div class="grupo-input-row">
                 <label for="pac_metodoPago">Forma de Pago:</label>
                 <select id="pac_metodoPago">
-                  <option value="Efectivo">Efectivo ($ / Bs)</option>
+                  <option value="Dólares">Dólares</option>
+                  <option value="Efectivo">Efectivo (Bs)</option>
                   <option value="Punto de Venta">Punto de Venta</option>
                   <option value="Pago Móvil">Pago Móvil</option>
                 </select>
               </div>
             </div>
 
-            <button type="submit" class="btn-exito btn-bloque full-row" style="margin-top: 15px;">💳 Confirmar
-              Facturación y Procesar Orden</button>
+            <div class="grupo-botones-pago">
+              <button type="submit" id="btn_procesarOrden" class="btn-procesar-pago">💳 Confirmar
+                Facturación y Procesar Orden</button>
+              <button type="button" id="btn_cancelarEdicion" class="btn-cancelar-edicion oculto">❌ Cancelar Edición</button>
+            </div>
           </form>
         </div>
       </section>
@@ -251,10 +239,9 @@
           </div>
         </div>
 
-        <!-- MEJORA #4: Buscador dentro de la bandeja de espera para localizar pacientes rápidamente -->
         <div class="buscador-bandeja">
           <span>🔍</span>
-          <input type="text" id="input_buscarBandeja" placeholder="Buscar por nombre o cédula..." />
+          <input type="text" id="input_buscarBandeja" placeholder="Buscar por nombre, cédula o N° de orden..." />
         </div>
         <div id="adm_listaEspera" class="bandeja-scroll-monitor">
           <!-- Inyectado dinámicamente -->

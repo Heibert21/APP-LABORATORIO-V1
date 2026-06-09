@@ -21,7 +21,6 @@ export interface I_vLaboratorio {
   get estNombre(): string;
   get estPrecio(): number;
   get estTiempo(): number;
-  get estSugerido(): string;
   get estUnidad(): string;
   get estRango(): string;
 
@@ -42,12 +41,12 @@ export interface I_vLaboratorio {
   onAgregarEstudio(callback: () => void): void;
   onRegistrarOrden(callback: () => void): void;
   onEliminarEstudio(callback: (id: string) => void): void;
-  onCambioFiltroSugerido(callback: () => void): void;
   onCambioChecks(callback: () => void): void;
   onDespacharOrden(callback: (id: string, metodo: "Impreso" | "WhatsApp" | "Correo") => void): void;
   onBuscarCedulaPaciente(callback: (cedula: string) => void): void;
   onEliminarOrdenEspera(callback: (id: string) => void): void;
   onEditarOrdenEspera(callback: (id: string) => void): void;
+  onCancelarEdicion(callback: () => void): void;
   onExportarCaja(callback: () => void): void;
 
   // --- Métodos de actualización de UI ---
@@ -55,7 +54,7 @@ export interface I_vLaboratorio {
   setTotalesFactura(totalUsd: number, totalBs: number, horaRetiro: string): void;
 
   // --- Renderizado de listas y paneles ---
-  renderizarEstudiosDisponibles(estudios: any[], sugerencia: string): void;
+  renderizarEstudiosDisponibles(estudios: any[]): void;
   renderizarListaCatalogo(estudios: any[]): void;
 
   renderizarOrdenesEspera(ordenes: Cl_mOrdenBio[]): void;
@@ -70,9 +69,10 @@ export interface I_vLaboratorio {
   imprimirReporteResultadosPDF(orden: Cl_mOrdenBio): void;
   onFiltrarEstudiosBusqueda(callback: (texto: string) => void): void;
 
-  // --- Autocompletado y Historial ---
+  // --- Autocompletado, Historial y Edición ---
   autocompletarPaciente(orden: Cl_mOrdenBio): void;
   mostrarHistorialPaciente(ordenes: Cl_mOrdenBio[]): void;
+  prepararEdicionOrden(orden: Cl_mOrdenBio): void;
 
   // --- Notificaciones y Feedback ---
   mostrarToast(mensaje: string, tipo: "exito" | "error" | "info" | "advertencia"): void;

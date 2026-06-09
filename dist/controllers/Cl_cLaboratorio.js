@@ -4,6 +4,7 @@ export default class Cl_cLaboratorio {
     vista;
     modeloGlobal;
     catalogoEstudiosCoche = [];
+    ordenEnEdicionId = null;
     constructor({ modelo, vista }) {
         this.vista = vista;
         this.modeloGlobal = modelo;
@@ -12,14 +13,19 @@ export default class Cl_cLaboratorio {
         this.vista.onAgregarEstudio(() => this.procesarRegistroNuevoEstudio());
         this.vista.onRegistrarOrden(() => this.procesarCierreYFacturacionOrden());
         this.vista.onEliminarEstudio((id) => this.procesarBajaEstudioCatálogo(id));
-        this.vista.onCambioFiltroSugerido(() => this.evaluarEdadYSexoParaSugerencias());
         this.vista.onDespacharOrden((id, metodo) => this.ejecutarDespachoFinalPaciente(id, metodo));
         this.vista.onCambioChecks(() => this.recalcularTotalesEnTiempoReal());
         this.vista.onBuscarCedulaPaciente((cedula) => this.buscarPacientePorCedula(cedula));
         this.vista.onExportarCaja(() => this.procesarExportarCaja());
         this.vista.onEliminarOrdenEspera((id) => this.procesarEliminarOrdenEspera(id));
         this.vista.onEditarOrdenEspera((id) => this.procesarEditarOrdenEspera(id));
+        this.vista.onCancelarEdicion(() => this.cancelarEdicionActual());
         this.vista.onCambioFiltrosReporteExamen((nombre, fecha) => this.procesarCambioFiltrosExamen(nombre, fecha));
+    }
+    cancelarEdicionActual() {
+        this.ordenEnEdicionId = null;
+        this.vista.limpiarFormPaciente();
+        this.vista.mostrarToast("Edición de orden cancelada.", "info");
     }
     async cargarConfiguracionesYListas() {
         this.vista.mostrarSpinner();
@@ -29,7 +35,7 @@ export default class Cl_cLaboratorio {
             this.vista.setTasaActual(tasa);
             this.catalogoEstudiosCoche = await Cl_sLaboratorio.obtenerEstudios();
             this.vista.renderizarListaCatalogo(this.catalogoEstudiosCoche);
-            this.evaluarEdadYSexoParaSugerencias();
+            this.vista.renderizarEstudiosDisponibles(this.catalogoEstudiosCoche);
             await this.actualizarMonitorYEstadisticas();
         }
         catch (error) {
@@ -73,13 +79,6 @@ export default class Cl_cLaboratorio {
         const cantidad = this.modeloGlobal.contarExamenesPorFecha(nombre, fecha);
         this.vista.setCantidadExamen(cantidad);
     }
-    evaluarEdadYSexoParaSugerencias() {
-        const fechaNac = this.vista.pacFechaNac;
-        const sexo = this.vista.pacSexo;
-        const clasificacion = this.modeloGlobal.determinarSugerenciaMedica(fechaNac, sexo);
-        this.vista.renderizarEstudiosDisponibles(this.catalogoEstudiosCoche, clasificacion);
-        this.recalcularTotalesEnTiempoReal();
-    }
     recalcularTotalesEnTiempoReal() {
         const codigosSeleccionados = this.vista.getEstudiosSeleccionados();
         const estudiosElegidos = this.catalogoEstudiosCoche.filter(e => codigosSeleccionados.includes(e.id));
@@ -115,7 +114,7 @@ export default class Cl_cLaboratorio {
         const nombre = this.vista.estNombre;
         const precio = this.vista.estPrecio;
         const tiempo = this.vista.estTiempo;
-        const sugerido = this.vista.estSugerido;
+        const sugerido = "Todos"; // Ya no se usa la sugerencia desde UI
         const unidad = this.vista.estUnidad || "";
         const rango = this.vista.estRango || "";
         if (!id || !nombre || precio <= 0 || tiempo <= 0) {
@@ -141,7 +140,7 @@ export default class Cl_cLaboratorio {
                 this.vista.limpiarFormEstudio();
                 this.catalogoEstudiosCoche = await Cl_sLaboratorio.obtenerEstudios();
                 this.vista.renderizarListaCatalogo(this.catalogoEstudiosCoche);
-                this.evaluarEdadYSexoParaSugerencias();
+                this.vista.renderizarEstudiosDisponibles(this.catalogoEstudiosCoche);
             }
         }
         catch (error) {
@@ -166,7 +165,7 @@ export default class Cl_cLaboratorio {
                 this.vista.mostrarToast("Estudio removido del catálogo correctamente.", "exito");
                 this.catalogoEstudiosCoche = await Cl_sLaboratorio.obtenerEstudios();
                 this.vista.renderizarListaCatalogo(this.catalogoEstudiosCoche);
-                this.evaluarEdadYSexoParaSugerencias();
+                this.vista.renderizarEstudiosDisponibles(this.catalogoEstudiosCoche);
             }
         }
         catch {
@@ -186,6 +185,30 @@ export default class Cl_cLaboratorio {
         const calculosFactura = this.modeloGlobal.calcularEstructuraFactura(estudiosElegidos);
         const tiemposEntrega = this.modeloGlobal.calcularTiemposEntrega(calculosFactura.tiempoMaxHoras);
         const listaNombresExamenes = estudiosElegidos.map(e => e.nombre).join(", ");
+        // --- FLUJO DE EDICIÓN ---
+        if (this.ordenEnEdicionId) {
+            this.vista.mostrarSpinner();
+            try {
+                await Cl_sLaboratorio.actualizarOrden(this.ordenEnEdicionId, {
+                    examenesSolicitados: listaNombresExamenes,
+                    montoTotal$: calculosFactura.totalUsd,
+                    resultados: calculosFactura.matrizResultados,
+                    horaEntregaEstimada: tiemposEntrega.entrega
+                });
+                this.vista.mostrarToast(`Exámenes de la Orden #${this.ordenEnEdicionId} actualizados exitosamente.`, "exito");
+                this.cancelarEdicionActual(); // Limpia formulario y resetea id
+                await this.actualizarMonitorYEstadisticas();
+            }
+            catch (error) {
+                console.error("Error al actualizar la orden:", error);
+                this.vista.mostrarToast("Error de red al actualizar los exámenes.", "error");
+            }
+            finally {
+                this.vista.ocultarSpinner();
+            }
+            return;
+        }
+        // --- FLUJO DE CREACIÓN NORMAL ---
         const edadCalculada = Cl_mOrdenBio.calcularEdad(this.vista.pacFechaNac);
         const edadAnios = Cl_mOrdenBio.convertirEdadAAños(edadCalculada);
         const cedulaEscrita = this.vista.pacCedula.trim();
@@ -206,7 +229,9 @@ export default class Cl_cLaboratorio {
                 return;
             }
         }
-        const cedulaFinal = esMenor ? "MENOR" : cedulaEscrita;
+        // Generar CR + cédula del representante + número aleatorio de 3 dígitos si es menor
+        const randomNum = Math.floor(Math.random() * 900) + 100;
+        const cedulaFinal = esMenor ? `CR${cedulaRep}-${randomNum}` : cedulaEscrita;
         // --- VALIDACIÓN: cédula + nombre únicos por paciente ---
         const esDuplicado = this.modeloGlobal.validarDuplicadoPaciente(cedulaFinal, this.vista.pacNombre, this.vista.pacApellido, esMenor, cedulaRep, nombreRep, apellidoRep);
         if (esDuplicado) {
@@ -271,29 +296,8 @@ export default class Cl_cLaboratorio {
         const ordenActual = this.modeloGlobal.ordenes.find(o => o.id === id);
         if (!ordenActual)
             return;
-        const nuevoTelefono = prompt("Ingrese el nuevo número de teléfono:", ordenActual.telefono);
-        if (nuevoTelefono === null)
-            return; // Cancelado
-        const nuevoCorreo = prompt("Ingrese el nuevo correo electrónico:", ordenActual.correo);
-        if (nuevoCorreo === null)
-            return; // Cancelado
-        if (nuevoTelefono.trim() === "" && nuevoCorreo.trim() === "") {
-            this.vista.mostrarToast("Debe proveer al menos un dato válido de contacto.", "advertencia");
-            return;
-        }
-        this.vista.mostrarSpinner();
-        try {
-            await Cl_sLaboratorio.actualizarOrden(id, { telefono: nuevoTelefono, correo: nuevoCorreo });
-            this.vista.mostrarToast(`Datos de la Orden #${id} actualizados.`, "exito");
-            await this.actualizarMonitorYEstadisticas();
-        }
-        catch (error) {
-            console.error("Error al editar la orden:", error);
-            this.vista.mostrarToast("Error de red al intentar actualizar la orden.", "error");
-        }
-        finally {
-            this.vista.ocultarSpinner();
-        }
+        this.ordenEnEdicionId = id;
+        this.vista.prepararEdicionOrden(ordenActual);
     }
     async ejecutarDespachoFinalPaciente(id, metodo) {
         try {
@@ -320,32 +324,42 @@ export default class Cl_cLaboratorio {
         return this.vista.estId;
     }
     /**
-     * Busca en el historial de órdenes si ya existe algún registro con la cédula dada.
+     * Busca en el historial de órdenes por cédula del paciente O por número de orden.
      * Si lo encuentra: autocompleta el formulario y muestra el historial de visitas.
      * Si no existe: avisa al recepcionista con un toast informativo.
      */
-    buscarPacientePorCedula(cedula) {
-        const cedulaNorm = cedula.trim().toLowerCase();
+    buscarPacientePorCedula(termino) {
+        const terminoNorm = termino.trim().toLowerCase();
         // Validación Evitar búsquedas vacías
-        if (!cedulaNorm) {
-            this.vista.mostrarToast("Por favor, ingrese un número de cédula válido para buscar.", "advertencia");
+        if (!terminoNorm) {
+            this.vista.mostrarToast("Por favor, ingrese una cédula o número de orden para buscar.", "advertencia");
             return;
         }
         // Validación Evitar buscar pacientes con la cédula genérica "MENOR"
-        if (cedulaNorm === "menor") {
+        if (terminoNorm === "menor") {
             this.vista.mostrarToast("No se puede autocompletar el historial con la cédula genérica 'MENOR'.", "advertencia");
             this.vista.mostrarHistorialPaciente([]);
             return;
         }
-        // Filtramos todas las órdenes que coincidan con esa cédula principal o con la del representante
-        const ordenesDelPaciente = this.modeloGlobal.ordenes.filter(o => o.cedula.trim().toLowerCase() === cedulaNorm || o.cedulaRepresentante.trim().toLowerCase() === cedulaNorm);
+        // 1. Intentar buscar por número de orden exacto (id)
+        const ordenPorId = this.modeloGlobal.ordenes.find(o => String(o.id).trim().toLowerCase() === terminoNorm);
+        if (ordenPorId) {
+            this.vista.autocompletarPaciente(ordenPorId);
+            // Si se buscó por orden, mostramos el historial completo de ese paciente (por cédula)
+            const cedulaDeLaOrden = ordenPorId.cedula.trim().toLowerCase();
+            const historialDelPaciente = this.modeloGlobal.ordenes.filter(o => o.cedula.trim().toLowerCase() === cedulaDeLaOrden ||
+                o.cedulaRepresentante.trim().toLowerCase() === cedulaDeLaOrden);
+            this.vista.mostrarHistorialPaciente(historialDelPaciente);
+            return;
+        }
+        // 2. Si no se encontró por orden, buscar por cédula del paciente o representante
+        const ordenesDelPaciente = this.modeloGlobal.ordenes.filter(o => o.cedula.trim().toLowerCase() === terminoNorm || o.cedulaRepresentante.trim().toLowerCase() === terminoNorm);
         if (ordenesDelPaciente.length === 0) {
-            this.vista.mostrarToast("Cédula no encontrada. Ingrese los datos del paciente manualmente.", "info");
+            this.vista.mostrarToast("No se encontró ningún paciente con esa cédula o número de orden.", "info");
             this.vista.mostrarHistorialPaciente([]);
             return;
         }
         // Tomamos la orden más reciente para autocompletar (la última del array)
-        // Asumiendo que el array mantiene el orden de inserción y el último es el más reciente
         const ordenMasReciente = ordenesDelPaciente[ordenesDelPaciente.length - 1];
         this.vista.autocompletarPaciente(ordenMasReciente);
         // Mostramos todo el historial de visitas del paciente

@@ -72,13 +72,13 @@ export default class Cl_mLaboratorio {
                 return mismaCedulaRep && !(mismoNombreRep && mismoApellidoRep);
             });
         }
-        // Si no es menor pero tiene cédula "menor" (legacy), lo dejamos pasar
-        if (cedulaNorm === "menor")
+        // Si no es menor pero tiene cédula "menor" o "cr" (legacy o generada), lo dejamos pasar
+        if (cedulaNorm === "menor" || cedulaNorm.startsWith("cr"))
             return false;
         // Buscar si la cédula del paciente ya existe en el sistema con otro nombre
         return this._ordenes.some(orden => {
             // Ignoramos si la orden guardada es de un menor
-            if (orden.cedula.trim().toLowerCase() === "menor")
+            if (orden.cedula.trim().toLowerCase() === "menor" || orden.cedula.trim().toLowerCase().startsWith("cr"))
                 return false;
             const mismaCedula = orden.cedula.trim().toLowerCase() === cedulaNorm;
             const mismoNombre = orden.nombre.trim().toLowerCase() === nombreNorm;
@@ -145,6 +145,7 @@ export default class Cl_mLaboratorio {
      * @param fechaFiltroYMD Fecha seleccionada en el selector (formato "yyyy-mm-dd")
      * @returns El número total de incidencias encontradas
      */
+    // Metodo que permite contar la cantidad de veces que un examen especifico fue solicitado durante un dia particular
     contarExamenesPorFecha(nombreExamen, fechaFiltroYMD) {
         if (!fechaFiltroYMD)
             return 0;

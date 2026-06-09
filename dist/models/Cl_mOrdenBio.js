@@ -19,7 +19,7 @@ export default class Cl_mOrdenBio {
     _licBioanalista = "";
     _resultados = [];
     constructor({ id, cedula, cedulaRepresentante = "", nombreRepresentante = "", apellidoRepresentante = "", nombre, apellido, edad, sexo, telefono = "", correo = "", metodoPago = "", montoTotal$ = 0, fechaRegistro, horaEntregaEstimada = "", examenesSolicitados, status = "En Espera", licBioanalista = "", resultados = [] }) {
-        this._id = id;
+        this._id = String(id ?? "");
         this._cedulaRepresentante = cedulaRepresentante;
         this._nombreRepresentante = nombreRepresentante;
         this._apellidoRepresentante = apellidoRepresentante;
