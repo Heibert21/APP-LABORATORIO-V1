@@ -111,7 +111,33 @@ export default class Cl_mLaboratorio {
         estudioMasVendido = estudio;
       }
     }
-    return maxCantidad > 0 ? `${estudioMasVendido} (${maxCantidad} sols)` : "Ninguno";
+    if (maxCantidad > 0) {
+      const porcentaje = this.calcularPorcentajeSolicitudEstudio(estudioMasVendido);
+      return `${estudioMasVendido} (${porcentaje}%)`;
+    }
+    return "Ninguno";
+  }
+
+  // Método que calcula el porcentaje de veces que se ha solicitado un estudio específico
+  public calcularPorcentajeSolicitudEstudio(nombreEstudio: string): number {
+    const nombreNormalizado = nombreEstudio.trim().toLowerCase();
+    let totalExamenesSolicitados = 0;
+    let totalEstudioEspecifico = 0;
+
+    this._ordenes.forEach(orden => {
+      const desgloses = orden.desglosarExamenes();
+      desgloses.forEach(item => {
+        totalExamenesSolicitados += item.cantidad;
+        if (item.examen.trim().toLowerCase() === nombreNormalizado) {
+          totalEstudioEspecifico += item.cantidad;
+        }
+      });
+    });
+
+    if (totalExamenesSolicitados === 0) return 0;
+    
+    const porcentaje = (totalEstudioEspecifico / totalExamenesSolicitados) * 100;
+    return parseFloat(porcentaje.toFixed(2));
   }
   // Metodo que permite calcular la estructura de la factura
   public calcularEstructuraFactura(estudiosElegidos: any[]): {

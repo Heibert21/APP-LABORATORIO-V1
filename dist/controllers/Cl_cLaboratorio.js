@@ -68,10 +68,13 @@ export default class Cl_cLaboratorio {
     procesarCambioFiltrosExamen(nombre, fecha) {
         if (!fecha || !nombre) {
             this.vista.setCantidadExamen(0);
+            this.vista.setPorcentajeExamen(0);
             return;
         }
         const cantidad = this.modeloGlobal.contarExamenesPorFecha(nombre, fecha);
+        const porcentaje = this.modeloGlobal.calcularPorcentajeSolicitudEstudio(nombre);
         this.vista.setCantidadExamen(cantidad);
+        this.vista.setPorcentajeExamen(porcentaje);
     }
     evaluarEdadYSexoParaSugerencias() {
         const fechaNac = this.vista.pacFechaNac;

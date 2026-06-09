@@ -328,6 +328,13 @@ export default class Cl_vLaboratorio {
             this.lblCantidadExamen.innerText = cantidad.toString();
         }
     }
+    // Función para actualizar el porcentaje de veces que se ha solicitado un examen
+    setPorcentajeExamen(porcentaje) {
+        const lblPorcentajeExamen = document.getElementById("rep_porcentaje_examen");
+        if (lblPorcentajeExamen) {
+            lblPorcentajeExamen.innerText = `(${porcentaje}%)`;
+        }
+    }
     //obtener estudios seleccionados
     getEstudiosSeleccionados() {
         const checkboxes = this.contenedorEstudios.querySelectorAll(".chk-estudio:checked");
@@ -709,7 +716,7 @@ export default class Cl_vLaboratorio {
     </thead>
     <tbody>
       <tr><td>Pacientes Atendidos</td><td class="monto">${datos.totalPacientes}</td></tr>
-      <tr><td>Examen Más Solicitado</td><td class="monto">${datos.estudioTop}</td></tr>
+      <tr><td>% de Solicitud (Examen Top)</td><td class="monto">${datos.estudioTop}</td></tr>
       <tr><td>Tasa del Día (Bs/$)</td><td class="monto">${datos.tasa.toFixed(2)} Bs</td></tr>
       <tr><td>Total Ingresos (USD)</td><td class="monto" style="color:#059669;">$ ${datos.totalUsd.toFixed(2)}</td></tr>
       <tr><td>Total Ingresos (Bs)</td><td class="monto" style="color:#0284c7;">${datos.totalBs.toFixed(2)} Bs</td></tr>

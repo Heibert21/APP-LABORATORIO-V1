@@ -36,6 +36,8 @@ export interface I_vLaboratorio {
   onCambioFiltrosReporteExamen(callback: (nombre: string, fecha: string) => void): void;
   // Actualiza el contador visual con la cantidad de estudios coincidentes
   setCantidadExamen(cantidad: number): void;
+  // Actualiza el porcentaje del estudio coincidente
+  setPorcentajeExamen(porcentaje: number): void;
 
   // --- Suscripción a eventos ---
   onActualizarTasa(callback: () => void): void;

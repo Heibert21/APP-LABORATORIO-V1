@@ -47,7 +47,7 @@
         </div>
         <div class="indicadores-caja">
           <div class="indicador-item"><span>Pacientes Atendidos:</span> <strong id="rep_totalPacientes">0</strong></div>
-          <div class="indicador-item"><span>Examen mas Solicitado:</span> <strong id="rep_estudioTop"
+          <div class="indicador-item"><span>% de Solicitud (Examen Top):</span> <strong id="rep_estudioTop"
               class="badge-sugerido">Ninguno</strong></div>
           <div class="indicador-item"><span>Total de $:</span> <strong id="rep_totalUSD" class="txt-exito">0.00
               $</strong></div>
@@ -62,7 +62,10 @@
                 <input type="date" id="rep_fecha_examen" style="padding: 2px 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; outline: none;" title="Fecha del Examen">
               </div>
             </span> 
-            <strong id="rep_cantidad_examen" style="font-size: 1.2rem; color: #0ea5e9;">0</strong>
+            <div style="display:flex; flex-direction:column; align-items:flex-end;">
+              <strong id="rep_cantidad_examen" style="font-size: 1.2rem; color: #0ea5e9;">0</strong>
+              <small id="rep_porcentaje_examen" style="color: #8b5cf6; font-weight: bold;" title="Porcentaje histórico de solicitudes">0%</small>
+            </div>
           </div>
         </div>
         <!-- MEJORA #6: Botón para imprimir el resumen financiero del día en PDF -->
