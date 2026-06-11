@@ -2,86 +2,119 @@
 <html lang="es">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APP laboratorio</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            color: #333;
-        }
-
-        .container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-        }
-
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 30px;
-            font-size: 24px;
-        }
-
-        .links-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .btn {
-            display: inline-block;
-            text-decoration: none;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .btn-laboratorio {
-            background-color: #3498db;
-        }
-
-        .btn-laboratorio:hover {
-            background-color: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.4);
-        }
-
-        .btn-bioanalista {
-            background-color: #2ecc71;
-        }
-
-        .btn-bioanalista:hover {
-            background-color: #27ae60;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.4);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab GitForce - Panel del Bioanalista</title>
+  <link rel="stylesheet" href="style-Bioanalista.css" />
+  <!-- Importamos los estilos de toast y spinner definidos en style-Laboratorio.css -->
+  <link rel="stylesheet" href="style-Laboratorio.css" />
 </head>
 
 <body>
-    <div class="container">
-        <h1>Bienvenido al Sistema</h1>
-        <p style="margin-bottom: 30px; color: #7f8c8d;">Selecciona el módulo al que deseas ingresar:</p>
-        <div class="links-container">
-            <a href="index-Laboratorio.html" class="btn btn-laboratorio">Administrativo entrar aqui</a>
-            <a href="index-Bioanalista.html" class="btn btn-bioanalista"> bioanalistas entrar aqui</a>
+
+  <!-- Contenedor de toasts flotantes (misma implementación que en Recepción) -->
+  <div id="toast-container"></div>
+
+  <!-- Encabezado Clínico Unificado con el Laboratorio -->
+  <header class="header-app">
+    <h1>🔬 Lab GitForce <small>| Área Técnica</small></h1>
+    <p>Módulo de Transcripción, Validación y Auditoría Clínica de Resultados</p>
+  </header>
+
+  <!-- Contenedor Principal en Formato Dashboard de Dos Columnas Compresivo -->
+  <main class="dashboard-container">
+    <aside class="sidebar-panel">
+
+      <!-- Bandeja de Entrada de Casos Pendientes -->
+      <section class="tarjeta-modulo">
+        <div class="modulo-cabecera-simple">
+          <h3>⏳ Muestras en Espera</h3>
         </div>
+        <p class="instruccion">Muestras listas por procesar ordenadas secuencialmente:</p>
+        <div id="bio_listaEspera" class="bandeja-scroll-monitor">
+          <!-- Inyectado dinámicamente -->
+        </div>
+      </section>
+
+      <!-- Histórico de Casos Validados en el Turno -->
+      <section class="tarjeta-modulo">
+        <div class="modulo-cabecera-simple">
+          <h3>✅ Historial del Turno</h3>
+        </div>
+        <ul id="bio_listaAtendidos" class="lista-catalogo-scroll">
+          <!-- Inyectado dinámicamente -->
+        </ul>
+      </section>
+
+    </aside>
+    <div class="main-content-panel">
+
+      <!-- Panel Dinámico de Transcripción (Se activa al seleccionar paciente) -->
+      <section id="bio_panelFormulario" class="tarjeta-modulo oculto">
+        <div class="modulo-cabecera">
+          <h2>🧫 Carga de Resultados Clínicos</h2>
+        </div>
+
+        <!-- Ficha de Datos Filiatorios Inyectada de la Nube -->
+        <div id="bio_cabeceraPaciente"></div>
+
+        <hr class="divisor-dashed" />
+
+        <!-- Formulario Técnico Generador de Columnas Reales -->
+        <form id="form_cargaResultados" onsubmit="event.preventDefault();">
+          <div id="bio_tablaInputs" class="contenedor-filas-medicas">
+            <!-- Filas dinámicas inyectadas con unidades y rangos reales -->
+          </div>
+
+          <!-- Cuadro Inferior de Firma Digital y Autorización -->
+          <div class="factura-pre-pago area-firma-profesional">
+            <div class="factura-header">
+              <h3>✍️ Validación Jurídica del Informe</h3>
+            </div>
+            <div class="grupo-input" style="max-width: 380px;">
+              <label for="bio_inLicenciado">Lic. en Bioanálisis Responsable:</label>
+              <input type="text" id="bio_inLicenciado" placeholder="Ej. Lcda. Maria Fernanda Ortiz" required />
+            </div>
+          </div>
+
+          <button type="button" id="bio_btEnviar" class="btn-exito btn-bloque" style="margin-top: 20px;">
+            🚀 Validar Rangos y Despachar Informe a Recepción
+          </button>
+        </form>
+      </section>
+
+      <!-- Pantalla de Bienvenida Inicial Vacía -->
+      <section id="bio_panelVacio" class="tarjeta-modulo estado-vacio-panel">
+        <div class="icono-vacio">🔬</div>
+        <h3>Bandeja de Trabajo Inactiva</h3>
+        <p>Por favor, seleccione un paciente de la columna izquierda para desplegar sus casillas analíticas fijas.</p>
+      </section>
+
     </div>
+  </main>
+
+  <!-- Créditos Institucionales Unificados Git Force -->
+  <footer class="footer-creditos">
+    <p>© 2026 UCLA DCyT - Proyecto Final</p>
+    <p class="autor-info">Designe By <strong>Git Force</strong> | Todos los derechos reservados © 2026</p>
+  </footer>
+
+  <!-- SCRIPT DE ACOPLAMIENTO MODULAR COMPLETO CON TU VISTA ORDENBIO -->
+  <script type="module">
+    import Cl_mOrdenBio from "./dist/models/Cl_mOrdenBio.js"; // 1. Importamos el modelo principal
+    import Cl_vOrdenBio from "./dist/views/Cl_vOrdenBio.js";
+    import Cl_cOrdenBio from "./dist/controllers/Cl_cOrdenBio.js";
+
+    // 2. Instanciamos la Vista y el Modelo vacío que servirá de contenedor de datos
+    const vista = new Cl_vOrdenBio();
+    const modelo = new Cl_mOrdenBio({
+      id: "", cedula: "", nombre: "", apellido: "", edad: 0, sexo: "", fechaRegistro: "", examenesSolicitados: ""
+    });
+
+    // 3. Los inyectamos juntos siguiendo el formato exacto del profesor: { modelo, vista }
+    new Cl_cOrdenBio({ modelo, vista });
+  </script>
+
 </body>
 
 </html>
