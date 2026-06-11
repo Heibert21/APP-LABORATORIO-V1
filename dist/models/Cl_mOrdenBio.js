@@ -19,7 +19,7 @@ export default class Cl_mOrdenBio {
     _licBioanalista = "";
     _resultados = [];
     constructor({ id, cedula, cedulaRepresentante = "", nombreRepresentante = "", apellidoRepresentante = "", nombre, apellido, edad, sexo, telefono = "", correo = "", metodoPago = "", montoTotal$ = 0, fechaRegistro, horaEntregaEstimada = "", examenesSolicitados, status = "En Espera", licBioanalista = "", resultados = [] }) {
-        this._id = id;
+        this._id = String(id ?? "");
         this._cedulaRepresentante = cedulaRepresentante;
         this._nombreRepresentante = nombreRepresentante;
         this._apellidoRepresentante = apellidoRepresentante;
@@ -261,7 +261,7 @@ export default class Cl_mOrdenBio {
         if (item) {
             let valorLimpio = valor.trim();
             if (valorLimpio && !isNaN(Number(valorLimpio)) && item.rangoReferencia) {
-                const fueraDeRango = Cl_mOrdenBio.validarRangoTexto(valorLimpio, item.rangoReferencia);
+                const fueraDeRango = Cl_mOrdenBio.valorReferencia(valorLimpio, item.rangoReferencia);
                 if (fueraDeRango && !valorLimpio.includes("*")) {
                     valorLimpio = `${valorLimpio}*`;
                 }
@@ -270,7 +270,7 @@ export default class Cl_mOrdenBio {
         }
     }
     //Metodo que permite validar el rango de referencia de un parametro
-    static validarRangoTexto(valor, rangoTexto) {
+    static valorReferencia(valor, rangoTexto) {
         const rangoLimpio = rangoTexto.replace("Ref:", "").trim();
         const partesRango = rangoLimpio.split("-");
         if (partesRango.length === 2 && valor && !isNaN(Number(valor))) {
@@ -280,6 +280,35 @@ export default class Cl_mOrdenBio {
             return numCargado < min || numCargado > max;
         }
         return false;
+    }
+    // NUEVO METODO ELIAN
+    // GRACIAS HEIBERT UWU
+    // Retorna el nombre (parametro) del examen
+    static obtenerNombreExamen(res) {
+        if (!res)
+            return "Sin nombre";
+        const nombre = res.parametro?.trim();
+        if (!nombre || nombre === "")
+            return "Sin nombre";
+        return nombre;
+    }
+    // Retorna la unidad de medida del examen, con valor por defecto
+    static obtenerUnidadExamen(res) {
+        if (!res)
+            return "mg/dL";
+        const unidad = res.unidad?.trim();
+        if (!unidad || unidad === "")
+            return "mg/dL";
+        return unidad;
+    }
+    // Retorna el rango de referencia del examen, con valor por defecto
+    static obtenerRangoReferencia(res) {
+        if (!res)
+            return "70 - 100";
+        const rango = res.rangoReferencia?.trim();
+        if (!rango || rango === "")
+            return "70 - 100";
+        return rango;
     }
     //Metodo que permite convertir un objeto a JSON
     toJSON() {

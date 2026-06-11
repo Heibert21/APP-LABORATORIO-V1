@@ -367,36 +367,52 @@ export default class Cl_cLaboratorio {
     return this.vista.estId;
   }
   /**
-   * Busca en el historial de órdenes si ya existe algún registro con la cédula dada.
+   * Busca en el historial de órdenes por cédula del paciente O por número de orden.
    * Si lo encuentra: autocompleta el formulario y muestra el historial de visitas.
    * Si no existe: avisa al recepcionista con un toast informativo.
    */
-  private buscarPacientePorCedula(cedula: string): void {
-    const cedulaNorm = cedula.trim().toLowerCase();
+  private buscarPacientePorCedula(termino: string): void {
+    const terminoNorm = termino.trim().toLowerCase();
 
     // Validación Evitar búsquedas vacías
-    if (!cedulaNorm) {
-      this.vista.mostrarToast("Por favor, ingrese un número de cédula válido para buscar.", "advertencia");
+    if (!terminoNorm) {
+      this.vista.mostrarToast("Por favor, ingrese una cédula o número de orden para buscar.", "advertencia");
       return;
     }
     // Validación Evitar buscar pacientes con la cédula genérica "MENOR"
-    if (cedulaNorm === "menor") {
+    if (terminoNorm === "menor") {
       this.vista.mostrarToast("No se puede autocompletar el historial con la cédula genérica 'MENOR'.", "advertencia");
       this.vista.mostrarHistorialPaciente([]);
       return;
     }
-    // Filtramos todas las órdenes que coincidan con esa cédula principal o con la del representante
+
+    // 1. Intentar buscar por número de orden exacto (id)
+    const ordenPorId = this.modeloGlobal.ordenes.find(
+      o => String(o.id).trim().toLowerCase() === terminoNorm
+    );
+    if (ordenPorId) {
+      this.vista.autocompletarPaciente(ordenPorId);
+      // Si se buscó por orden, mostramos el historial completo de ese paciente (por cédula)
+      const cedulaDeLaOrden = ordenPorId.cedula.trim().toLowerCase();
+      const historialDelPaciente = this.modeloGlobal.ordenes.filter(
+        o => o.cedula.trim().toLowerCase() === cedulaDeLaOrden ||
+             o.cedulaRepresentante.trim().toLowerCase() === cedulaDeLaOrden
+      );
+      this.vista.mostrarHistorialPaciente(historialDelPaciente);
+      return;
+    }
+
+    // 2. Si no se encontró por orden, buscar por cédula del paciente o representante
     const ordenesDelPaciente = this.modeloGlobal.ordenes.filter(
-      o => o.cedula.trim().toLowerCase() === cedulaNorm || o.cedulaRepresentante.trim().toLowerCase() === cedulaNorm
+      o => o.cedula.trim().toLowerCase() === terminoNorm || o.cedulaRepresentante.trim().toLowerCase() === terminoNorm
     );
 
     if (ordenesDelPaciente.length === 0) {
-      this.vista.mostrarToast("Cédula no encontrada. Ingrese los datos del paciente manualmente.", "info");
+      this.vista.mostrarToast("No se encontró ningún paciente con esa cédula o número de orden.", "info");
       this.vista.mostrarHistorialPaciente([]);
       return;
     }
     // Tomamos la orden más reciente para autocompletar (la última del array)
-    // Asumiendo que el array mantiene el orden de inserción y el último es el más reciente
     const ordenMasReciente = ordenesDelPaciente[ordenesDelPaciente.length - 1];
     this.vista.autocompletarPaciente(ordenMasReciente);
     // Mostramos todo el historial de visitas del paciente

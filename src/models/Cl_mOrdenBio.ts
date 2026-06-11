@@ -35,7 +35,7 @@ export default class Cl_mOrdenBio {
     licBioanalista = "",
     resultados = []
   }: any) {
-    this._id = id;
+    this._id = String(id ?? "");
     this._cedulaRepresentante = cedulaRepresentante;
     this._nombreRepresentante = nombreRepresentante;
     this._apellidoRepresentante = apellidoRepresentante;
@@ -72,23 +72,23 @@ export default class Cl_mOrdenBio {
     this._cedula = value;
   }
   public get cedulaRepresentante(): string {
-     return this._cedulaRepresentante; 
-    }
+    return this._cedulaRepresentante;
+  }
   public set cedulaRepresentante(value: string) {
-     this._cedulaRepresentante = value; 
-    }
+    this._cedulaRepresentante = value;
+  }
   public get nombreRepresentante(): string {
-     return this._nombreRepresentante; 
-    }
+    return this._nombreRepresentante;
+  }
   public set nombreRepresentante(value: string) {
-     this._nombreRepresentante = value; 
-    }
+    this._nombreRepresentante = value;
+  }
   public get apellidoRepresentante(): string {
-     return this._apellidoRepresentante; 
-    }
+    return this._apellidoRepresentante;
+  }
   public set apellidoRepresentante(value: string) {
-     this._apellidoRepresentante = value; 
-    }
+    this._apellidoRepresentante = value;
+  }
   public get nombre(): string {
     return this._nombre;
   }
@@ -274,7 +274,7 @@ export default class Cl_mOrdenBio {
     if (item) {
       let valorLimpio = valor.trim();
       if (valorLimpio && !isNaN(Number(valorLimpio)) && item.rangoReferencia) {
-        const fueraDeRango = Cl_mOrdenBio.validarRangoTexto(valorLimpio, item.rangoReferencia);
+        const fueraDeRango = Cl_mOrdenBio.valorReferencia(valorLimpio, item.rangoReferencia);
         if (fueraDeRango && !valorLimpio.includes("*")) {
           valorLimpio = `${valorLimpio}*`;
         }
@@ -283,7 +283,7 @@ export default class Cl_mOrdenBio {
     }
   }
   //Metodo que permite validar el rango de referencia de un parametro
-  public static validarRangoTexto(valor: string, rangoTexto: string): boolean {
+  public static valorReferencia(valor: string, rangoTexto: string): boolean {
     const rangoLimpio = rangoTexto.replace("Ref:", "").trim();
     const partesRango = rangoLimpio.split("-");
     if (partesRango.length === 2 && valor && !isNaN(Number(valor))) {
@@ -293,6 +293,31 @@ export default class Cl_mOrdenBio {
       return numCargado < min || numCargado > max;
     }
     return false;
+  }
+  // NUEVO METODO ELIAN
+  // GRACIAS HEIBERT UWU
+
+
+  // Retorna el nombre (parametro) del examen
+  public static obtenerNombreExamen(res: IResultadoExamen): string {
+    if (!res) return "Sin nombre";
+    const nombre = res.parametro?.trim();
+    if (!nombre || nombre === "") return "Sin nombre";
+    return nombre;
+  }
+  // Retorna la unidad de medida del examen, con valor por defecto
+  public static obtenerUnidadExamen(res: IResultadoExamen): string {
+    if (!res) return "mg/dL";
+    const unidad = res.unidad?.trim();
+    if (!unidad || unidad === "") return "mg/dL";
+    return unidad;
+  }
+  // Retorna el rango de referencia del examen, con valor por defecto
+  public static obtenerRangoReferencia(res: IResultadoExamen): string {
+    if (!res) return "70 - 100";
+    const rango = res.rangoReferencia?.trim();
+    if (!rango || rango === "") return "70 - 100";
+    return rango;
   }
   //Metodo que permite convertir un objeto a JSON
   public toJSON() {

@@ -142,6 +142,15 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
         ? " Abrir Registro de Paciente"
         : " Cerrar Registro de Paciente";
     };
+    //mostrar/ocultar lista de estudios disponibles
+    const btnToggleEstudiosDisponibles = document.getElementById("btnToggleEstudiosDisponibles") as HTMLElement;
+    const seccionEstudiosDisponibles = document.getElementById("seccionEstudiosDisponibles") as HTMLElement;
+    btnToggleEstudiosDisponibles.onclick = () => {
+      seccionEstudiosDisponibles.classList.toggle("oculto");
+      btnToggleEstudiosDisponibles.innerText = seccionEstudiosDisponibles.classList.contains("oculto")
+        ? "➕ Abrir Estudios Disponibles"
+        : "➖ Cerrar Estudios Disponibles";
+    };
     //despachar ordenes
     this.tablaListos.addEventListener("click", (e) => {
       const target = e.target as HTMLElement;
@@ -200,6 +209,7 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
         const texto = inputBandeja.value.trim().toLowerCase();
         
         const filtro = (o: Cl_mOrdenBio) =>
+          String(o.id).toLowerCase().includes(texto) ||
           o.nombre.toLowerCase().includes(texto) ||
           o.apellido.toLowerCase().includes(texto) ||
           o.cedula.toLowerCase().includes(texto) ||

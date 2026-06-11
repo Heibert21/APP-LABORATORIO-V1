@@ -31,7 +31,7 @@ export default class Cl_vBioanalista {
                 const fila = target.closest(".fila-medica");
                 const rangoTexto = fila.querySelector(".referencia-texto")?.textContent || "";
                 // REGLA DE NEGOCIO DELEGADA: Evaluada por la función estática del Modelo Unificado
-                const esInvalido = Cl_mOrdenBio.validarRangoTexto(valor, rangoTexto);
+                const esInvalido = Cl_mOrdenBio.valorReferencia(valor, rangoTexto);
                 if (esInvalido) {
                     fila.classList.add("border-pago");
                     target.style.color = "red";
@@ -104,7 +104,12 @@ export default class Cl_vBioanalista {
         document.getElementById("bio_panelVacio")?.classList.add("oculto");
         const contenedorCabecera = document.getElementById("bio_cabeceraPaciente");
         const contenedorTabla = document.getElementById("bio_tablaInputs");
-        contenedorCabecera.innerHTML = `
+        contenedorCabecera.innerHTML = this.construirCabeceraPaciente(orden);
+        contenedorTabla.innerHTML = orden.resultados.map((res) => this.construirFilaExamen(res)).join("");
+    }
+    // Construye el HTML de la cabecera con los datos del paciente
+    construirCabeceraPaciente(orden) {
+        return `
       <div class="grid-form" style="margin-bottom: 17px;">
         <p><b>📋 Nro. Orden:</b> #${orden.id}</p>
         <p><b>⏱️ Fecha/Hora Registro:</b> ${orden.fechaRegistro}</p>
@@ -117,16 +122,19 @@ export default class Cl_vBioanalista {
         🔬 Estudios a Procesar: ${orden.examenesSolicitados}
       </p>
     `;
-        contenedorTabla.innerHTML = orden.resultados.map((res) => `
+    }
+    // Construye el HTML de una fila completa de examen (nombre + input + unidad + rango)
+    construirFilaExamen(res) {
+        return `
       <div class="fila-medica">
-        <span class="label-medico"><b>${res.parametro}</b></span>
+        <span class="label-medico"><b>${Cl_mOrdenBio.obtenerNombreExamen(res)}</b></span>
         <div class="input-unificado">
           <input type="text" class="input-resultado" placeholder="0.00" data-parametro="${res.parametro}" value="${res.resultado}">
-          <span class="unidad-texto">${res.unidad || 'mg/dL'}</span>
+          <span class="unidad-texto">${Cl_mOrdenBio.obtenerUnidadExamen(res)}</span>
         </div>
-        <span class="referencia-texto">Ref: ${res.rangoReferencia || '70 - 100'}</span>
+        <span class="referencia-texto">Ref: ${Cl_mOrdenBio.obtenerRangoReferencia(res)}</span>
       </div>
-    `).join("");
+    `;
     }
     //limpiar formulario de carga
     limpiarFormularioCarga() {

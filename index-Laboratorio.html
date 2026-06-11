@@ -106,12 +106,12 @@
 
       <!-- Lista Scrollable de Catálogo Activo -->
       <section class="tarjeta-modulo">
-        <div class="modulo-cabecera-simple">
-          <h3>🔬 Estudios Disponibles</h3>
+        <button type="button" id="btnToggleEstudiosDisponibles" class="btn-toggle-accordion">➕ Abrir Estudios Disponibles</button>
+        <div id="seccionEstudiosDisponibles" class="oculto accordion-content">
+          <ul id="adm_listaEstudiosCatalogo" class="lista-catalogo-scroll">
+            <!-- Inyectado dinámicamente -->
+          </ul>
         </div>
-        <ul id="adm_listaEstudiosCatalogo" class="lista-catalogo-scroll">
-          <!-- Inyectado dinámicamente -->
-        </ul>
       </section>
     </aside>
 
@@ -257,7 +257,7 @@
         <!-- MEJORA #4: Buscador dentro de la bandeja de espera para localizar pacientes rápidamente -->
         <div class="buscador-bandeja">
           <span>🔍</span>
-          <input type="text" id="input_buscarBandeja" placeholder="Buscar por nombre o cédula..." />
+          <input type="text" id="input_buscarBandeja" placeholder="Buscar por nombre, cédula o N° de orden..." />
         </div>
         <div id="adm_listaEspera" class="bandeja-scroll-monitor">
           <!-- Inyectado dinámicamente -->

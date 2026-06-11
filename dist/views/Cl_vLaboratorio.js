@@ -132,6 +132,15 @@ export default class Cl_vLaboratorio {
                 ? " Abrir Registro de Paciente"
                 : " Cerrar Registro de Paciente";
         };
+        //mostrar/ocultar lista de estudios disponibles
+        const btnToggleEstudiosDisponibles = document.getElementById("btnToggleEstudiosDisponibles");
+        const seccionEstudiosDisponibles = document.getElementById("seccionEstudiosDisponibles");
+        btnToggleEstudiosDisponibles.onclick = () => {
+            seccionEstudiosDisponibles.classList.toggle("oculto");
+            btnToggleEstudiosDisponibles.innerText = seccionEstudiosDisponibles.classList.contains("oculto")
+                ? "➕ Abrir Estudios Disponibles"
+                : "➖ Cerrar Estudios Disponibles";
+        };
         //despachar ordenes
         this.tablaListos.addEventListener("click", (e) => {
             const target = e.target;
@@ -192,7 +201,8 @@ export default class Cl_vLaboratorio {
         if (inputBandeja) {
             inputBandeja.addEventListener("input", () => {
                 const texto = inputBandeja.value.trim().toLowerCase();
-                const filtro = (o) => o.nombre.toLowerCase().includes(texto) ||
+                const filtro = (o) => String(o.id).toLowerCase().includes(texto) ||
+                    o.nombre.toLowerCase().includes(texto) ||
                     o.apellido.toLowerCase().includes(texto) ||
                     o.cedula.toLowerCase().includes(texto) ||
                     (o.cedulaRepresentante && o.cedulaRepresentante.toLowerCase().includes(texto)) ||
