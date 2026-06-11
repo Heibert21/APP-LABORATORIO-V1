@@ -73,7 +73,7 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
     this.btnProcesarOrden = document.getElementById("btn_procesarOrden") as HTMLButtonElement;
     this.btnCancelarEdicion = document.getElementById("btn_cancelarEdicion") as HTMLButtonElement;
 
-    this.inTasa = document.getElementById("conf_tasa") as HTMLInputElement;
+    this.inTasa = document.getElementById("adm_inTasa") as HTMLInputElement;
     this.btTasa = document.getElementById("adm_btnActualizarTasa") as HTMLButtonElement;
     this.inEstId = document.getElementById("est_id") as HTMLInputElement;
     this.inEstNombre = document.getElementById("est_nombre") as HTMLInputElement;
@@ -135,6 +135,15 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
       btnToggleEstudio.innerText = seccionFormEstudio.classList.contains("oculto")
         ? " Abrir Carga de Estudios"
         : " Cerrar Carga de Estudios";
+    };
+    //mostrar lista de estudios disponibles (catálogo)
+    const btnToggleCatalogo = document.getElementById("btnToggleCatalogo") as HTMLElement;
+    const seccionCatalogo = document.getElementById("seccionCatalogo") as HTMLElement;
+    btnToggleCatalogo.onclick = () => {
+      seccionCatalogo.classList.toggle("oculto");
+      btnToggleCatalogo.innerText = seccionCatalogo.classList.contains("oculto")
+        ? "➕ Abrir Estudios Disponibles"
+        : "➖ Cerrar Estudios Disponibles";
     };
     //mostrar formulario de pacientes
     const btnTogglePaciente = document.getElementById("btnToggleFormPaciente") as HTMLElement;

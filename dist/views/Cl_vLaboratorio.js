@@ -65,7 +65,7 @@ export default class Cl_vLaboratorio {
         this.formPaciente = document.getElementById("form_registroPaciente");
         this.btnProcesarOrden = document.getElementById("btn_procesarOrden");
         this.btnCancelarEdicion = document.getElementById("btn_cancelarEdicion");
-        this.inTasa = document.getElementById("conf_tasa");
+        this.inTasa = document.getElementById("adm_inTasa");
         this.btTasa = document.getElementById("adm_btnActualizarTasa");
         this.inEstId = document.getElementById("est_id");
         this.inEstNombre = document.getElementById("est_nombre");
@@ -124,6 +124,15 @@ export default class Cl_vLaboratorio {
             btnToggleEstudio.innerText = seccionFormEstudio.classList.contains("oculto")
                 ? " Abrir Carga de Estudios"
                 : " Cerrar Carga de Estudios";
+        };
+        //mostrar lista de estudios disponibles (catálogo)
+        const btnToggleCatalogo = document.getElementById("btnToggleCatalogo");
+        const seccionCatalogo = document.getElementById("seccionCatalogo");
+        btnToggleCatalogo.onclick = () => {
+            seccionCatalogo.classList.toggle("oculto");
+            btnToggleCatalogo.innerText = seccionCatalogo.classList.contains("oculto")
+                ? "➕ Abrir Estudios Disponibles"
+                : "➖ Cerrar Estudios Disponibles";
         };
         //mostrar formulario de pacientes
         const btnTogglePaciente = document.getElementById("btnToggleFormPaciente");

@@ -98,12 +98,13 @@
 
       <!-- Lista Scrollable de Catálogo Activo -->
       <section class="tarjeta-modulo">
-        <div class="modulo-cabecera-simple">
-          <h3>🔬 Estudios Disponibles</h3>
+        <button type="button" id="btnToggleCatalogo" class="btn-toggle-accordion">➕ Abrir Estudios Disponibles</button>
+
+        <div id="seccionCatalogo" class="oculto accordion-content">
+          <ul id="adm_listaEstudiosCatalogo" class="lista-catalogo-scroll">
+            <!-- Inyectado dinámicamente -->
+          </ul>
         </div>
-        <ul id="adm_listaEstudiosCatalogo" class="lista-catalogo-scroll">
-          <!-- Inyectado dinámicamente -->
-        </ul>
       </section>
     </aside>
 
