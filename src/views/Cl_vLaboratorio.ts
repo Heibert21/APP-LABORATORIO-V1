@@ -1,5 +1,6 @@
 import { I_vLaboratorio } from "../interfaces/I_vLaboratorio.js";
 import Cl_mOrdenBio from "../models/Cl_mOrdenBio.js";
+import { IReporte } from "../interfaces/IReporte.js";
 
 export default class Cl_vLaboratorio implements I_vLaboratorio {
   // --- Elementos del DOM (Formulario Registro de Pacientes) ---
@@ -736,57 +737,11 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
       panel.appendChild(item);
     });
   }
-  //exportar caja del dia
-  public exportarCajaDelDia(datos: {
-    totalPacientes: number;
-    totalUsd: number;
-    totalBs: number;
-    tasa: number;
-    estudioTop: string;
-  }): void {
+  //imprimir reporte polimorficamente
+  public imprimirReporte(reporte: IReporte): void {
     const ventana = window.open("", "_blank");
     if (!ventana) return;
-    const fecha = new Date().toLocaleDateString();
-    const hora = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    // @ts-ignore: document.write is deprecated but required by current logic
-    ventana.document.write(`
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <title>Cierre de Caja - ${fecha}</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
-    body { padding: 50px; color: #000; font-size: 14px; }
-    h1 { font-size: 26px; font-weight: 900; font-style: italic; margin-bottom: 4px; }
-    .subtitulo { font-size: 13px; color: #64748b; margin-bottom: 30px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th { background: #0f172a; color: white; padding: 10px 14px; text-align: left; font-size: 12px; text-transform: uppercase; }
-    td { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
-    .monto { font-weight: 700; font-size: 15px; }
-    .pie { margin-top: 40px; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; }
-  </style>
-</head>
-<body>
-  <h1>Git Force <span style="font-size:14px;font-style:normal;">C.A.</span></h1>
-  <p class="subtitulo">Cierre de Caja — ${fecha} a las ${hora}</p>
-  <table>
-    <thead>
-      <tr>
-        <th>Concepto</th>
-        <th>Valor</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td>Pacientes Atendidos</td><td class="monto">${datos.totalPacientes}</td></tr>
-      <tr><td>Examen Más Solicitado</td><td class="monto">${datos.estudioTop}</td></tr>
-      <tr><td>Tasa del Día (Bs/$)</td><td class="monto">${datos.tasa.toFixed(2)} Bs</td></tr>
-      <tr><td>Total Ingresos (USD)</td><td class="monto" style="color:#059669;">$ ${datos.totalUsd.toFixed(2)}</td></tr>
-      <tr><td>Total Ingresos (Bs)</td><td class="monto" style="color:#0284c7;">${datos.totalBs.toFixed(2)} Bs</td></tr>
-    </tbody>
-  </table>
-  <p class="pie">Generado por el Sistema de Laboratorio Git Force C.A. — © 2026 UCLA DCyT</p>
-</body>
-</html>`);
+    ventana.document.write(reporte.obtenerContenidoReporte());
     ventana.document.close();
     ventana.focus();
     ventana.print();
@@ -828,109 +783,6 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
     const inputBuscar = document.getElementById("pac_buscarEstudioInput") as HTMLInputElement;
     if (inputBuscar) inputBuscar.oninput = () => callback(inputBuscar.value.trim());
   }
-  //imprimir reporte de resultados pdf
-  public imprimirReporteResultadosPDF(orden: Cl_mOrdenBio): void {
-    const ventanaImpresion = window.open("", "_blank");
-    if (!ventanaImpresion) return;
-    let cedulaFormateada = orden.cedula;
-    if (cedulaFormateada !== "MENOR" && !cedulaFormateada.startsWith("V-") && !cedulaFormateada.startsWith("CR")) {
-      cedulaFormateada = "V-" + cedulaFormateada;
-    }
-    ventanaImpresion.document.write(`
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<title>Reporte de Resultados - Orden #${orden.id}</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
-  body { padding: 40px 50px; color: #000; background: #fff; font-size: 13px; line-height: 1.4; }
-  .cabecera-logo-seccion { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
-  .logo-texto { font-size: 38px; font-weight: 900; font-style: italic; font-family: 'Arial Black', sans-serif; color: #000; line-height: 1; }
-  .fecha-bloque { font-size: 14px; text-align: right; font-weight: bold; margin-top: 15px; }
-  .datos-paciente-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; font-size: 13px; font-weight: bold; margin-top: 25px; margin-bottom: 5px; }
-  .linea-separadora-principal { border-bottom: 2px solid #000; margin-bottom: 25px; margin-top: 5px; }
-  .bloque-examen-contenedor { margin-bottom: 30px; }
-  .titulo-examen-categoria { font-size: 13px; font-weight: bold; padding-bottom: 3px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.3px; }
-  .tabla-medica-interna { width: 100%; border-collapse: collapse; margin-bottom: 5px; table-layout: fixed; }
-  .tabla-medica-interna th { font-weight: normal; font-size: 12px; text-align: left; padding-bottom: 8px; }
-  .tabla-medica-interna td { padding: 5px 0; vertical-align: top; }
-  .col-parametro { width: 45%; padding-left: 10px; }
-  .col-resultado { width: 15%; text-align: left; }
-  .col-unidad-ref { width: 40%; text-align: left; color: #000; }
-  .texto-alterado-alerta { color: #dc2626 !important; font-weight: bold !important; }
-  .nota-verificacion { font-size: 11px; font-weight: bold; margin-top: 12px; padding-left: 10px; text-transform: uppercase; }
-  .nota-sociedad-medica { font-size: 11px; font-weight: bold; color: #000; margin-top: 25px; text-align: justify; max-width: 95%; line-height: 1.3; }
-  .pie-pagina-fijo { position: fixed; bottom: 40px; left: 50px; right: 50px; }
-  .hora-sistema { text-align: right; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
-  .tabla-firmas-estructura { width: 100%; border-collapse: collapse; text-align: center; font-size: 11px; font-weight: bold; border-top: 1px solid #000; }
-  .tabla-firmas-estructura td { width: 33.33%; padding-top: 6px; vertical-align: top; border-right: 1px solid #000; }
-  .tabla-firmas-estructura td:last-child { border-right: none; }
-  .cargo-sub { font-size: 10px; color: #475569; font-weight: normal; margin-top: 2px; text-transform: uppercase; }
-</style>
-</head>
-<body>
-<div class="cabecera-logo-seccion">
-  <div><div class="logo-texto">Git Force<span style="font-size:16px;font-style:normal;font-weight:bold;margin-left:2px;">C.A.</span></div></div>
-  <div class="fecha-bloque">Fecha: &nbsp; ${orden.fechaRegistro ? orden.fechaRegistro.split(" ")[0] : new Date().toLocaleDateString()}</div>
-</div>
-<div class="datos-paciente-grid">
-  <div>Paciente: &nbsp; ${orden.apellido.toUpperCase()} ${orden.nombre.toUpperCase()}</div>
-  <div>Edad: &nbsp; ${orden.edad}</div>
-  <div>C.I: &nbsp; ${cedulaFormateada}</div>
-</div>
-<div class="datos-paciente-grid" style="margin-top:0px;margin-bottom:10px;">
-  <div>Orden: &nbsp; ${orden.id}</div>
-</div>
-<div class="linea-separadora-principal"></div>
-<div class="cuerpo-reporte-estudios">
-  <div class="bloque-examen-contenedor">
-    <div class="titulo-examen-categoria">${orden.examenesSolicitados.toUpperCase()}</div>
-    <table class="tabla-medica-interna">
-      <thead>
-        <tr>
-          <th class="col-parametro"></th>
-          <th class="col-resultado"></th>
-          <th class="col-unidad-ref" style="font-weight:bold;color:#000;">Intervalos de Referencia</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${orden.resultados.map((r: any) => {
-      const esAlterado = r.resultado && r.resultado.includes("*");
-      return `
-            <tr>
-              <td class="col-parametro">${r.parametro}</td>
-              <td class="col-resultado ${esAlterado ? "texto-alterado-alerta" : ""}">${r.resultado}</td>
-              <td class="col-unidad-ref">${r.unidad} I.R. ${r.rangoReferencia} ${r.unidad}</td>
-            </tr>`;
-    }).join("")}
-      </tbody>
-    </table>
-    <div class="nota-verificacion">*RESULTADOS VERIFICADOS.</div>
-  </div>
-  <div class="bloque-examen-contenedor">
-    <p class="nota-sociedad-medica">
-      Los valores de referencia sugeridos para las pruebas analíticas han sido propuestos en concordancia con los lineamientos internacionales de la IFCC y la Sociedad Venezolana de Bioanalistas Especialistas, conforme a los últimos estudios clínicos automatizados. Para una correcta interpretación clínica consulte a su médico especialista.
-    </p>
-  </div>
-</div>
-<div class="pie-pagina-fijo">
-  <div class="hora-sistema">Hora Entrada al Sistema: &nbsp; ${orden.fechaRegistro ? orden.fechaRegistro.split(" ")[1] || "08:00 AM" : "08:00 AM"}</div>
-  <table class="tabla-firmas-estructura">
-    <tbody>
-      <tr>
-        <td>${orden.licBioanalista ? orden.licBioanalista.toUpperCase() : "MIRNA MAHMUD"}<br><span class="cargo-sub">Lcda. en Bioanálisis</span></td>
-        <td>JOSEFINA PEREZ<br><span class="cargo-sub">Transcrito por</span></td>
-        <td>JOSEFINA PEREZ<br><span class="cargo-sub">Revisado por</span></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-</body>
-</html>`);
-    ventanaImpresion.document.close();
-    ventanaImpresion.focus();
-    ventanaImpresion.print();
-    setTimeout(() => ventanaImpresion.close(), 300);
-  }
+
 }
 // forzar recompilacion

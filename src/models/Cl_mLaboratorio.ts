@@ -1,7 +1,8 @@
 import Cl_mOrdenBio from "./Cl_mOrdenBio.js";
 import { IResultadoExamen } from "../interfaces/IResultadoExamen.js";
+import { IReporte } from "../interfaces/IReporte.js";
 
-export default class Cl_mLaboratorio {
+export default class Cl_mLaboratorio implements IReporte {
   private _tasaCambio: number;
   private _ordenes: Cl_mOrdenBio[] = [];
 
@@ -182,5 +183,60 @@ export default class Cl_mLaboratorio {
     const registro = ahora.toLocaleDateString() + " " + ahora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const entrega = horaPrometida.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     return { registro, entrega };
+  }
+
+  //polimorfismo del reporte de resultados pdf
+  public obtenerTituloReporte(): string {
+    const fecha = new Date().toLocaleDateString();
+    return `Cierre de Caja - ${fecha}`;
+  }
+  //implementacion del polimorfismo
+  public obtenerContenidoReporte(): string {
+    const fecha = new Date().toLocaleDateString();
+    const hora = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const totalPacientes = this.calcularTotalPacientesAtendidos();
+    const estudioTop = this.obtenerEstudioMasSolicitado();
+    const tasa = this.tasaCambio;
+    const totalUsd = this.calcularMontoTotalUsd();
+    const totalBs = this.calcularMontoTotalBs();
+
+    return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <title>${this.obtenerTituloReporte()}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    body { padding: 50px; color: #000; font-size: 14px; }
+    h1 { font-size: 26px; font-weight: 900; font-style: italic; margin-bottom: 4px; }
+    .subtitulo { font-size: 13px; color: #64748b; margin-bottom: 30px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th { background: #0f172a; color: white; padding: 10px 14px; text-align: left; font-size: 12px; text-transform: uppercase; }
+    td { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
+    .monto { font-weight: 700; font-size: 15px; }
+    .pie { margin-top: 40px; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; }
+  </style>
+</head>
+<body>
+  <h1>Git Force <span style="font-size:14px;font-style:normal;">C.A.</span></h1>
+  <p class="subtitulo">Cierre de Caja — ${fecha} a las ${hora}</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Concepto</th>
+        <th>Valor</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Pacientes Atendidos</td><td class="monto">${totalPacientes}</td></tr>
+      <tr><td>Examen Más Solicitado</td><td class="monto">${estudioTop}</td></tr>
+      <tr><td>Tasa del Día (Bs/$)</td><td class="monto">${tasa.toFixed(2)} Bs</td></tr>
+      <tr><td>Total Ingresos (USD)</td><td class="monto" style="color:#059669;">$ ${totalUsd.toFixed(2)}</td></tr>
+      <tr><td>Total Ingresos (Bs)</td><td class="monto" style="color:#0284c7;">${totalBs.toFixed(2)} Bs</td></tr>
+    </tbody>
+  </table>
+  <p class="pie">Generado por el Sistema de Laboratorio Git Force C.A. — © 2026 UCLA DCyT</p>
+</body>
+</html>`;
   }
 }

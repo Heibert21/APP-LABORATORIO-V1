@@ -1,4 +1,5 @@
 import Cl_mOrdenBio from "../models/Cl_mOrdenBio.js";
+import { IReporte } from "./IReporte.js";
 
 export interface I_vLaboratorio {
   // --- Getters del formulario de paciente ---
@@ -66,7 +67,7 @@ export interface I_vLaboratorio {
   limpiarFormEstudio(): void;
 
   // --- Impresión ---
-  imprimirReporteResultadosPDF(orden: Cl_mOrdenBio): void;
+  imprimirReporte(reporte: IReporte): void;
   onFiltrarEstudiosBusqueda(callback: (texto: string) => void): void;
 
   // --- Autocompletado, Historial y Edición ---
@@ -78,7 +79,4 @@ export interface I_vLaboratorio {
   mostrarToast(mensaje: string, tipo: "exito" | "error" | "info" | "advertencia"): void;
   mostrarSpinner(): void;
   ocultarSpinner(): void;
-
-  // --- Cierre de caja ---
-  exportarCajaDelDia(datos: { totalPacientes: number; totalUsd: number; totalBs: number; tasa: number; estudioTop: string; }): void;
 }

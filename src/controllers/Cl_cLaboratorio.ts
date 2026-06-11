@@ -352,7 +352,7 @@ export default class Cl_cLaboratorio {
       const orden = new Cl_mOrdenBio(datosPlanos);
 
       if (metodo === "Impreso") {
-        this.vista.imprimirReporteResultadosPDF(orden);
+        this.vista.imprimirReporte(orden);
       } else if (metodo === "WhatsApp") {
         this.vista.mostrarToast(`📱 PDF enviado al número ${orden.telefono}`, "exito");
       } else if (metodo === "Correo") {
@@ -425,12 +425,6 @@ export default class Cl_cLaboratorio {
    * a la vista para que genere el PDF del cierre de caja del día.
    */
   private procesarExportarCaja(): void {
-    this.vista.exportarCajaDelDia({
-      totalPacientes: this.modeloGlobal.calcularTotalPacientesAtendidos(),
-      totalUsd: this.modeloGlobal.calcularMontoTotalUsd(),
-      totalBs: this.modeloGlobal.calcularMontoTotalBs(),
-      tasa: this.modeloGlobal.tasaCambio,
-      estudioTop: this.modeloGlobal.obtenerEstudioMasSolicitado()
-    });
+    this.vista.imprimirReporte(this.modeloGlobal);
   }
 }
