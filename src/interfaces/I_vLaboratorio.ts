@@ -1,5 +1,4 @@
 import Cl_mOrdenBio from "../models/Cl_mOrdenBio.js";
-import { IReporte } from "./IReporte.js";
 
 export interface I_vLaboratorio {
   // --- Getters del formulario de paciente ---
@@ -49,6 +48,9 @@ export interface I_vLaboratorio {
   onEditarOrdenEspera(callback: (id: string) => void): void;
   onCancelarEdicion(callback: () => void): void;
   onExportarCaja(callback: () => void): void;
+  // --- Búsqueda y Filtrado de Bandejas (MVC) ---
+  get textoBusquedaBandeja(): string;
+  onFiltrarBandeja(callback: (texto: string) => void): void;
 
   // --- Métodos de actualización de UI ---
   setTasaActual(tasa: number): void;
@@ -67,7 +69,8 @@ export interface I_vLaboratorio {
   limpiarFormEstudio(): void;
 
   // --- Impresión ---
-  imprimirReporte(reporte: IReporte): void;
+  imprimirReporteResultados(orden: Cl_mOrdenBio): void;
+  imprimirReporteCaja(laboratorio: any): void;
   onFiltrarEstudiosBusqueda(callback: (texto: string) => void): void;
 
   // --- Autocompletado, Historial y Edición ---
@@ -79,4 +82,7 @@ export interface I_vLaboratorio {
   mostrarToast(mensaje: string, tipo: "exito" | "error" | "info" | "advertencia"): void;
   mostrarSpinner(): void;
   ocultarSpinner(): void;
+  // REFACTORIZACIÓN MVC: confirm() es una función nativa del navegador (DOM) y no debe llamarse
+  // desde el controlador. La vista es la única capa autorizada a interactuar con el entorno del navegador.
+  confirmarAccion(mensaje: string): Promise<boolean>;
 }

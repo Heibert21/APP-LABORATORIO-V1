@@ -12,22 +12,34 @@ Gestión de pacientes y exámenes médicos.
 import Cl_mOrdenBio from "../models/Cl_mOrdenBio.js";
 import Cl_sOrdenBio from "../services/Cl_sOrdenBio.js";
 export default class Cl_cOrdenBio {
-    modelo;
+    // modeloColeccion gestiona la lista completa de órdenes y sus reglas de ordenamiento
+    modeloColeccion;
+    // modeloOrden es una instancia de trabajo que se hidrata con los datos de la orden seleccionada
+    modeloOrden;
     vista;
     constructor({ modelo, vista }) {
-        this.modelo = modelo;
+        this.modeloColeccion = modelo;
+        this.modeloOrden = new Cl_mOrdenBio({
+            id: "", cedula: "", nombre: "", apellido: "", edad: "", sexo: "",
+            fechaRegistro: "", examenesSolicitados: "", status: "En Espera"
+        });
         this.vista = vista;
         this.vista.onSeleccionarPaciente((idOrden) => this.procesarSeleccionPaciente(idOrden));
         this.vista.onEnviarResultadosALaboratorio(() => this.procesarEnvioResultados());
+        // Se suscribe a la validación de rango de texto de la vista y la delega al modelo
+        this.vista.onValidarRangoTexto((valor, rangoTexto) => Cl_mOrdenBio.validarRangoTexto(valor, rangoTexto));
         this.inicializarApp();
     }
+    // Metodo que permite inicializar la app
     async inicializarApp() {
         try {
             const todasLasOrdenesPlanas = await Cl_sOrdenBio.obtenerOrdenes();
+            // Rehidratamos todas las órdenes desde datos planos hacia instancias del modelo
             const todasLasOrdenes = todasLasOrdenesPlanas.map((o) => new Cl_mOrdenBio(o));
-            const pendientes = todasLasOrdenes
-                .filter((o) => o.status === "En Espera")
-                .sort((a, b) => new Date(a.fechaRegistro).getTime() - new Date(b.fechaRegistro).getTime());
+            // Cargamos las órdenes en el modelo de laboratorio para poder usar su lógica de ordenamiento
+            this.modeloColeccion.setOrdenes(todasLasOrdenesPlanas);
+            // Se obtiene las ordenes pendientes y atendidas
+            const pendientes = this.modeloColeccion.obtenerOrdenesEnEsperaOrdenadas();
             const atendidos = todasLasOrdenes.filter((o) => o.status === "Listo para Despacho");
             this.vista.renderizarPacientesEnEspera(pendientes);
             this.vista.renderizarPacientesAtendidos(atendidos);
@@ -36,6 +48,7 @@ export default class Cl_cOrdenBio {
             console.error("Error al inicializar la App del Bioanalista:", error);
         }
     }
+    // Metodo que permite procesar la seleccion de un paciente
     async procesarSeleccionPaciente(idOrden) {
         try {
             const datosPlanos = await Cl_sOrdenBio.buscarOrdenPorId(idOrden);
@@ -44,7 +57,6 @@ export default class Cl_cOrdenBio {
                 this.vista.mostrarFormularioCarga(ordenInstancia);
             }
             else {
-                // MEJORA #9: Toast de error en lugar de alert
                 this.vista.mostrarToast("No se pudo cargar la información de la orden seleccionada.", "error");
             }
         }
@@ -52,48 +64,34 @@ export default class Cl_cOrdenBio {
             console.error("Error al seleccionar paciente:", error);
         }
     }
+    // Metodo que permite procesar el envio de resultados
     async procesarEnvioResultados() {
         if (!this.vista.nombreLicenciado) {
-            // MEJORA #3: Validación con toast en lugar de alert bloqueante
             this.vista.mostrarToast("Introduzca el nombre del Lic. Bioanalista que valida los resultados.", "advertencia");
             return;
         }
-        // obtener datos de la orden
+        // Se obtiene datos de la orden
         const idOrden = this.vista.idOrdenSeleccionada;
         const camposCargados = this.vista.getValoresCamposCargados();
         const algunoVacio = camposCargados.some(c => c.valor === "");
-        // confirmar envio de resultados
+        // Se confirma el envio de resultados
         if (algunoVacio && !confirm("Hay casillas de resultados vacías. ¿Desea enviar la orden de todas formas?")) {
             return;
         }
-        // enviar resultados al laboratorio
+        // Se envian los resultados al laboratorio
         try {
             const ordenOriginal = await Cl_sOrdenBio.buscarOrdenPorId(idOrden);
             if (!ordenOriginal) {
                 this.vista.mostrarToast("Error: No se encontró la orden original en el servidor.", "error");
                 return;
             }
-            // obtener datos de la orden
-            this.modelo.id = ordenOriginal.id;
-            this.modelo.cedula = ordenOriginal.cedula;
-            this.modelo.nombre = ordenOriginal.nombre;
-            this.modelo.apellido = ordenOriginal.apellido;
-            this.modelo.edad = ordenOriginal.edad;
-            this.modelo.sexo = ordenOriginal.sexo;
-            this.modelo.telefono = ordenOriginal.telefono || "";
-            this.modelo.correo = ordenOriginal.correo || "";
-            this.modelo.metodoPago = ordenOriginal.metodoPago || "";
-            this.modelo.montoTotal$ = ordenOriginal.montoTotal$ || 0;
-            this.modelo.fechaRegistro = ordenOriginal.fechaRegistro;
-            this.modelo.horaEntregaEstimada = ordenOriginal.horaEntregaEstimada || "";
-            this.modelo.examenesSolicitados = ordenOriginal.examenesSolicitados;
-            this.modelo.resultados = ordenOriginal.resultados;
+            this.modeloOrden.hidratarDesde(ordenOriginal);
             camposCargados.forEach(campo => {
-                this.modelo.registrarValorResultado(campo.parametro, campo.valor);
+                this.modeloOrden.registrarValorResultado(campo.parametro, campo.valor);
             });
-            this.modelo.licBioanalista = this.vista.nombreLicenciado;
-            this.modelo.status = "Listo para Despacho";
-            const exito = await Cl_sOrdenBio.despacharOCerrarOrden(idOrden, this.modelo.toJSON());
+            this.modeloOrden.licBioanalista = this.vista.nombreLicenciado;
+            this.modeloOrden.status = "Listo para Despacho";
+            const exito = await Cl_sOrdenBio.despacharOCerrarOrden(idOrden, this.modeloOrden.toJSON());
             if (exito.ok) {
                 this.vista.mostrarToast("¡Resultados cargados con éxito!", "exito");
                 this.vista.limpiarFormularioCarga();

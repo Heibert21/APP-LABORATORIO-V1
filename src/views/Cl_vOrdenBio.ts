@@ -1,6 +1,6 @@
 import { I_vOrdenBio } from "../interfaces/I_vOrdenBio.js";
 import { IResultadoExamen } from "../interfaces/IResultadoExamen.js";
-import Cl_mOrdenBio from "../models/Cl_mOrdenBio.js";
+import type Cl_mOrdenBio from "../models/Cl_mOrdenBio.js";
 
 export default class Cl_vBioanalista implements I_vOrdenBio {
   private listaEspera: HTMLElement;
@@ -11,6 +11,8 @@ export default class Cl_vBioanalista implements I_vOrdenBio {
   private idOrdenActual: string = "";
   private examenesCargadosLocales: IResultadoExamen[] = [];
   private manejadorSeleccionarPaciente!: (idOrden: string) => void;
+  // REFACTORIZACIÓN MVC: Handler para la validación de rango de texto inyectado por el controlador
+  private validadorRangoTexto!: (valor: string, rangoTexto: string) => boolean;
 
   constructor() {
     this.listaEspera = document.getElementById("bio_listaEspera") as HTMLElement;
@@ -36,8 +38,8 @@ export default class Cl_vBioanalista implements I_vOrdenBio {
         const valor = target.value.trim();
         const fila = target.closest(".fila-medica") as HTMLElement;
         const rangoTexto = fila.querySelector(".referencia-texto")?.textContent || "";
-        // REGLA DE NEGOCIO DELEGADA: Evaluada por la función estática del Modelo Unificado
-        const esInvalido = Cl_mOrdenBio.validarRangoTexto(valor, rangoTexto);
+        // REFACTORIZACIÓN MVC: Delegación de la validación al handler provisto por el controlador
+        const esInvalido = this.validadorRangoTexto ? this.validadorRangoTexto(valor, rangoTexto) : false;
         if (esInvalido) {
           fila.classList.add("border-pago");
           target.style.color = "red";
@@ -69,9 +71,13 @@ export default class Cl_vBioanalista implements I_vOrdenBio {
   }
   //renderizar pacientes en espera
   public renderizarPacientesEnEspera(ordenes: Cl_mOrdenBio[]): void {
-    this.listaEspera.innerHTML = ordenes.length === 0
-      ? `<div class="vacio-texto">⏳ No hay muestras pendientes en este momento.</div>`
-      : "";
+    this.listaEspera.innerHTML = "";
+    if (ordenes.length === 0) {
+      this.listaEspera.innerHTML = `<div class="vacio-texto">⏳ No hay muestras pendientes en este momento.</div>`;
+      return;
+    }
+    // REFACTORIZACIÓN CLEAN CODE: Optimización de Renderizado DOM (Evita Reflows)
+    const fragmento = document.createDocumentFragment();
     ordenes.forEach(o => {
       const div = document.createElement("div");
       div.className = "paciente-tarjeta espera";
@@ -83,14 +89,20 @@ export default class Cl_vBioanalista implements I_vOrdenBio {
         </div>
         <button type="button" class="btn-atender" data-id="${o.id}">Procesar</button>
       `;
-      this.listaEspera.appendChild(div);
+      fragmento.appendChild(div);
     });
+    this.listaEspera.appendChild(fragmento);
   }
   //renderizar pacientes atendidos
   public renderizarPacientesAtendidos(ordenes: Cl_mOrdenBio[]): void {
-    this.listaAtendidos.innerHTML = ordenes.length === 0
-      ? `<li class="vacio-texto">✅ No has procesado órdenes en este turno.</li>`
-      : "";
+    this.listaAtendidos.innerHTML = "";
+    if (ordenes.length === 0) {
+      this.listaAtendidos.innerHTML = `<li class="vacio-texto">✅ No has procesado órdenes en este turno.</li>`;
+      return;
+    }
+
+    // REFACTORIZACIÓN CLEAN CODE: Optimización de Renderizado DOM
+    const fragmento = document.createDocumentFragment();
     ordenes.forEach(o => {
       const li = document.createElement("li");
       li.className = "item-atendido";
@@ -98,8 +110,9 @@ export default class Cl_vBioanalista implements I_vOrdenBio {
         <span>📋 <b>Orden #${o.id}</b> - 👤 ${o.cedula} ${o.apellido} (🔬 ${o.examenesSolicitados})</span>
         <span class="badge status-listo">✔ ENVIADO</span>
       `;
-      this.listaAtendidos.appendChild(li);
+      fragmento.appendChild(li);
     });
+    this.listaAtendidos.appendChild(fragmento);
   }
   //mostrar formulario de carga de examenes
   public mostrarFormularioCarga(orden: Cl_mOrdenBio): void {
@@ -160,10 +173,18 @@ export default class Cl_vBioanalista implements I_vOrdenBio {
     toast.className = `toast ${tipo}`;
     toast.innerHTML = `<span>${iconos[tipo]}</span><span>${mensaje}</span>`;
     container.appendChild(toast);
-    requestAnimationFrame(() => toast.classList.add("visible"));
+    // Forzar reflow para asegurar la animación
+    void toast.offsetWidth;
+    toast.classList.add("visible");
     setTimeout(() => {
       toast.classList.remove("visible");
       toast.addEventListener("transitionend", () => toast.remove());
+      // Fallback por si falla transitionend (ej: pestaña inactiva)
+      setTimeout(() => toast.remove(), 400);
     }, 3500);
+  }
+  // REFACTORIZACIÓN MVC: Registro del callback de validación inyectado por el controlador
+  public onValidarRangoTexto(callback: (valor: string, rangoTexto: string) => boolean): void {
+    this.validadorRangoTexto = callback;
   }
 }

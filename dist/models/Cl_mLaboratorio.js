@@ -53,49 +53,66 @@ export default class Cl_mLaboratorio {
      @returns `true` si la cédula ya está registrada con un nombre diferente (conflicto).
      */
     validarDuplicadoPaciente(cedula, nombre, apellido, isMenor = false, cedulaRep = "", nombreRep = "", apellidoRep = "") {
-        const cedulaNorm = cedula.trim().toLowerCase();
-        const nombreNorm = nombre.trim().toLowerCase();
-        const apellidoNorm = apellido.trim().toLowerCase();
+        if (isMenor && cedulaRep.trim() !== "") {
+            return this._validarDuplicadoMenor(cedulaRep, nombreRep, apellidoRep);
+        }
+        return this._validarDuplicadoAdulto(cedula, nombre, apellido);
+    }
+    _validarDuplicadoMenor(cedulaRep, nombreRep, apellidoRep) {
         const cedulaRepNorm = cedulaRep.trim().toLowerCase();
         const nombreRepNorm = nombreRep.trim().toLowerCase();
         const apellidoRepNorm = apellidoRep.trim().toLowerCase();
-        // Si es menor, la validación de identidad se hace sobre el representante
-        if (isMenor && cedulaRepNorm !== "") {
-            return this._ordenes.some(orden => {
-                // Ignoramos órdenes viejas que no tengan cedulaRepresentante
-                if (!orden.cedulaRepresentante)
-                    return false;
-                const mismaCedulaRep = orden.cedulaRepresentante.trim().toLowerCase() === cedulaRepNorm;
-                const mismoNombreRep = orden.nombreRepresentante.trim().toLowerCase() === nombreRepNorm;
-                const mismoApellidoRep = orden.apellidoRepresentante.trim().toLowerCase() === apellidoRepNorm;
-                // Conflicto: misma cédula de representante pero distinto nombre/apellido
-                return mismaCedulaRep && !(mismoNombreRep && mismoApellidoRep);
-            });
-        }
-        // Si no es menor pero tiene cédula "menor" o "cr" (legacy o generada), lo dejamos pasar
+        return this._ordenes.some(orden => {
+            if (!orden.cedulaRepresentante)
+                return false;
+            const mismaCedulaRep = orden.cedulaRepresentante.trim().toLowerCase() === cedulaRepNorm;
+            const mismoNombreRep = orden.nombreRepresentante.trim().toLowerCase() === nombreRepNorm;
+            const mismoApellidoRep = orden.apellidoRepresentante.trim().toLowerCase() === apellidoRepNorm;
+            return mismaCedulaRep && !(mismoNombreRep && mismoApellidoRep);
+        });
+    }
+    // Metodo que permite validar el duplicado de un paciente adulto
+    _validarDuplicadoAdulto(cedula, nombre, apellido) {
+        const cedulaNorm = cedula.trim().toLowerCase();
+        const nombreNorm = nombre.trim().toLowerCase();
+        const apellidoNorm = apellido.trim().toLowerCase();
+        // Si la cedula es menor o es una cedula de representante, no se valida
         if (cedulaNorm === "menor" || cedulaNorm.startsWith("cr"))
             return false;
-        // Buscar si la cédula del paciente ya existe en el sistema con otro nombre
+        // Se recorre la lista de ordenes para validar el duplicado
         return this._ordenes.some(orden => {
-            // Ignoramos si la orden guardada es de un menor
             if (orden.cedula.trim().toLowerCase() === "menor" || orden.cedula.trim().toLowerCase().startsWith("cr"))
                 return false;
             const mismaCedula = orden.cedula.trim().toLowerCase() === cedulaNorm;
             const mismoNombre = orden.nombre.trim().toLowerCase() === nombreNorm;
             const mismoApellido = orden.apellido.trim().toLowerCase() === apellidoNorm;
-            // Conflicto: misma cédula pero nombre o apellido diferente
             return mismaCedula && !(mismoNombre && mismoApellido);
         });
     }
-    // --- ACUMULADORES DE CAJA CORREGIDOS ---
+    // Metodo que permite obtener las ordenes en espera ordenadas cronológicamente
+    obtenerOrdenesEnEsperaOrdenadas() {
+        return this._ordenes
+            .filter(o => o.status === "En Espera")
+            .sort((a, b) => {
+            // Usar obtenerMinutosEspera: más minutos = más antiguo = primero en la lista
+            const minsA = a.obtenerMinutosEspera();
+            const minsB = b.obtenerMinutosEspera();
+            if (minsA === -1)
+                return 1;
+            if (minsB === -1)
+                return -1;
+            return minsB - minsA; // Mayor espera primero
+        });
+    }
+    // Metodo que permite calcular el total de pacientes atendidos
     calcularTotalPacientesAtendidos() {
         return this._ordenes.length;
     }
+    // Metodo que permite calcular el monto total en dolares
     calcularMontoTotalUsd() {
         return this._ordenes.reduce((acum, o) => acum + o.montoTotal$, 0);
     }
     calcularMontoTotalBs() {
-        // Multiplica dinámicamente el total de dólares por la tasa del día
         return this.calcularMontoTotalUsd() * this._tasaCambio;
     }
     // Metodo que permite obtener el estudio mas solicitado
@@ -138,13 +155,6 @@ export default class Cl_mLaboratorio {
         const totalBs = totalUsd * this._tasaCambio;
         return { totalUsd, totalBs, tiempoMaxHoras, matrizResultados };
     }
-    /**
-     * Método que contabiliza la cantidad de veces que un examen específico fue solicitado
-     * durante un día particular (utilizado para el Reporte Dinámico en UI).
-     * @param nombreExamen Texto libre a buscar en la lista de exámenes (Ej: "Creatinina", "Glucosa")
-     * @param fechaFiltroYMD Fecha seleccionada en el selector (formato "yyyy-mm-dd")
-     * @returns El número total de incidencias encontradas
-     */
     // Metodo que permite contar la cantidad de veces que un examen especifico fue solicitado durante un dia particular
     contarExamenesPorFecha(nombreExamen, fechaFiltroYMD) {
         if (!fechaFiltroYMD)
@@ -181,59 +191,6 @@ export default class Cl_mLaboratorio {
         const registro = ahora.toLocaleDateString() + " " + ahora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         const entrega = horaPrometida.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         return { registro, entrega };
-    }
-    //polimorfismo del reporte de resultados pdf
-    obtenerTituloReporte() {
-        const fecha = new Date().toLocaleDateString();
-        return `Cierre de Caja - ${fecha}`;
-    }
-    //implementacion del polimorfismo
-    obtenerContenidoReporte() {
-        const fecha = new Date().toLocaleDateString();
-        const hora = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-        const totalPacientes = this.calcularTotalPacientesAtendidos();
-        const estudioTop = this.obtenerEstudioMasSolicitado();
-        const tasa = this.tasaCambio;
-        const totalUsd = this.calcularMontoTotalUsd();
-        const totalBs = this.calcularMontoTotalBs();
-        return `
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <title>${this.obtenerTituloReporte()}</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
-    body { padding: 50px; color: #000; font-size: 14px; }
-    h1 { font-size: 26px; font-weight: 900; font-style: italic; margin-bottom: 4px; }
-    .subtitulo { font-size: 13px; color: #64748b; margin-bottom: 30px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th { background: #0f172a; color: white; padding: 10px 14px; text-align: left; font-size: 12px; text-transform: uppercase; }
-    td { padding: 10px 14px; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
-    .monto { font-weight: 700; font-size: 15px; }
-    .pie { margin-top: 40px; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; }
-  </style>
-</head>
-<body>
-  <h1>Git Force <span style="font-size:14px;font-style:normal;">C.A.</span></h1>
-  <p class="subtitulo">Cierre de Caja — ${fecha} a las ${hora}</p>
-  <table>
-    <thead>
-      <tr>
-        <th>Concepto</th>
-        <th>Valor</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td>Pacientes Atendidos</td><td class="monto">${totalPacientes}</td></tr>
-      <tr><td>Examen Más Solicitado</td><td class="monto">${estudioTop}</td></tr>
-      <tr><td>Tasa del Día (Bs/$)</td><td class="monto">${tasa.toFixed(2)} Bs</td></tr>
-      <tr><td>Total Ingresos (USD)</td><td class="monto" style="color:#059669;">$ ${totalUsd.toFixed(2)}</td></tr>
-      <tr><td>Total Ingresos (Bs)</td><td class="monto" style="color:#0284c7;">${totalBs.toFixed(2)} Bs</td></tr>
-    </tbody>
-  </table>
-  <p class="pie">Generado por el Sistema de Laboratorio Git Force C.A. — © 2026 UCLA DCyT</p>
-</body>
-</html>`;
     }
 }
 //# sourceMappingURL=Cl_mLaboratorio.js.map

@@ -13,4 +13,6 @@ export interface I_vOrdenBio {
   onEnviarResultadosALaboratorio(callback: () => void): void;
   // Notificación flotante compartida con la pantalla del Laboratorio
   mostrarToast(mensaje: string, tipo: "exito" | "error" | "info" | "advertencia"): void;
+  // Callback para delegar la validación del rango de texto al controlador/modelo sin acoplar la vista al modelo
+  onValidarRangoTexto(callback: (valor: string, rangoTexto: string) => boolean): void;
 }

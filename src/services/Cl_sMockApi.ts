@@ -37,7 +37,6 @@ export default class Cl_sMockApi {
       return { ok: false, mensaje: "Error de red al actualizar: " + error.message };
     }
   }
-
   // Método universal para eliminar registros (DELETE)
   protected static async delete(url: string): Promise<{ ok: boolean; mensaje: string }> {
     try {

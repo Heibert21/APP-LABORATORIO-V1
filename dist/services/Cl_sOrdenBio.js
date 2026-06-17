@@ -5,9 +5,11 @@ export default class Cl_sOrdenBio extends Cl_sMockApi {
     static async obtenerOrdenes() {
         return await this.get(this.urlOrdenes);
     }
+    //obtener orden por id
     static async buscarOrdenPorId(id) {
         return await this.get(`${this.urlOrdenes}/${id}`);
     }
+    //despachar o cerrar orden
     static async despacharOCerrarOrden(id, ordenActualizada) {
         return await this.put(`${this.urlOrdenes}/${id}`, ordenActualizada);
     }

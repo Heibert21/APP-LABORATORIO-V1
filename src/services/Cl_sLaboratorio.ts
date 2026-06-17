@@ -8,41 +8,40 @@ export default class Cl_sLaboratorio extends Cl_sMockApi {
   static async obtenerEstudios(): Promise<any[]> {
     return await this.get(this.urlEstudios);
   }
+  //registrar estudio en el catalogo
   static async registrarEstudioCatalogo(nuevoEstudio: any): Promise<{ ok: boolean; mensaje: string }> {
     return await this.post(this.urlEstudios, nuevoEstudio);
   }
-
+  //eliminar estudio del catalogo
   static async eliminarEstudioCatalogo(id: string): Promise<{ ok: boolean; mensaje: string }> {
     return await this.delete(`${this.urlEstudios}/${id}`);
   }
-
   // --- Métodos de Configuración Financiera ---
   static async obtenerTasaDinamica(): Promise<number> {
     const data = await this.get(this.urlConfig);
     return data && data.tasaCambio ? parseFloat(data.tasaCambio) : 40.50;
   }
-
+  //actualizar tasa dinamica
   static async actualizarTasaDinamica(nuevaTasa: number): Promise<{ ok: boolean; mensaje: string }> {
     return await this.put(this.urlConfig, { tasaCambio: nuevaTasa });
   }
-
-  // --- Métodos de Órdenes (Requeridos por Cl_cLaboratorio) ---
+  //obtener ordenes
   static async obtenerOrdenes(): Promise<any[]> {
     return await this.get(this.urlOrdenes);
   }
-
+  //buscar orden por id
   static async buscarOrdenPorId(id: string): Promise<any> {
     return await this.get(`${this.urlOrdenes}/${id}`);
   }
-
+  //registrar nueva orden
   static async registrarNuevaOrden(orden: any): Promise<{ ok: boolean; mensaje: string }> {
     return await this.post(this.urlOrdenes, orden);
   }
-
+  //eliminar orden
   static async eliminarOrden(id: string): Promise<{ ok: boolean; mensaje: string }> {
     return await this.delete(`${this.urlOrdenes}/${id}`);
   }
-
+  //actualizar orden
   static async actualizarOrden(id: string, datos: any): Promise<{ ok: boolean; mensaje: string }> {
     return await this.put(`${this.urlOrdenes}/${id}`, datos);
   }

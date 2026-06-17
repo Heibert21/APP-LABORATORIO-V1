@@ -7,9 +7,11 @@ export default class Cl_sLaboratorio extends Cl_sMockApi {
     static async obtenerEstudios() {
         return await this.get(this.urlEstudios);
     }
+    //registrar estudio en el catalogo
     static async registrarEstudioCatalogo(nuevoEstudio) {
         return await this.post(this.urlEstudios, nuevoEstudio);
     }
+    //eliminar estudio del catalogo
     static async eliminarEstudioCatalogo(id) {
         return await this.delete(`${this.urlEstudios}/${id}`);
     }
@@ -18,22 +20,27 @@ export default class Cl_sLaboratorio extends Cl_sMockApi {
         const data = await this.get(this.urlConfig);
         return data && data.tasaCambio ? parseFloat(data.tasaCambio) : 40.50;
     }
+    //actualizar tasa dinamica
     static async actualizarTasaDinamica(nuevaTasa) {
         return await this.put(this.urlConfig, { tasaCambio: nuevaTasa });
     }
-    // --- Métodos de Órdenes (Requeridos por Cl_cLaboratorio) ---
+    //obtener ordenes
     static async obtenerOrdenes() {
         return await this.get(this.urlOrdenes);
     }
+    //buscar orden por id
     static async buscarOrdenPorId(id) {
         return await this.get(`${this.urlOrdenes}/${id}`);
     }
+    //registrar nueva orden
     static async registrarNuevaOrden(orden) {
         return await this.post(this.urlOrdenes, orden);
     }
+    //eliminar orden
     static async eliminarOrden(id) {
         return await this.delete(`${this.urlOrdenes}/${id}`);
     }
+    //actualizar orden
     static async actualizarOrden(id, datos) {
         return await this.put(`${this.urlOrdenes}/${id}`, datos);
     }

@@ -1,7 +1,6 @@
 import { IResultadoExamen } from "../interfaces/IResultadoExamen.js";
-import { IReporte } from "../interfaces/IReporte.js";
 
-export default class Cl_mOrdenBio implements IReporte {
+export default class Cl_mOrdenBio {
   private _id: string = "";
   private _cedula: string = "";
   private _cedulaRepresentante: string = "";
@@ -21,51 +20,26 @@ export default class Cl_mOrdenBio implements IReporte {
   private _status: "En Espera" | "Listo para Despacho" = "En Espera";
   private _licBioanalista: string = "";
   private _resultados: IResultadoExamen[] = [];
-  constructor({
-    id, cedula,
-    cedulaRepresentante = "", nombreRepresentante = "", apellidoRepresentante = "",
-    nombre, apellido, edad, sexo,
-    telefono = "",
-    correo = "",
-    metodoPago = "",
-    montoTotal$ = 0,
-    fechaRegistro,
-    horaEntregaEstimada = "",
-    examenesSolicitados,
-    status = "En Espera",
-    licBioanalista = "",
-    resultados = []
-  }: any) {
-    this._id = String(id ?? "");
-    this._cedulaRepresentante = cedulaRepresentante;
-    this._nombreRepresentante = nombreRepresentante;
-    this._apellidoRepresentante = apellidoRepresentante;
-    this._nombre = nombre;
-    this._apellido = apellido;
-    this._edad = typeof edad === "number" ? `${edad} Año(s)` : String(edad || "");
-    this._sexo = sexo;
-    this._telefono = telefono;
-    this._correo = correo;
-    this._metodoPago = metodoPago;
-    this._montoTotal$ = Number(montoTotal$);
-    this._fechaRegistro = fechaRegistro;
-    this._horaEntregaEstimada = horaEntregaEstimada;
-    this._examenesSolicitados = examenesSolicitados;
-    this._status = status;
-    this._licBioanalista = licBioanalista;
-    this._resultados = resultados;
-    // Regla de interfaz/modelo compartida
+
+  constructor(datos: any) {
+    // Convertir edad numérica a formato string si es necesario antes de hidratar
+    if (typeof datos.edad === "number") {
+      datos.edad = `${datos.edad} Año(s)`;
+    }
+    // Hidratar masivamente todos los campos
+    this.hidratarDesde(datos);
+    // Manejo especial de cédula para menores
     const edadAnios = Cl_mOrdenBio.convertirEdadAAños(this._edad);
-    this._cedula = (edadAnios <= 9 && (!cedula || cedula.trim() === "")) ? "MENOR" : cedula.trim();
+    const cedulaInput = String(datos.cedula || "").trim();
+    this._cedula = (edadAnios <= 9 && cedulaInput === "") ? "MENOR" : cedulaInput;
   }
-  //GETTERS Y SETTERS
+  // GETTERS Y SETTERS
   public get id(): string {
     return this._id;
   }
   public set id(value: string) {
     this._id = value;
   }
-
   public get cedula(): string {
     return this._cedula;
   }
@@ -73,23 +47,23 @@ export default class Cl_mOrdenBio implements IReporte {
     this._cedula = value;
   }
   public get cedulaRepresentante(): string {
-     return this._cedulaRepresentante; 
-    }
+    return this._cedulaRepresentante;
+  }
   public set cedulaRepresentante(value: string) {
-     this._cedulaRepresentante = value; 
-    }
+    this._cedulaRepresentante = value;
+  }
   public get nombreRepresentante(): string {
-     return this._nombreRepresentante; 
-    }
+    return this._nombreRepresentante;
+  }
   public set nombreRepresentante(value: string) {
-     this._nombreRepresentante = value; 
-    }
+    this._nombreRepresentante = value;
+  }
   public get apellidoRepresentante(): string {
-     return this._apellidoRepresentante; 
-    }
+    return this._apellidoRepresentante;
+  }
   public set apellidoRepresentante(value: string) {
-     this._apellidoRepresentante = value; 
-    }
+    this._apellidoRepresentante = value;
+  }
   public get nombre(): string {
     return this._nombre;
   }
@@ -319,11 +293,93 @@ export default class Cl_mOrdenBio implements IReporte {
       resultados: this.resultados
     };
   }
-
+  // Metodo que permite hidratar los datos del modelo
+  public hidratarDesde(datos: any): void {
+    this._id = String(datos.id ?? "");
+    this._cedula = datos.cedula ?? "";
+    this._cedulaRepresentante = datos.cedulaRepresentante ?? "";
+    this._nombreRepresentante = datos.nombreRepresentante ?? "";
+    this._apellidoRepresentante = datos.apellidoRepresentante ?? "";
+    this._nombre = datos.nombre ?? "";
+    this._apellido = datos.apellido ?? "";
+    this._edad = datos.edad ?? "";
+    this._sexo = datos.sexo ?? "";
+    this._telefono = datos.telefono ?? "";
+    this._correo = datos.correo ?? "";
+    this._metodoPago = datos.metodoPago ?? "";
+    this._montoTotal$ = Number(datos.montoTotal$ ?? 0);
+    this._fechaRegistro = datos.fechaRegistro ?? "";
+    this._horaEntregaEstimada = datos.horaEntregaEstimada ?? "";
+    this._examenesSolicitados = datos.examenesSolicitados ?? "";
+    this._status = datos.status ?? "En Espera";
+    this._licBioanalista = datos.licBioanalista ?? "";
+    this._resultados = datos.resultados ?? [];
+  }
+  // Metodo que permite generar la cedula de un paciente menor
+  public static generarCedulaMenor(cedulaRep: string): string {
+    const randomNum = Math.floor(Math.random() * 900) + 100;
+    return `CR${cedulaRep}-${randomNum}`;
+  }
+  // Metodo que permite filtrar los datos del modelo
+  public coincideConFiltro(textoBusqueda: string): boolean {
+    const textoFiltro = textoBusqueda.trim().toLowerCase();
+    if (!textoFiltro) return true;
+    //  Se convierte a texto y se busca el valor
+    return Boolean(
+      String(this._id).toLowerCase().includes(textoFiltro) ||
+      this._nombre.toLowerCase().includes(textoFiltro) ||
+      this._apellido.toLowerCase().includes(textoFiltro) ||
+      this._cedula.toLowerCase().includes(textoFiltro) ||
+      (this._cedulaRepresentante && this._cedulaRepresentante.toLowerCase().includes(textoFiltro)) ||
+      (this._nombreRepresentante && this._nombreRepresentante.toLowerCase().includes(textoFiltro)) ||
+      (this._apellidoRepresentante && this._apellidoRepresentante.toLowerCase().includes(textoFiltro))
+    );
+  }
+  // Metodo que permite obtener los minutos de espera
+  public obtenerMinutosEspera(): number {
+    if (!this._fechaRegistro) return -1;
+    try {
+      const normalizado = this._fechaRegistro.replace(",", "").trim();
+      const partes = normalizado.split(" ");
+      if (partes.length < 2) return -1;
+      const [fechaParte, horaParte] = partes;
+      const segmentosFecha = fechaParte.split("/");
+      if (segmentosFecha.length < 3) return -1;
+      const dia = parseInt(segmentosFecha[0], 10);
+      const mes = parseInt(segmentosFecha[1], 10) - 1;
+      const anio = parseInt(segmentosFecha[2], 10);
+      const [hh, mm] = horaParte.split(":").map(Number);
+      const fechaOrden = new Date(anio, mes, dia, hh, mm);
+      const ahora = new Date();
+      const diffMs = ahora.getTime() - fechaOrden.getTime();
+      return Math.max(0, Math.floor(diffMs / 60000));
+    } catch {
+      return -1;
+    }
+  }
+  // Metodo que permite obtener la fecha de registro en formato ISO
+  public get fechaRegistroISO(): string {
+    if (!this._fechaRegistro) return "";
+    try {
+      const partes = this._fechaRegistro.replace(",", "").trim().split(" ");
+      if (partes.length >= 1) {
+        const segmentos = partes[0].split("/");
+        if (segmentos.length === 3) {
+          const dia = segmentos[0].padStart(2, "0");
+          const mes = segmentos[1].padStart(2, "0");
+          const anio = segmentos[2];
+          return `${anio}-${mes}-${dia}`;
+        }
+      }
+      // Se silencia el error y se retorna vacío si ocurre algún error de formato o parseo
+    } catch { }
+    return "";
+  }
+  // Metodo que permite obtener el titulo del reporte
   public obtenerTituloReporte(): string {
     return `Reporte de Resultados - Orden #${this.id}`;
   }
-
+  // Metodo que permite obtener el contenido del reporte
   public obtenerContenidoReporte(): string {
     let cedulaFormateada = this.cedula;
     if (cedulaFormateada !== "MENOR" && !cedulaFormateada.startsWith("V-") && !cedulaFormateada.startsWith("CR")) {
@@ -388,14 +444,14 @@ export default class Cl_mOrdenBio implements IReporte {
       </thead>
       <tbody>
         ${this.resultados.map((r: any) => {
-          const esAlterado = r.resultado && r.resultado.includes("*");
-          return `
+      const esAlterado = r.resultado && r.resultado.includes("*");
+      return `
             <tr>
               <td class="col-parametro">${r.parametro}</td>
               <td class="col-resultado ${esAlterado ? "texto-alterado-alerta" : ""}">${r.resultado}</td>
               <td class="col-unidad-ref">${r.unidad} I.R. ${r.rangoReferencia} ${r.unidad}</td>
             </tr>`;
-        }).join("")}
+    }).join("")}
       </tbody>
     </table>
     <div class="nota-verificacion">*RESULTADOS VERIFICADOS.</div>

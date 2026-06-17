@@ -10,10 +10,10 @@
 
 <body>
 
-  <!-- MEJORA #8: Contenedor de toasts flotantes. Se inyectan dinámicamente desde la vista. -->
+  <!-- Contenedor de toasts flotantes. Se inyectan dinámicamente desde la vista. -->
   <div id="toast-container"></div>
 
-  <!-- MEJORA #8: Overlay de carga (spinner). Se muestra/oculta desde el controlador durante peticiones a la API. -->
+  <!-- Overlay de carga (spinner). Se muestra/oculta desde el controlador durante peticiones a la API. -->
   <div id="spinner-overlay" class="oculto">
     <div class="spinner-caja">
       <div class="spinner-rueda"></div>
@@ -224,7 +224,8 @@
             <div class="grupo-botones-pago">
               <button type="submit" id="btn_procesarOrden" class="btn-procesar-pago">💳 Confirmar
                 Facturación y Procesar Orden</button>
-              <button type="button" id="btn_cancelarEdicion" class="btn-cancelar-edicion oculto">❌ Cancelar Edición</button>
+              <button type="button" id="btn_cancelarEdicion" class="btn-cancelar-edicion oculto">❌ Cancelar
+                Edición</button>
             </div>
           </form>
         </div>
@@ -264,16 +265,16 @@
 
   <!-- SCRIPT DE ACOPLAMIENTO MODULAR COMPLETO CON TU VISTA ADMINISTRATIVA -->
   <script type="module">
-    // 1. Importamos las tres capas necesarias
+    // Importamos las tres capas necesarias
     import Cl_mLaboratorio from "./dist/models/Cl_mLaboratorio.js";
     import Cl_vLaboratorio from "./dist/views/Cl_vLaboratorio.js";
     import Cl_cLaboratorio from "./dist/controllers/Cl_cLaboratorio.js";
 
-    // 2. Instanciamos el Modelo Global contenedor (arranca con tasa 0) y la Vista Administrativa
+    // Instanciamos el Modelo Global contenedor (arranca con tasa 0) y la Vista Administrativa
     const modelo = new Cl_mLaboratorio(0);
     const vista = new Cl_vLaboratorio();
 
-    // 3. Los inyectamos empaquetados en un objeto, tal cual como el ejemplo del profesor: { modelo, vista }
+    // Los inyectamos empaquetados en un objeto, tal cual como el ejemplo del profesor: { modelo, vista }
     new Cl_cLaboratorio({ modelo, vista });
   </script>
 

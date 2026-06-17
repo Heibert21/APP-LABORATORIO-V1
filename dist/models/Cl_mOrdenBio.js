@@ -18,30 +18,19 @@ export default class Cl_mOrdenBio {
     _status = "En Espera";
     _licBioanalista = "";
     _resultados = [];
-    constructor({ id, cedula, cedulaRepresentante = "", nombreRepresentante = "", apellidoRepresentante = "", nombre, apellido, edad, sexo, telefono = "", correo = "", metodoPago = "", montoTotal$ = 0, fechaRegistro, horaEntregaEstimada = "", examenesSolicitados, status = "En Espera", licBioanalista = "", resultados = [] }) {
-        this._id = String(id ?? "");
-        this._cedulaRepresentante = cedulaRepresentante;
-        this._nombreRepresentante = nombreRepresentante;
-        this._apellidoRepresentante = apellidoRepresentante;
-        this._nombre = nombre;
-        this._apellido = apellido;
-        this._edad = typeof edad === "number" ? `${edad} Año(s)` : String(edad || "");
-        this._sexo = sexo;
-        this._telefono = telefono;
-        this._correo = correo;
-        this._metodoPago = metodoPago;
-        this._montoTotal$ = Number(montoTotal$);
-        this._fechaRegistro = fechaRegistro;
-        this._horaEntregaEstimada = horaEntregaEstimada;
-        this._examenesSolicitados = examenesSolicitados;
-        this._status = status;
-        this._licBioanalista = licBioanalista;
-        this._resultados = resultados;
-        // Regla de interfaz/modelo compartida
+    constructor(datos) {
+        // Convertir edad numérica a formato string si es necesario antes de hidratar
+        if (typeof datos.edad === "number") {
+            datos.edad = `${datos.edad} Año(s)`;
+        }
+        // Hidratar masivamente todos los campos
+        this.hidratarDesde(datos);
+        // Manejo especial de cédula para menores
         const edadAnios = Cl_mOrdenBio.convertirEdadAAños(this._edad);
-        this._cedula = (edadAnios <= 9 && (!cedula || cedula.trim() === "")) ? "MENOR" : cedula.trim();
+        const cedulaInput = String(datos.cedula || "").trim();
+        this._cedula = (edadAnios <= 9 && cedulaInput === "") ? "MENOR" : cedulaInput;
     }
-    //GETTERS Y SETTERS
+    // GETTERS Y SETTERS
     get id() {
         return this._id;
     }
@@ -305,9 +294,98 @@ export default class Cl_mOrdenBio {
             resultados: this.resultados
         };
     }
+    // Metodo que permite hidratar los datos del modelo
+    hidratarDesde(datos) {
+        this._id = String(datos.id ?? "");
+        this._cedula = datos.cedula ?? "";
+        this._cedulaRepresentante = datos.cedulaRepresentante ?? "";
+        this._nombreRepresentante = datos.nombreRepresentante ?? "";
+        this._apellidoRepresentante = datos.apellidoRepresentante ?? "";
+        this._nombre = datos.nombre ?? "";
+        this._apellido = datos.apellido ?? "";
+        this._edad = datos.edad ?? "";
+        this._sexo = datos.sexo ?? "";
+        this._telefono = datos.telefono ?? "";
+        this._correo = datos.correo ?? "";
+        this._metodoPago = datos.metodoPago ?? "";
+        this._montoTotal$ = Number(datos.montoTotal$ ?? 0);
+        this._fechaRegistro = datos.fechaRegistro ?? "";
+        this._horaEntregaEstimada = datos.horaEntregaEstimada ?? "";
+        this._examenesSolicitados = datos.examenesSolicitados ?? "";
+        this._status = datos.status ?? "En Espera";
+        this._licBioanalista = datos.licBioanalista ?? "";
+        this._resultados = datos.resultados ?? [];
+    }
+    // Metodo que permite generar la cedula de un paciente menor
+    static generarCedulaMenor(cedulaRep) {
+        const randomNum = Math.floor(Math.random() * 900) + 100;
+        return `CR${cedulaRep}-${randomNum}`;
+    }
+    // Metodo que permite filtrar los datos del modelo
+    coincideConFiltro(textoBusqueda) {
+        const textoFiltro = textoBusqueda.trim().toLowerCase();
+        if (!textoFiltro)
+            return true;
+        //  Se convierte a texto y se busca el valor
+        return Boolean(String(this._id).toLowerCase().includes(textoFiltro) ||
+            this._nombre.toLowerCase().includes(textoFiltro) ||
+            this._apellido.toLowerCase().includes(textoFiltro) ||
+            this._cedula.toLowerCase().includes(textoFiltro) ||
+            (this._cedulaRepresentante && this._cedulaRepresentante.toLowerCase().includes(textoFiltro)) ||
+            (this._nombreRepresentante && this._nombreRepresentante.toLowerCase().includes(textoFiltro)) ||
+            (this._apellidoRepresentante && this._apellidoRepresentante.toLowerCase().includes(textoFiltro)));
+    }
+    // Metodo que permite obtener los minutos de espera
+    obtenerMinutosEspera() {
+        if (!this._fechaRegistro)
+            return -1;
+        try {
+            const normalizado = this._fechaRegistro.replace(",", "").trim();
+            const partes = normalizado.split(" ");
+            if (partes.length < 2)
+                return -1;
+            const [fechaParte, horaParte] = partes;
+            const segmentosFecha = fechaParte.split("/");
+            if (segmentosFecha.length < 3)
+                return -1;
+            const dia = parseInt(segmentosFecha[0], 10);
+            const mes = parseInt(segmentosFecha[1], 10) - 1;
+            const anio = parseInt(segmentosFecha[2], 10);
+            const [hh, mm] = horaParte.split(":").map(Number);
+            const fechaOrden = new Date(anio, mes, dia, hh, mm);
+            const ahora = new Date();
+            const diffMs = ahora.getTime() - fechaOrden.getTime();
+            return Math.max(0, Math.floor(diffMs / 60000));
+        }
+        catch {
+            return -1;
+        }
+    }
+    // Metodo que permite obtener la fecha de registro en formato ISO
+    get fechaRegistroISO() {
+        if (!this._fechaRegistro)
+            return "";
+        try {
+            const partes = this._fechaRegistro.replace(",", "").trim().split(" ");
+            if (partes.length >= 1) {
+                const segmentos = partes[0].split("/");
+                if (segmentos.length === 3) {
+                    const dia = segmentos[0].padStart(2, "0");
+                    const mes = segmentos[1].padStart(2, "0");
+                    const anio = segmentos[2];
+                    return `${anio}-${mes}-${dia}`;
+                }
+            }
+            // Se silencia el error y se retorna vacío si ocurre algún error de formato o parseo
+        }
+        catch { }
+        return "";
+    }
+    // Metodo que permite obtener el titulo del reporte
     obtenerTituloReporte() {
         return `Reporte de Resultados - Orden #${this.id}`;
     }
+    // Metodo que permite obtener el contenido del reporte
     obtenerContenidoReporte() {
         let cedulaFormateada = this.cedula;
         if (cedulaFormateada !== "MENOR" && !cedulaFormateada.startsWith("V-") && !cedulaFormateada.startsWith("CR")) {
