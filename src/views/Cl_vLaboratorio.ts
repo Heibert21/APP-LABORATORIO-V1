@@ -44,7 +44,12 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
   private inFechaReporteExamen: HTMLInputElement;
   private inNombreReporteExamen: HTMLInputElement;
   private lblCantidadExamen: HTMLElement;
-
+  // --- Elementos del DOM (Nuevas Estadísticas) ---
+  private inNombreReporteEstudioStats: HTMLInputElement;
+  private lblEstSolicitudes: HTMLElement;
+  private lblEstIngreso: HTMLElement;
+  private lblEstPromedios: HTMLElement;
+  private lblPorcentajeFinalizados: HTMLElement;
   private manejadorEliminarEstudio!: (id: string) => void;
   private manejadorDespacharOrden!: (id: string, metodo: "Impreso" | "WhatsApp" | "Correo") => void;
   private manejadorCambioChecks!: () => void;
@@ -91,6 +96,12 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
     this.inFechaReporteExamen = document.getElementById("rep_fecha_examen") as HTMLInputElement;
     this.inNombreReporteExamen = document.getElementById("rep_nombre_examen") as HTMLInputElement;
     this.lblCantidadExamen = document.getElementById("rep_cantidad_examen") as HTMLElement;
+
+    this.inNombreReporteEstudioStats = document.getElementById("rep_nombre_estudio_stats") as HTMLInputElement;
+    this.lblEstSolicitudes = document.getElementById("rep_est_solicitudes") as HTMLElement;
+    this.lblEstIngreso = document.getElementById("rep_est_ingreso") as HTMLElement;
+    this.lblEstPromedios = document.getElementById("rep_est_promedios") as HTMLElement;
+    this.lblPorcentajeFinalizados = document.getElementById("rep_porcentajeFinalizados") as HTMLElement;
 
     // Set default date to today for the report
     if (this.inFechaReporteExamen) {
@@ -313,6 +324,29 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
       this.lblCantidadExamen.innerText = cantidad.toString();
     }
   }
+
+  // --- Implementación de Nuevas Estadísticas ---
+  public get nombreReporteEstudioStats(): string {
+    return this.inNombreReporteEstudioStats ? this.inNombreReporteEstudioStats.value : "";
+  }
+  public onCambioReporteEstudioStats(callback: (nombre: string) => void): void {
+    if (this.inNombreReporteEstudioStats) {
+      this.inNombreReporteEstudioStats.addEventListener("input", () => callback(this.nombreReporteEstudioStats));
+    }
+  }
+  public setEstadisticasEstudio(solicitudes: number, ingresoUsd: number, promediosHtml: string): void {
+    if (this.lblEstSolicitudes) this.lblEstSolicitudes.innerText = solicitudes.toString();
+    if (this.lblEstIngreso) this.lblEstIngreso.innerText = `$ ${ingresoUsd.toFixed(2)}`;
+    if (this.lblEstPromedios) {
+      this.lblEstPromedios.innerHTML = promediosHtml;
+    }
+  }
+  public setPorcentajeFinalizados(porcentaje: string): void {
+    if (this.lblPorcentajeFinalizados) {
+      this.lblPorcentajeFinalizados.innerText = porcentaje;
+    }
+  }
+
   //obtener estudios seleccionados
   public getEstudiosSeleccionados(): string[] {
     const checkboxes = this.contenedorEstudios.querySelectorAll(".chk-estudio:checked") as NodeListOf<HTMLInputElement>;

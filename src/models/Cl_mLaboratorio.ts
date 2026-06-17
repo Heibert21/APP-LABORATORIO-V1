@@ -190,5 +190,56 @@ export default class Cl_mLaboratorio {
     const entrega = horaPrometida.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     return { registro, entrega };
   }
+  // Metodo que permite obtener las estadisticas de un estudio
+  public estadisticasDeUnEstudio(nombreEstudio: string, precioEstudioUsd: number): { solicitudes: number, ingresoTotalUsd: number, ingresoTotalBs: number } {
+    let solicitudes = 0;
+    const nombreNorm = nombreEstudio.trim().toLowerCase();
+    this._ordenes.forEach(orden => {
+      const desgloses = orden.desglosarExamenes();
+      const tieneExamen = desgloses.some(item => item.examen.trim().toLowerCase() === nombreNorm || item.examen.trim().toLowerCase().includes(nombreNorm));
+      if (tieneExamen) {
+        solicitudes++;
+      }
+    });
 
+    const ingresoTotalUsd = solicitudes * precioEstudioUsd;
+    const ingresoTotalBs = ingresoTotalUsd * this._tasaCambio;
+
+    return { solicitudes, ingresoTotalUsd, ingresoTotalBs };
+  }
+
+  // Metodo que permite obtener el porcentaje de examenes finalizados
+  public porcentajeExamenesFinalizados(): string {
+    if (this._ordenes.length === 0) return "0.00%";
+    const finalizados = this._ordenes.filter(o => o.status === "Listo para Despacho").length;
+    const porcentaje = (finalizados / this._ordenes.length) * 100;
+    return porcentaje.toFixed(2) + "%";
+  }
+  // Metodo que permite calcular el promedio general de un estudio seleccionado
+  public promedioResultadosEstudio(nombreEstudio: string): { parametro: string, promedio: number }[] {
+    const nombreNorm = nombreEstudio.trim().toLowerCase();
+    const sumas: { [param: string]: { total: number, cantidad: number } } = {};
+
+    this._ordenes.forEach(orden => {
+      const desgloses = orden.desglosarExamenes();
+      const tieneExamen = desgloses.some(item => item.examen.trim().toLowerCase() === nombreNorm || item.examen.trim().toLowerCase().includes(nombreNorm));
+      if (tieneExamen && orden.status === "Listo para Despacho") {
+        orden.resultados.forEach(res => {
+          // Limpiamos asteriscos y espacios que indican que el valor estaba fuera de rango
+          const valorLimpio = res.resultado.replace("*", "").trim();
+          const num = parseFloat(valorLimpio);
+          if (!isNaN(num)) {
+            if (!sumas[res.parametro]) sumas[res.parametro] = { total: 0, cantidad: 0 };
+            sumas[res.parametro].total += num;
+            sumas[res.parametro].cantidad++;
+          }
+        });
+      }
+    });
+
+    return Object.keys(sumas).map(param => ({
+      parametro: param,
+      promedio: sumas[param].total / sumas[param].cantidad
+    }));
+  }
 }

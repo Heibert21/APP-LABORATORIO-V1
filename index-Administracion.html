@@ -53,10 +53,11 @@
               $</strong></div>
           <div class="indicador-item"><span>Total de Bs:</span> <strong id="rep_totalBs" class="txt-primario">0.00
               Bs</strong></div>
+          <div class="indicador-item"><span>% Exámenes Finalizados:</span> <strong id="rep_porcentajeFinalizados" class="txt-primario">0.00%</strong></div>
           <div class="indicador-item">
             <!-- NUEVO: Sección de Reporte Dinámico de Exámenes (permite escribir un nombre y elegir fecha para ver la cantidad) -->
             <span style="display: flex; flex-direction: column; gap: 4px;">
-              Reporte Específico:
+              Reporte Específico por Fecha:
               <div style="display:flex; gap:4px; align-items:center;">
                 <input type="text" id="rep_nombre_examen" placeholder="Ej. Creatinina"
                   style="padding: 2px 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; outline: none; width:90px;"
@@ -67,6 +68,21 @@
               </div>
             </span>
             <strong id="rep_cantidad_examen" style="font-size: 1.2rem; color: #0ea5e9;">0</strong>
+          </div>
+          <div class="indicador-item" style="border-top: 1px dashed #cbd5e1; padding-top: 10px; margin-top: 10px; display: block;">
+            <span style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 5px;">
+              Estadísticas por Estudio:
+              <div style="display:flex; gap:4px; align-items:center;">
+                <input type="text" id="rep_nombre_estudio_stats" placeholder="Ej. Perfil 20"
+                  style="padding: 2px 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; outline: none; width:100%;"
+                  title="Nombre del Estudio">
+              </div>
+            </span>
+            <div style="font-size: 0.85rem; color: #475569; display: flex; flex-direction: column; gap: 2px;">
+              <div style="display:flex; justify-content: space-between;"><span>Solicitudes:</span> <strong id="rep_est_solicitudes" style="color:#0f172a;">0</strong></div>
+              <div style="display:flex; justify-content: space-between;"><span>Ingreso:</span> <strong id="rep_est_ingreso" style="color:#059669;">$ 0.00</strong></div>
+              <div id="rep_est_promedios" style="margin-top: 4px; font-size: 0.75rem; border-top: 1px solid #e2e8f0; padding-top: 4px;"></div>
+            </div>
           </div>
         </div>
         <button id="btn_exportarCaja" class="btn-exportar-caja">📄 Exportar Cierre del Día</button>

@@ -36,6 +36,12 @@ export interface I_vLaboratorio {
   // Actualiza el contador visual con la cantidad de estudios coincidentes
   setCantidadExamen(cantidad: number): void;
 
+  // --- Nuevas Estadísticas (Porcentaje y Estudio) ---
+  get nombreReporteEstudioStats(): string;
+  onCambioReporteEstudioStats(callback: (nombre: string) => void): void;
+  setEstadisticasEstudio(solicitudes: number, ingresoUsd: number, promediosHtml: string): void;
+  setPorcentajeFinalizados(porcentaje: string): void;
+
   // --- Suscripción a eventos ---
   onActualizarTasa(callback: () => void): void;
   onAgregarEstudio(callback: () => void): void;

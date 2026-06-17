@@ -34,6 +34,9 @@ export default class Cl_cLaboratorio {
 
     // REFACTORIZACIÓN MVC: El controlador se suscribe al evento de filtrado de búsqueda de la vista
     this.vista.onFiltrarBandeja((texto) => this.procesarFiltradoBandeja(texto));
+
+    // NUEVAS ESTADISTICAS PROFESOR
+    this.vista.onCambioReporteEstudioStats((nombre) => this.procesarCambioReporteEstudio(nombre));
   }
   // Metodo que permite cancelar la edicion actual
   private cancelarEdicionActual() {
@@ -81,7 +84,9 @@ export default class Cl_cLaboratorio {
         totalBs: this.modeloGlobal.calcularMontoTotalBs(),
         estudioMasSolicitado: this.modeloGlobal.obtenerEstudioMasSolicitado(),
       });
+      this.vista.setPorcentajeFinalizados(this.modeloGlobal.porcentajeExamenesFinalizados());
       this.procesarCambioFiltrosExamen(this.vista.nombreReporteExamen, this.vista.fechaReporteExamen);
+      this.procesarCambioReporteEstudio(this.vista.nombreReporteEstudioStats);
     } catch (error) {
       console.error("Error al actualizar monitores del laboratorio:", error);
     }
@@ -95,6 +100,32 @@ export default class Cl_cLaboratorio {
     const cantidad = this.modeloGlobal.contarExamenesPorFecha(nombre, fecha);
     this.vista.setCantidadExamen(cantidad);
   }
+
+  // Metodo que captura el cambio de texto para el reporte estadístico del estudio (solicitudes, ingresos y promedios)
+  private procesarCambioReporteEstudio(nombre: string) {
+    if (!nombre) {
+      this.vista.setEstadisticasEstudio(0, 0, "");
+      return;
+    }
+    const nombreNorm = nombre.trim().toLowerCase();
+    const estudioEnCatalogo = this.catalogoEstudiosCoche.find(e => 
+      e.nombre.toLowerCase().includes(nombreNorm) || (e.codigo && e.codigo.toLowerCase().includes(nombreNorm))
+    );
+    const precio = estudioEnCatalogo ? Number(estudioEnCatalogo.precio) : 0;
+
+    const stats = this.modeloGlobal.estadisticasDeUnEstudio(nombre, precio);
+    const promedios = this.modeloGlobal.promedioResultadosEstudio(nombre);
+    
+    let promediosHtml = "";
+    if (promedios.length > 0) {
+      promediosHtml = "<strong>Promedios Analíticos:</strong><br>" + promedios.map(p => `- ${p.parametro}: ${p.promedio.toFixed(2)}`).join("<br>");
+    } else if (stats.solicitudes > 0) {
+      promediosHtml = "<em>Sin resultados finalizados.</em>";
+    }
+
+    this.vista.setEstadisticasEstudio(stats.solicitudes, stats.ingresoTotalUsd, promediosHtml);
+  }
+
   // Metodo que permite filtrar la bandeja de ordenes
   private procesarFiltradoBandeja(texto: string) {
     const textoFiltro = texto.trim();
