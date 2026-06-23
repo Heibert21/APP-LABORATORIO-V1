@@ -1235,3 +1235,75 @@ select:focus {
   transform: translateY(1px);
   box-shadow: 0 2px 10px rgba(239, 68, 68, 0.3);
 }
+
+/* ================================================================= */
+/* 📋 ESTILOS PARA REPORTE DINÁMICO DE EXÁMENES                      */
+/* ================================================================= */
+
+.filtros-reporte-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px dashed var(--color-borde);
+  margin-bottom: 20px;
+}
+
+.tabla-reporte-contenedor {
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--color-borde);
+  background: var(--blanco);
+}
+
+.tabla-reporte {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.tabla-reporte th,
+.tabla-reporte td {
+  padding: 10px 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.tabla-reporte th {
+  background-color: var(--pago-bg);
+  color: var(--blanco);
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tabla-reporte tbody tr:nth-child(even) {
+  background-color: #f1f5f9;
+}
+
+.tabla-reporte tbody tr:hover {
+  background-color: #e2e8f0;
+}
+
+.badge-estado {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: white;
+  display: inline-block;
+  text-align: center;
+}
+
+.badge-estado.espera {
+  background-color: #f59e0b; /* Amber */
+}
+
+.badge-estado.listo {
+  background-color: #10b981; /* Emerald */
+}

@@ -53,20 +53,29 @@
               $</strong></div>
           <div class="indicador-item"><span>Total de Bs:</span> <strong id="rep_totalBs" class="txt-primario">0.00
               Bs</strong></div>
-          <div class="indicador-item">
-            <!-- NUEVO: Sección de Reporte Dinámico de Exámenes (permite escribir un nombre y elegir fecha para ver la cantidad) -->
-            <span style="display: flex; flex-direction: column; gap: 4px;">
-              Reporte Específico:
-              <div style="display:flex; gap:4px; align-items:center;">
-                <input type="text" id="rep_nombre_examen" placeholder="Ej. Creatinina"
-                  style="padding: 2px 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; outline: none; width:90px;"
-                  title="Nombre del Examen">
-                <input type="date" id="rep_fecha_examen"
-                  style="padding: 2px 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; outline: none;"
-                  title="Fecha del Examen">
+          <div class="indicador-item reporte-caja-container" style="flex-direction: column; align-items: stretch; margin-top: 15px; border-top: 1px dashed #cbd5e1; padding-top: 15px;">
+            <h4 style="margin-bottom: 10px; color: var(--primario); font-size: 0.95rem;">📋 Reporte de Exámenes</h4>
+            
+            <div class="filtros-reporte-grid sidebar-filtros" style="display: flex; flex-direction: column; gap: 10px; padding: 10px; margin-bottom: 15px;">
+              <div class="grupo-input" style="margin-bottom: 0;">
+                <label for="rep_filtro_examen" style="font-size: 0.8rem;">🔍 Nombre del Examen:</label>
+                <input type="text" id="rep_filtro_examen" placeholder="Ej. Creatinina..." style="padding: 6px; font-size: 0.8rem;" />
               </div>
-            </span>
-            <strong id="rep_cantidad_examen" style="font-size: 1.2rem; color: #0ea5e9;">0</strong>
+            </div>
+
+            <div class="tabla-reporte-contenedor sidebar-tabla" style="max-height: 250px;">
+              <table class="tabla-reporte" style="font-size: 0.8rem; width: 100%;">
+                <thead>
+                  <tr>
+                    <th>Examen</th>
+                    <th>Cant.</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody_reporte_examenes">
+                  <!-- Inyectado dinámicamente -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
         <button id="btn_exportarCaja" class="btn-exportar-caja">📄 Exportar Cierre del Día</button>

@@ -101,17 +101,15 @@
 
   <!-- SCRIPT DE ACOPLAMIENTO MODULAR COMPLETO CON TU VISTA ORDENBIO -->
   <script type="module">
-    import Cl_mOrdenBio from "./dist/models/Cl_mOrdenBio.js";
+    import Cl_mLaboratorio from "./dist/models/Cl_mLaboratorio.js";
     import Cl_vOrdenBio from "./dist/views/Cl_vOrdenBio.js";
     import Cl_cOrdenBio from "./dist/controllers/Cl_cOrdenBio.js";
 
-    // Instanciamos la Vista y el Modelo vacío que servirá de contenedor de datos
+    // Instanciamos la Vista y el Modelo de colección (Cl_mLaboratorio gestiona la lista de órdenes)
     const vista = new Cl_vOrdenBio();
-    const modelo = new Cl_mOrdenBio({
-      id: "", cedula: "", nombre: "", apellido: "", edad: 0, sexo: "", fechaRegistro: "", examenesSolicitados: ""
-    });
+    const modelo = new Cl_mLaboratorio();
 
-    //Los inyectamos juntos siguiendo el formato exacto del profesor: { modelo, vista }
+    // Los inyectamos juntos siguiendo el formato exacto del profesor: { modelo, vista }
     new Cl_cOrdenBio({ modelo, vista });
   </script>
 

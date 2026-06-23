@@ -77,9 +77,10 @@ export default class Cl_cOrdenBio {
     const idOrden = this.vista.idOrdenSeleccionada;
     const camposCargados = this.vista.getValoresCamposCargados();
     const algunoVacio = camposCargados.some(c => c.valor === "");
-    // Se confirma el envio de resultados
-    if (algunoVacio && !confirm("Hay casillas de resultados vacías. ¿Desea enviar la orden de todas formas?")) {
-      return;
+    // Se confirma el envio de resultados delegando a la vista
+    if (algunoVacio) {
+      const confirmar = await this.vista.confirmarAccion("Hay casillas de resultados vacías. ¿Desea enviar la orden de todas formas?");
+      if (!confirmar) return;
     }
     // Se envian los resultados al laboratorio
     try {

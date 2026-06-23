@@ -1,12 +1,14 @@
 import Cl_mOrdenBio from "../models/Cl_mOrdenBio.js";
 
 export interface I_vLaboratorio {
-  // --- Getters del formulario de paciente ---
+  // --- Getters y Setters del formulario de paciente ---
   get isMenor(): boolean;
   get pacCedulaRep(): string;
+  setCedulaRep(valor: string): void;
   get pacNombreRep(): string;
   get pacApellidoRep(): string;
   get pacCedula(): string;
+  setCedula(valor: string): void;
   get pacNombre(): string;
   get pacApellido(): string;
   get pacFechaNac(): string;
@@ -14,7 +16,6 @@ export interface I_vLaboratorio {
   get pacTelefono(): string;
   get pacCorreo(): string;
   get pacMetodoPago(): string;
-
   // --- Getters del formulario de estudios ---
   get nuevaTasa(): number;
   get estId(): string;
@@ -26,7 +27,6 @@ export interface I_vLaboratorio {
 
   // --- Lectura de selecciones ---
   getEstudiosSeleccionados(): string[];
-
   // --- Reportes Específicos (Búsqueda Dinámica por Examen) ---
   // Obtiene la fecha (yyyy-mm-dd) y el texto de búsqueda del examen del UI
   get fechaReporteExamen(): string;
@@ -44,6 +44,8 @@ export interface I_vLaboratorio {
   onCambioChecks(callback: () => void): void;
   onDespacharOrden(callback: (id: string, metodo: "Impreso" | "WhatsApp" | "Correo") => void): void;
   onBuscarCedulaPaciente(callback: (cedula: string) => void): void;
+  onInputCedula(callback: (valor: string) => void): void;
+  onInputCedulaRep(callback: (valor: string) => void): void;
   onEliminarOrdenEspera(callback: (id: string) => void): void;
   onEditarOrdenEspera(callback: (id: string) => void): void;
   onCancelarEdicion(callback: () => void): void;
@@ -73,8 +75,15 @@ export interface I_vLaboratorio {
   imprimirReporteCaja(laboratorio: any): void;
   onFiltrarEstudiosBusqueda(callback: (texto: string) => void): void;
 
+  // --- Lógica de UI delegada al Controlador ---
+  onCambioEsMenor(callback: (esMenor: boolean) => void): void;
+  mostrarBloqueRepresentante(esMenor: boolean): void;
+  limpiarCamposCedula(): void;
+  ocultarTarjetasEstudio(idsAocultar: string[]): void;
+  marcarEstudiosPorId(ids: string[]): void;
+
   // --- Autocompletado, Historial y Edición ---
-  autocompletarPaciente(orden: Cl_mOrdenBio): void;
+  autocompletarPaciente(orden: Cl_mOrdenBio, esMenor: boolean): void;
   mostrarHistorialPaciente(ordenes: Cl_mOrdenBio[]): void;
   prepararEdicionOrden(orden: Cl_mOrdenBio): void;
 

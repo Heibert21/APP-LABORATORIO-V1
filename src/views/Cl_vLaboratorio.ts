@@ -45,14 +45,21 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
   private inNombreReporteExamen: HTMLInputElement;
   private lblCantidadExamen: HTMLElement;
 
-  private manejadorEliminarEstudio!: (id: string) => void;
-  private manejadorDespacharOrden!: (id: string, metodo: "Impreso" | "WhatsApp" | "Correo") => void;
-  private manejadorCambioChecks!: () => void;
-  private cbCambioFiltro!: () => void;
-  private manejadorEliminarOrdenEspera!: (id: string) => void;
-  private manejadorEditarOrdenEspera!: (id: string) => void;
+  // --- Elementos del DOM (Reporte Histórico Dinámico de Exámenes) ---
+  private repFiltroExamen: HTMLInputElement;
+  private repFiltroFechaDesde: HTMLInputElement;
+  private repFiltroFechaHasta: HTMLInputElement;
+  private repFiltroPaciente: HTMLInputElement;
+  private tbodyReporteExamenes: HTMLElement;
+
+  private manejadorEliminarEstudio?: (id: string) => void;
+  private manejadorDespacharOrden?: (id: string, metodo: "Impreso" | "WhatsApp" | "Correo") => void;
+  private manejadorCambioChecks?: () => void;
+  private cbCambioFiltro?: () => void;
+  private manejadorEliminarOrdenEspera?: (id: string) => void;
+  private manejadorEditarOrdenEspera?: (id: string) => void;
   // Se usa para filtrar la bandeja
-  private manejadorFiltrarBandeja!: (texto: string) => void;
+  private manejadorFiltrarBandeja?: (texto: string) => void;
 
   constructor() {
     this.chkEsMenor = document.getElementById("pac_chkEsMenor") as HTMLInputElement;
@@ -92,38 +99,23 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
     this.inNombreReporteExamen = document.getElementById("rep_nombre_examen") as HTMLInputElement;
     this.lblCantidadExamen = document.getElementById("rep_cantidad_examen") as HTMLElement;
 
+    // Inicialización Elementos Reporte Histórico
+    this.repFiltroExamen = document.getElementById("rep_filtro_examen") as HTMLInputElement;
+    this.repFiltroFechaDesde = document.getElementById("rep_filtro_fecha_desde") as HTMLInputElement;
+    this.repFiltroFechaHasta = document.getElementById("rep_filtro_fecha_hasta") as HTMLInputElement;
+    this.repFiltroPaciente = document.getElementById("rep_filtro_paciente") as HTMLInputElement;
+    this.tbodyReporteExamenes = document.getElementById("tbody_reporte_examenes") as HTMLElement;
+
     // Set default date to today for the report
-    if (this.inFechaReporteExamen) {
+    this.inFechaReporteExamen && (() => {
       const today = new Date();
       const offset = today.getTimezoneOffset() * 60000;
       const localISOTime = (new Date(today.getTime() - offset)).toISOString().split('T')[0];
       this.inFechaReporteExamen.value = localISOTime;
-    }
+    })();
 
-    this.inCedula.addEventListener("input", () => {
-      this.inCedula.value = this.inCedula.value.replace(/\D/g, "");
-    });
-    this.inCedulaRep.addEventListener("input", () => {
-      // Remover caracteres que no sean letras V E o numeros
-      this.inCedulaRep.value = this.inCedulaRep.value.replace(/[^vVeE0-9-]/g, "");
-    });
-
-    // --- Lógica del Checkbox de Menor de Edad ---
-    this.chkEsMenor.addEventListener("change", () => {
-      const bloqueRep = document.getElementById("adm_bloqueRepresentante") as HTMLElement;
-      const bloqueCedula = document.getElementById("adm_bloqueCedulaPrincipal") as HTMLElement;
-      if (this.chkEsMenor.checked) {
-        bloqueRep.classList.remove("oculto");
-        bloqueCedula.classList.add("oculto");
-        this.inCedula.value = "";
-      } else {
-        bloqueRep.classList.add("oculto");
-        bloqueCedula.classList.remove("oculto");
-        this.inCedulaRep.value = "";
-        this.inNombreRep.value = "";
-        this.inApellidoRep.value = "";
-      }
-    });
+    // REFACTORIZACIÓN MVC: Se elimina el formateo regex de aquí, se delega mediante onInputCedula y onInputCedulaRep
+    // REFACTORIZACIÓN MVC: La lógica de chkEsMenor ahora se hace en el controlador mediante eventos.
     //mostrar formulario de estudios disponibles
     const btnToggleEstudio = document.getElementById("btnToggleFormEstudio") as HTMLElement;
     const seccionFormEstudio = document.getElementById("seccionFormEstudio") as HTMLElement;
@@ -154,27 +146,21 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
     //despachar ordenes
     this.tablaListos.addEventListener("click", (e) => {
       const target = e.target as HTMLElement;
-      if (target.classList.contains("btn-despacho") && this.manejadorDespacharOrden) {
-        const id = target.dataset.id!;
-        const metodo = target.dataset.metodo as "Impreso" | "WhatsApp" | "Correo";
-        this.manejadorDespacharOrden(id, metodo);
-      }
+      (target.classList.contains("btn-despacho") && this.manejadorDespacharOrden) &&
+        this.manejadorDespacharOrden(target.dataset.id!, target.dataset.metodo as "Impreso" | "WhatsApp" | "Correo");
     });
     //eliminar orden de espera y editar orden de espera
     this.tablaEspera.addEventListener("click", (e) => {
       const target = (e.target as HTMLElement).closest("button");
-      if (!target) return;
-      const id = target.dataset.id;
-      if (!id) return;
-      if (target.classList.contains("btn-eliminar-orden") && this.manejadorEliminarOrdenEspera) {
-        this.manejadorEliminarOrdenEspera(id);
-      } else if (target.classList.contains("btn-editar-orden") && this.manejadorEditarOrdenEspera) {
-        this.manejadorEditarOrdenEspera(id);
-      }
+      target && target.dataset.id && (() => {
+        const id = target.dataset.id!;
+        target.classList.contains("btn-eliminar-orden") && this.manejadorEliminarOrdenEspera && this.manejadorEliminarOrdenEspera(id);
+        target.classList.contains("btn-editar-orden") && this.manejadorEditarOrdenEspera && this.manejadorEditarOrdenEspera(id);
+      })();
     });
     //cambio de checks en estudios disponibles
     this.contenedorEstudios.addEventListener("change", () => {
-      if (this.manejadorCambioChecks) this.manejadorCambioChecks();
+      this.manejadorCambioChecks && this.manejadorCambioChecks();
     });
     //cambio de filtro en estudios disponibles
     const btnEspera = document.getElementById("btnVerEspera") as HTMLElement;
@@ -193,36 +179,64 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
     };
     //buscar estudio
     const inputBuscar = document.getElementById("pac_buscarEstudioInput") as HTMLInputElement;
-    if (inputBuscar) {
-      inputBuscar.addEventListener("input", () => {
-        const texto = inputBuscar.value.trim().toLowerCase();
-        const tarjetas = this.contenedorEstudios.querySelectorAll(".chk-wrapper");
-        tarjetas.forEach((tarjeta: any) => {
-          tarjeta.classList.toggle("oculto", !tarjeta.textContent.toLowerCase().includes(texto));
-        });
+    inputBuscar && inputBuscar.addEventListener("input", () => {
+      const texto = inputBuscar.value.trim().toLowerCase();
+      const tarjetas = this.contenedorEstudios.querySelectorAll(".chk-wrapper");
+      tarjetas.forEach((tarjeta: any) => {
+        tarjeta.classList.toggle("oculto", !tarjeta.textContent.toLowerCase().includes(texto));
       });
-    }
+    });
     //buscar ordenes en espera
     const inputBandeja = document.getElementById("input_buscarBandeja") as HTMLInputElement;
-    if (inputBandeja) {
-      inputBandeja.addEventListener("input", () => {
-        if (this.manejadorFiltrarBandeja) {
-          this.manejadorFiltrarBandeja(inputBandeja.value);
-        }
-      });
-    }
+    inputBandeja && inputBandeja.addEventListener("input", () => {
+      this.manejadorFiltrarBandeja && this.manejadorFiltrarBandeja(inputBandeja.value);
+    });
     //cambio de sexo en pacientes
     this.inSexo.addEventListener("change", () => {
-      if (this.manejadorCambioChecks) this.manejadorCambioChecks();
-      if (this.cbCambioFiltro) this.cbCambioFiltro();
+      this.manejadorCambioChecks && this.manejadorCambioChecks();
+      this.cbCambioFiltro && this.cbCambioFiltro();
     });
     //exportar caja
     const btnExportar = document.getElementById("btn_exportarCaja") as HTMLButtonElement;
-    if (btnExportar) {
-      btnExportar.addEventListener("click", () => {
-        if ((this as any)._cbExportarCaja) (this as any)._cbExportarCaja();
-      });
-    }
+    btnExportar && btnExportar.addEventListener("click", () => {
+      (this as any)._cbExportarCaja && (this as any)._cbExportarCaja();
+    });
+  }
+  public setCedula(valor: string): void {
+    this.inCedula && (this.inCedula.value = valor);
+  }
+  public setCedulaRep(valor: string): void {
+    this.inCedulaRep && (this.inCedulaRep.value = valor);
+  }
+
+  public onCambioEsMenor(callback: (esMenor: boolean) => void): void {
+    this.chkEsMenor.addEventListener("change", () => callback(this.chkEsMenor.checked));
+  }
+
+  public mostrarBloqueRepresentante(esMenor: boolean): void {
+    const bloqueRep = document.getElementById("adm_bloqueRepresentante") as HTMLElement;
+    const bloqueCedula = document.getElementById("adm_bloqueCedulaPrincipal") as HTMLElement;
+    bloqueRep && bloqueRep.classList.toggle("oculto", !esMenor);
+    bloqueCedula && bloqueCedula.classList.toggle("oculto", esMenor);
+  }
+  public limpiarCamposCedula(): void {
+    this.inCedula.value = "";
+    this.inCedulaRep.value = "";
+    this.inNombreRep.value = "";
+    this.inApellidoRep.value = "";
+  }
+  public ocultarTarjetasEstudio(idsAocultar: string[]): void {
+    const tarjetas = this.contenedorEstudios.querySelectorAll(".chk-wrapper");
+    tarjetas.forEach((tarjeta) => {
+      const input = tarjeta.querySelector(".chk-estudio") as HTMLInputElement;
+      tarjeta.classList.toggle("oculto", !!(input && idsAocultar.includes(input.value)));
+    });
+  }
+  public marcarEstudiosPorId(ids: string[]): void {
+    const checkboxes = this.contenedorEstudios.querySelectorAll(".chk-estudio") as NodeListOf<HTMLInputElement>;
+    checkboxes.forEach(chk => {
+      chk.checked = ids.includes(chk.value);
+    });
   }
   get isMenor(): boolean {
     return this.chkEsMenor.checked;
@@ -287,7 +301,6 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
   get estRango(): string {
     return this.inEstRango.value.trim();
   }
-
   // Getters Reportes específicos
   // Getter de la fecha del selector (formato yyyy-mm-dd)
   get fechaReporteExamen(): string {
@@ -300,18 +313,12 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
   // Listener que se detona tanto si se tipea el nombre del examen ("input") como si se cambia la fecha ("change")
   public onCambioFiltrosReporteExamen(callback: (nombre: string, fecha: string) => void): void {
     const handler = () => callback(this.nombreReporteExamen, this.fechaReporteExamen);
-    if (this.inFechaReporteExamen) {
-      this.inFechaReporteExamen.addEventListener("change", handler);
-    }
-    if (this.inNombreReporteExamen) {
-      this.inNombreReporteExamen.addEventListener("input", handler);
-    }
+    this.inFechaReporteExamen && this.inFechaReporteExamen.addEventListener("change", handler);
+    this.inNombreReporteExamen && this.inNombreReporteExamen.addEventListener("input", handler);
   }
   // Función para re-escribir el contador numérico en el cuadro estadístico
   public setCantidadExamen(cantidad: number): void {
-    if (this.lblCantidadExamen) {
-      this.lblCantidadExamen.innerText = cantidad.toString();
-    }
+    this.lblCantidadExamen && (this.lblCantidadExamen.innerText = cantidad.toString());
   }
   //obtener estudios seleccionados
   public getEstudiosSeleccionados(): string[] {
@@ -347,42 +354,28 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
   //buscar cedula paciente o representante
   public onBuscarCedulaPaciente(callback: (cedula: string) => void): void {
     const btn = document.getElementById("btn_buscarCedula") as HTMLButtonElement;
-    if (btn) {
-      btn.onclick = () => {
-        const cedula = this.inCedula.value.trim();
-        if (!cedula) {
-          this.mostrarToast("Escriba una Cédula antes de buscar.", "advertencia");
-          return;
-        }
-        callback(cedula);
-      };
-    }
+    btn && (btn.onclick = () => callback(this.inCedula.value.trim()));
     const btnRep = document.getElementById("btn_buscarCedulaRep") as HTMLButtonElement;
-    if (btnRep) {
-      btnRep.onclick = () => {
-        const cedulaRep = this.inCedulaRep.value.trim();
-        if (!cedulaRep) {
-          this.mostrarToast("Escriba la Cédula del representante antes de buscar.", "advertencia");
-          return;
-        }
-        callback(cedulaRep);
-      };
-    }
+    btnRep && (btnRep.onclick = () => callback(this.inCedulaRep.value.trim()));
     // Permitir buscar con Enter
     this.inCedula.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
+      (e.key === "Enter") && (() => {
         e.preventDefault();
-        const cedula = this.inCedula.value.trim();
-        if (cedula) callback(cedula);
-      }
+        callback(this.inCedula.value.trim());
+      })();
     });
     this.inCedulaRep.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
+      (e.key === "Enter") && (() => {
         e.preventDefault();
-        const cedulaRep = this.inCedulaRep.value.trim();
-        if (cedulaRep) callback(cedulaRep);
-      }
+        callback(this.inCedulaRep.value.trim());
+      })();
     });
+  }
+  public onInputCedula(callback: (valor: string) => void): void {
+    this.inCedula.addEventListener("input", () => callback(this.inCedula.value));
+  }
+  public onInputCedulaRep(callback: (valor: string) => void): void {
+    this.inCedulaRep.addEventListener("input", () => callback(this.inCedulaRep.value));
   }
   //eliminar orden en espera
   public onEliminarOrdenEspera(callback: (id: string) => void): void {
@@ -401,9 +394,9 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
   }
   //establecer tasa actual
   public setTasaActual(tasa: number): void {
-    if (this.inTasa) this.inTasa.value = tasa.toString();
+    this.inTasa && (this.inTasa.value = tasa.toString());
     const lbl = document.getElementById("pedido_lblTasa");
-    if (lbl) lbl.innerText = tasa.toFixed(2);
+    lbl && (lbl.innerText = tasa.toFixed(2));
   }
   //establecer totales de factura
   public setTotalesFactura(totalUsd: number, totalBs: number, horaRetiro: string): void {
@@ -413,11 +406,7 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
   }
   //renderizar estudios disponibles
   public renderizarEstudiosDisponibles(estudios: any[]): void {
-    this.contenedorEstudios.innerHTML = "";
-    if (estudios.length === 0) {
-      this.contenedorEstudios.innerHTML = "<div>No hay estudios en catálogo.</div>";
-      return;
-    }
+    this.contenedorEstudios.innerHTML = estudios.length === 0 ? "<div>No hay estudios en catálogo.</div>" : "";
     //optimizar renderizado
     const fragmento = document.createDocumentFragment();
     estudios.forEach(e => {
@@ -435,11 +424,7 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
   }
   //renderizar lista de estudios
   public renderizarListaCatalogo(estudios: any[]): void {
-    this.listaCatalogo.innerHTML = "";
-    if (estudios.length === 0) {
-      this.listaCatalogo.innerHTML = "<li>Catálogo vacío.</li>";
-      return;
-    }
+    this.listaCatalogo.innerHTML = estudios.length === 0 ? "<li>Catálogo vacío.</li>" : "";
     const fragmento = document.createDocumentFragment();
     estudios.forEach(e => {
       const li = document.createElement("li");
@@ -449,7 +434,7 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
         <button class="btn-del" data-id="${e.id}">🗑️</button>
       `;
       fragmento.appendChild(li);
-      li.querySelector(".btn-del")?.addEventListener("click", () => this.manejadorEliminarEstudio(e.id));
+      li.querySelector(".btn-del")?.addEventListener("click", () => this.manejadorEliminarEstudio?.(e.id));
     });
     this.listaCatalogo.appendChild(fragmento);
   }
@@ -459,55 +444,53 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
   }
   //renderizar tarjetas de espera
   private _renderizarTarjetasEspera(ordenes: Cl_mOrdenBio[]): void {
-    this.tablaEspera.innerHTML = "";
-    if (ordenes.length === 0) {
-      this.tablaEspera.innerHTML = "No hay órdenes en espera.";
-      return;
-    }
-    const fragmento = document.createDocumentFragment();
-    ordenes.forEach(o => {
-      const cedulaAPintar = (!o.cedula || o.cedula.trim() === "") ? "MENOR" : o.cedula;
-      let badgeEspera = "";
-      if (o.fechaRegistro) {
-        const minutos = o.obtenerMinutosEspera();
-        if (minutos >= 0) {
-          const esUrgente = minutos >= 60;
-          const textoTiempo = minutos < 60 ? `${minutos} min` : `${Math.floor(minutos / 60)}h ${minutos % 60}m`;
-          badgeEspera = `<span class="badge-espera ${esUrgente ? "urgente" : ""}">⏱️ ${textoTiempo}</span>`;
-        }
-      }
-      //crear div para cada orden en espera
-      const div = document.createElement("div");
-      div.className = "resultado-busqueda";
-      div.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-          <div>
-            <b>Orden ${o.id}</b> - C.I: ${cedulaAPintar} ${badgeEspera}
-            <br><small>${o.apellido} ${o.nombre} [${o.examenesSolicitados}]</small>
-            <br><span class="badge">EN ESPERA</span>
+    this.tablaEspera.innerHTML = ordenes.length === 0 ? "No hay órdenes en espera." : "";
+    ordenes.length > 0 && (() => {
+      const fragmento = document.createDocumentFragment();
+      ordenes.forEach(o => {
+        const cedulaAPintar = (!o.cedula || o.cedula.trim() === "") ? "MENOR" : o.cedula;
+        let badgeEspera = "";
+        o.fechaRegistro && (() => {
+          const minutos = o.obtenerMinutosEspera();
+          (minutos >= 0) && (() => {
+            const esUrgente = minutos >= 60;
+            const textoTiempo = minutos < 60 ? `${minutos} min` : `${Math.floor(minutos / 60)}h ${minutos % 60}m`;
+            badgeEspera = `<span class="badge-espera ${esUrgente ? "urgente" : ""}">⏱️ ${textoTiempo}</span>`;
+          })();
+        })();
+        //crear div para cada orden en espera
+        const div = document.createElement("div");
+        div.className = "resultado-busqueda";
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <b>Orden ${o.id}</b> - C.I: ${cedulaAPintar} ${badgeEspera}
+              <br><small>${o.apellido} ${o.nombre} [${o.examenesSolicitados}]</small>
+              <br><span class="badge">EN ESPERA</span>
+            </div>
+            <div style="display:flex; gap:5px;">
+              <button class="btn-editar-orden" data-id="${o.id}" style="cursor:pointer; background:none; border:none; font-size:16px;" title="Editar Teléfono y Correo">✏️</button>
+              <button class="btn-eliminar-orden" data-id="${o.id}" style="cursor:pointer; background:none; border:none; font-size:16px;" title="Eliminar Orden">🗑️</button>
+            </div>
           </div>
-          <div style="display:flex; gap:5px;">
-            <button class="btn-editar-orden" data-id="${o.id}" style="cursor:pointer; background:none; border:none; font-size:16px;" title="Editar Teléfono y Correo">✏️</button>
-            <button class="btn-eliminar-orden" data-id="${o.id}" style="cursor:pointer; background:none; border:none; font-size:16px;" title="Eliminar Orden">🗑️</button>
-          </div>
-        </div>
-      `;
-      fragmento.appendChild(div);
-    });
-    this.tablaEspera.appendChild(fragmento);
-    //eventos de botones de editar y eliminar orden en espera
-    this.tablaEspera.querySelectorAll(".btn-editar-orden").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const id = (btn as HTMLButtonElement).dataset.id!;
-        this.manejadorEditarOrdenEspera(id);
+        `;
+        fragmento.appendChild(div);
       });
-    });
-    this.tablaEspera.querySelectorAll(".btn-eliminar-orden").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const id = (btn as HTMLButtonElement).dataset.id!;
-        this.manejadorEliminarOrdenEspera(id);
+      this.tablaEspera.appendChild(fragmento);
+      //eventos de botones de editar y eliminar orden en espera
+      this.tablaEspera.querySelectorAll(".btn-editar-orden").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = (btn as HTMLButtonElement).dataset.id!;
+          this.manejadorEditarOrdenEspera?.(id);
+        });
       });
-    });
+      this.tablaEspera.querySelectorAll(".btn-eliminar-orden").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = (btn as HTMLButtonElement).dataset.id!;
+          this.manejadorEliminarOrdenEspera?.(id);
+        });
+      });
+    })();
   }
   //renderizar ordenes listas (REFACTORIZACIÓN MVC: Ya no almacena datos en caché local)
   public renderizarOrdenesListas(ordenes: Cl_mOrdenBio[]): void {
@@ -544,7 +527,7 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
       btn.addEventListener("click", () => {
         const id = (btn as HTMLButtonElement).dataset.id!;
         const metodo = (btn as HTMLButtonElement).dataset.metodo! as "Impreso" | "WhatsApp" | "Correo";
-        this.manejadorDespacharOrden(id, metodo);
+        this.manejadorDespacharOrden?.(id, metodo);
       });
     });
   }
@@ -581,32 +564,16 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
     this.spinnerOverlay.classList.add("oculto");
   }
   //autocompletar paciente
-  public autocompletarPaciente(orden: Cl_mOrdenBio): void {
-    // Si la orden viene de un representante (Cédula empieza por CR o es MENOR)
-    if ((orden.cedula === "MENOR" || orden.cedula.startsWith("CR")) && orden.cedulaRepresentante) {
-      this.chkEsMenor.checked = true;
-      document.getElementById("adm_bloqueRepresentante")?.classList.remove("oculto");
-      document.getElementById("adm_bloqueCedulaPrincipal")?.classList.add("oculto");
-      this.inCedulaRep.value = orden.cedulaRepresentante;
-      this.inNombreRep.value = orden.nombreRepresentante;
-      this.inApellidoRep.value = orden.apellidoRepresentante;
-
-      this.inCedula.value = "";
-      this.inNombre.value = ""; // Dejar en blanco para el nuevo hijo
-      this.inApellido.value = orden.apellido; // Asumir mismo apellido
-      this.inFechaNac.value = ""; // Dejar en blanco para el nuevo hijo
-    } else {
-      this.chkEsMenor.checked = false;
-      document.getElementById("adm_bloqueRepresentante")?.classList.add("oculto");
-      document.getElementById("adm_bloqueCedulaPrincipal")?.classList.remove("oculto");
-      this.inCedulaRep.value = "";
-      this.inNombreRep.value = "";
-      this.inApellidoRep.value = "";
-      this.inCedula.value = orden.cedula;
-      this.inNombre.value = orden.nombre;
-      this.inApellido.value = orden.apellido;
-      this.inFechaNac.value = orden.fechaRegistroISO;
-    }
+  public autocompletarPaciente(orden: Cl_mOrdenBio, esMenor: boolean): void {
+    this.chkEsMenor.checked = esMenor;
+    this.mostrarBloqueRepresentante(esMenor);
+    this.inCedulaRep.value = esMenor ? orden.cedulaRepresentante : "";
+    this.inNombreRep.value = esMenor ? orden.nombreRepresentante : "";
+    this.inApellidoRep.value = esMenor ? orden.apellidoRepresentante : "";
+    this.inCedula.value = esMenor ? "" : orden.cedula;
+    this.inNombre.value = esMenor ? "" : orden.nombre;
+    this.inApellido.value = orden.apellido;
+    this.inFechaNac.value = esMenor ? "" : orden.fechaRegistroISO;
     // Autocompletar datos de contacto compartidos
     this.inSexo.value = orden.sexo;
     this.inTelefono.value = orden.telefono;
@@ -628,30 +595,20 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
     this.inCorreo.disabled = bloquear;
     this.inMetodoPago.disabled = bloquear;
     const btnBuscar = document.getElementById("btn_buscarCedula") as HTMLButtonElement;
-    if (btnBuscar) btnBuscar.disabled = bloquear;
+    btnBuscar && (btnBuscar.disabled = bloquear);
     const btnBuscarRep = document.getElementById("btn_buscarCedulaRep") as HTMLButtonElement;
-    if (btnBuscarRep) btnBuscarRep.disabled = bloquear;
+    btnBuscarRep && (btnBuscarRep.disabled = bloquear);
   }
   // Preparar la orden para su edición exclusiva de exámenes
   public prepararEdicionOrden(orden: Cl_mOrdenBio): void {
-    // Llenar todos los datos personales usando el historial
-    this.autocompletarPaciente(orden);
+    // REFACTORIZACIÓN MVC: La marcación de los estudios específicos ahora es orquestada
+    // por el controlador, llamando a autocompletarPaciente y marcarEstudiosPorId por separado.
+
     // Bloquear inputs para que solo se editen los exámenes
     this.bloquearInputsPaciente(true);
-    // Marcar los checkboxes correspondientes a los exámenes actuales
-    const examenesSolicitadosArray = orden.examenesSolicitados.split(", ").map(e => e.trim().toLowerCase());
-    const checkboxes = this.contenedorEstudios.querySelectorAll(".chk-estudio") as NodeListOf<HTMLInputElement>;
 
-    checkboxes.forEach(chk => {
-      const nombreExamenSpan = chk.nextElementSibling?.textContent?.toLowerCase() || "";
-      // Verificamos si el nombre del examen está en el array de exámenes de la orden
-      const debeEstarMarcado = examenesSolicitadosArray.some(ex => nombreExamenSpan.includes(ex));
-      chk.checked = debeEstarMarcado;
-    });
     // Forzamos el recalculo de totales simulando que se cambiaron los checks
-    if (this.manejadorCambioChecks) {
-      this.manejadorCambioChecks();
-    }
+    this.manejadorCambioChecks && this.manejadorCambioChecks();
     // Cambiar botones al modo edición (azul)
     this.btnProcesarOrden.innerText = "💾 Guardar Cambios";
     this.btnProcesarOrden.classList.add("modo-edicion");
@@ -663,24 +620,22 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
   //mostrar historial del paciente
   public mostrarHistorialPaciente(ordenes: Cl_mOrdenBio[]): void {
     const panel = document.getElementById("panel-historial-paciente") as HTMLElement;
-    if (!panel) return;
-    if (ordenes.length === 0) {
-      panel.classList.add("oculto");
-      return;
-    }
-    //mostrar historial
-    panel.classList.remove("oculto");
-    panel.innerHTML = `<h4>📋 Historial del paciente (${ordenes.length} visita${ordenes.length > 1 ? "s" : ""})</h4>`;
-    ordenes.forEach(o => {
-      const item = document.createElement("div");
-      item.className = "historial-item";
-      item.innerHTML = `
-        <span class="historial-fecha">${o.fechaRegistro ? o.fechaRegistro.split(" ")[0] : "-"}</span>
-        <span>🔬 ${o.examenesSolicitados}</span>
-        <span style="margin-left:auto; font-weight:700;">$${o.montoTotal$.toFixed(2)}</span>
-      `;
-      panel.appendChild(item);
-    });
+    panel && (() => {
+      panel.classList.toggle("oculto", ordenes.length === 0);
+      ordenes.length > 0 && (() => {
+        panel.innerHTML = `<h4>📋 Historial del paciente (${ordenes.length} visita${ordenes.length > 1 ? "s" : ""})</h4>`;
+        ordenes.forEach(o => {
+          const item = document.createElement("div");
+          item.className = "historial-item";
+          item.innerHTML = `
+            <span class="historial-fecha">${o.fechaRegistro ? o.fechaRegistro.split(" ")[0] : "-"}</span>
+            <span>🔬 ${o.examenesSolicitados}</span>
+            <span style="margin-left:auto; font-weight:700;">$${o.montoTotal$.toFixed(2)}</span>
+          `;
+          panel.appendChild(item);
+        });
+      })();
+    })();
   }
   //imprimir resultados
   public imprimirReporteResultados(orden: Cl_mOrdenBio): void {
@@ -695,20 +650,20 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
   //abrir ventana e imprimir
   private abrirVentanaEImprimir(html: string): void {
     const ventana = window.open("", "_blank");
-    if (!ventana) return;
-    ventana.document.write(html);
-    ventana.document.close();
-    ventana.focus();
-    ventana.print();
-    setTimeout(() => ventana.close(), 500);
+    ventana && (() => {
+      ventana.document.write(html);
+      ventana.document.close();
+      ventana.focus();
+      ventana.print();
+      setTimeout(() => ventana.close(), 500);
+    })();
   }
   //generar html reporte resultados
   private generarHtmlReporteResultados(orden: Cl_mOrdenBio): string {
     const titulo = `Reporte de Resultados - Orden #${orden.id}`;
-    let cedulaFormateada = orden.cedula;
-    if (cedulaFormateada !== "MENOR" && !cedulaFormateada.startsWith("V-") && !cedulaFormateada.startsWith("CR")) {
-      cedulaFormateada = "V-" + cedulaFormateada;
-    }
+    const cedulaFormateada = (orden.cedula !== "MENOR" && !orden.cedula.startsWith("V-") && !orden.cedula.startsWith("CR"))
+      ? "V-" + orden.cedula
+      : orden.cedula;
     return `
 <!DOCTYPE html>
 <html lang="es">
@@ -856,7 +811,7 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
     this.formPaciente.reset();
     this.setTotalesFactura(0, 0, "");
     const panel = document.getElementById("panel-historial-paciente");
-    if (panel) panel.classList.add("oculto");
+    panel && panel.classList.add("oculto");
 
     document.getElementById("adm_bloqueRepresentante")?.classList.add("oculto");
     document.getElementById("adm_bloqueCedulaPrincipal")?.classList.remove("oculto");
@@ -868,13 +823,11 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
     // Desbloquear inputs (por si veníamos de una edición)
     this.bloquearInputsPaciente(false);
     // Restaurar botones a modo creación
-    if (this.btnProcesarOrden) {
+    this.btnProcesarOrden && (() => {
       this.btnProcesarOrden.innerText = "💳 Confirmar Facturación y Procesar Orden";
       this.btnProcesarOrden.classList.remove("modo-edicion"); // Restaurar color verde
-    }
-    if (this.btnCancelarEdicion) {
-      this.btnCancelarEdicion.classList.add("oculto");
-    }
+    })();
+    this.btnCancelarEdicion && this.btnCancelarEdicion.classList.add("oculto");
   }
   //limpiar formulario estudio
   public limpiarFormEstudio(): void {
@@ -883,7 +836,7 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
   //filtrar estudios busqueda
   public onFiltrarEstudiosBusqueda(callback: (texto: string) => void): void {
     const inputBuscar = document.getElementById("pac_buscarEstudioInput") as HTMLInputElement;
-    if (inputBuscar) inputBuscar.oninput = () => callback(inputBuscar.value.trim());
+    inputBuscar && (inputBuscar.oninput = () => callback(inputBuscar.value.trim()));
   }
   //obtener texto busqueda bandeja
   public get textoBusquedaBandeja(): string {
@@ -898,62 +851,97 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
   public confirmarAccion(mensaje: string): Promise<boolean> {
     return new Promise((resolve) => {
       // Prevención de doble clic: Si ya hay un modal abierto, no abrimos otro.
-      if (document.querySelector(".modal-overlay")) {
-        return resolve(false);
-      }
-      const overlay = document.createElement("div");
-      overlay.className = "modal-overlay";
+      document.querySelector(".modal-overlay")
+        ? resolve(false)
+        : (() => {
+            const overlay = document.createElement("div");
+            overlay.className = "modal-overlay";
 
-      const modal = document.createElement("div");
-      modal.className = "modal-confirm modal-enter";
+            const modal = document.createElement("div");
+            modal.className = "modal-confirm modal-enter";
 
-      modal.innerHTML = `
-        <div class="modal-icon">⚠️</div>
-        <div class="modal-body">
-          <p class="modal-text">${mensaje}</p>
-        </div>
-        <div class="modal-actions">
-          <button class="btn-modal-cancel">Cancelar</button>
-          <button class="btn-modal-confirm">Aceptar</button>
-        </div>
-      `;
+            modal.innerHTML = `
+              <div class="modal-icon">⚠️</div>
+              <div class="modal-body">
+                <p class="modal-text">${mensaje}</p>
+              </div>
+              <div class="modal-actions">
+                <button class="btn-modal-cancel">Cancelar</button>
+                <button class="btn-modal-confirm">Aceptar</button>
+              </div>
+            `;
 
-      overlay.appendChild(modal);
-      document.body.appendChild(overlay);
-      void modal.offsetWidth;
-      modal.classList.remove("modal-enter");
-      // Función interna para cerrar el modal y disparar la animación de salida
-      const cerrarModal = (resultado: boolean) => {
-        btnConfirm.disabled = true;
-        btnCancel.disabled = true;
+            overlay.appendChild(modal);
+            document.body.appendChild(overlay);
+            void modal.offsetWidth;
+            modal.classList.remove("modal-enter");
+            // Función interna para cerrar el modal y disparar la animación de salida
+            const cerrarModal = (resultado: boolean) => {
+              btnConfirm.disabled = true;
+              btnCancel.disabled = true;
 
-        modal.classList.add("modal-leave"); // Activa la animación de "achicarse" y desvanecerse
-        overlay.classList.add("modal-leave-overlay");
+              modal.classList.add("modal-leave"); // Activa la animación de "achicarse" y desvanecerse
+              overlay.classList.add("modal-leave-overlay");
 
-        let transicionCompletada = false;
-        const finalizar = () => {
-          if (transicionCompletada) return;
-          transicionCompletada = true;
-          if (document.body.contains(overlay)) {
-            document.body.removeChild(overlay); // Se limpia el DOM para no dejar basura
-          }
-          resolve(resultado); // Se resuelve la Promesa avisándole al Controlador la decisión
-        };
+              let transicionCompletada = false;
+              const finalizar = () => {
+                !transicionCompletada && (() => {
+                  transicionCompletada = true;
+                  document.body.contains(overlay) && document.body.removeChild(overlay); // Se limpia el DOM para no dejar basura
+                  resolve(resultado); // Se resuelve la Promesa avisándole al Controlador la decisión
+                })();
+              };
 
-        // Esperamos a que la animación CSS de salida termine
-        modal.addEventListener("transitionend", finalizar);
-        // Fallback de seguridad por si falla el evento transitionend del navegador
-        setTimeout(finalizar, 300);
-      };
-      const btnConfirm = modal.querySelector(".btn-modal-confirm") as HTMLButtonElement;
-      const btnCancel = modal.querySelector(".btn-modal-cancel") as HTMLButtonElement;
-      btnConfirm.addEventListener("mousedown", () => cerrarModal(true));
-      btnCancel.addEventListener("mousedown", () => cerrarModal(false));
-      overlay.addEventListener("mousedown", (e) => {
-        if (e.target === overlay) {
-          cerrarModal(false);
-        }
-      });
+              // Esperamos a que la animación CSS de salida termine
+              modal.addEventListener("transitionend", finalizar);
+              // Fallback de seguridad por si falla el evento transitionend del navegador
+              setTimeout(finalizar, 300);
+            };
+            const btnConfirm = modal.querySelector(".btn-modal-confirm") as HTMLButtonElement;
+            const btnCancel = modal.querySelector(".btn-modal-cancel") as HTMLButtonElement;
+            btnConfirm.addEventListener("mousedown", () => cerrarModal(true));
+            btnCancel.addEventListener("mousedown", () => cerrarModal(false));
+            overlay.addEventListener("mousedown", (e) => {
+              (e.target === overlay) && cerrarModal(false);
+            });
+          })();
     });
   }
+
+  // --- MÉTODOS PARA EL REPORTE HISTÓRICO DINÁMICO ---
+  public onFiltrosReporteGralCambio(callback: (filtros: { examen: string, fechaDesde: string, fechaHasta: string, paciente: string }) => void): void {
+    const handler = () => {
+      callback({
+        examen: this.repFiltroExamen?.value || "",
+        fechaDesde: this.repFiltroFechaDesde?.value || "",
+        fechaHasta: this.repFiltroFechaHasta?.value || "",
+        paciente: this.repFiltroPaciente?.value || ""
+      });
+    };
+    this.repFiltroExamen && this.repFiltroExamen.addEventListener("input", handler);
+    this.repFiltroFechaDesde && this.repFiltroFechaDesde.addEventListener("change", handler);
+    this.repFiltroFechaHasta && this.repFiltroFechaHasta.addEventListener("change", handler);
+    this.repFiltroPaciente && this.repFiltroPaciente.addEventListener("input", handler);
+  }
+
+  public renderizarReporteExamenes(datos: any[]): void {
+    this.tbodyReporteExamenes && (() => {
+      this.tbodyReporteExamenes.innerHTML = datos.length === 0
+        ? `<tr><td colspan="2" style="text-align:center; padding:15px;">No se encontraron exámenes.</td></tr>`
+        : "";
+      datos.length > 0 && (() => {
+        const fragmento = document.createDocumentFragment();
+        datos.forEach(row => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${row.examen}</td>
+            <td style="text-align:center;"><strong>${row.cantidad}</strong></td>
+          `;
+          fragmento.appendChild(tr);
+        });
+        this.tbodyReporteExamenes.appendChild(fragmento);
+      })();
+    })();
+  }
+
 }

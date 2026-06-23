@@ -40,6 +40,12 @@ export default class Cl_vLaboratorio {
     inFechaReporteExamen;
     inNombreReporteExamen;
     lblCantidadExamen;
+    // --- Elementos del DOM (Reporte Histórico Dinámico de Exámenes) ---
+    repFiltroExamen;
+    repFiltroFechaDesde;
+    repFiltroFechaHasta;
+    repFiltroPaciente;
+    tbodyReporteExamenes;
     manejadorEliminarEstudio;
     manejadorDespacharOrden;
     manejadorCambioChecks;
@@ -85,6 +91,12 @@ export default class Cl_vLaboratorio {
         this.inFechaReporteExamen = document.getElementById("rep_fecha_examen");
         this.inNombreReporteExamen = document.getElementById("rep_nombre_examen");
         this.lblCantidadExamen = document.getElementById("rep_cantidad_examen");
+        // Inicialización Elementos Reporte Histórico
+        this.repFiltroExamen = document.getElementById("rep_filtro_examen");
+        this.repFiltroFechaDesde = document.getElementById("rep_filtro_fecha_desde");
+        this.repFiltroFechaHasta = document.getElementById("rep_filtro_fecha_hasta");
+        this.repFiltroPaciente = document.getElementById("rep_filtro_paciente");
+        this.tbodyReporteExamenes = document.getElementById("tbody_reporte_examenes");
         // Set default date to today for the report
         if (this.inFechaReporteExamen) {
             const today = new Date();
@@ -953,6 +965,44 @@ export default class Cl_vLaboratorio {
                 }
             });
         });
+    }
+    // --- MÉTODOS PARA EL REPORTE HISTÓRICO DINÁMICO ---
+    onFiltrosReporteGralCambio(callback) {
+        const handler = () => {
+            callback({
+                examen: this.repFiltroExamen?.value || "",
+                fechaDesde: this.repFiltroFechaDesde?.value || "",
+                fechaHasta: this.repFiltroFechaHasta?.value || "",
+                paciente: this.repFiltroPaciente?.value || ""
+            });
+        };
+        if (this.repFiltroExamen)
+            this.repFiltroExamen.addEventListener("input", handler);
+        if (this.repFiltroFechaDesde)
+            this.repFiltroFechaDesde.addEventListener("change", handler);
+        if (this.repFiltroFechaHasta)
+            this.repFiltroFechaHasta.addEventListener("change", handler);
+        if (this.repFiltroPaciente)
+            this.repFiltroPaciente.addEventListener("input", handler);
+    }
+    renderizarReporteExamenes(datos) {
+        if (!this.tbodyReporteExamenes)
+            return;
+        this.tbodyReporteExamenes.innerHTML = "";
+        if (datos.length === 0) {
+            this.tbodyReporteExamenes.innerHTML = `<tr><td colspan="2" style="text-align:center; padding:15px;">No se encontraron exámenes.</td></tr>`;
+            return;
+        }
+        const fragmento = document.createDocumentFragment();
+        datos.forEach(row => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+        <td>${row.examen}</td>
+        <td style="text-align:center;"><strong>${row.cantidad}</strong></td>
+      `;
+            fragmento.appendChild(tr);
+        });
+        this.tbodyReporteExamenes.appendChild(fragmento);
     }
 }
 //# sourceMappingURL=Cl_vLaboratorio.js.map

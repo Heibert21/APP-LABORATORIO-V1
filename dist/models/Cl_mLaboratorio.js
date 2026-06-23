@@ -192,5 +192,28 @@ export default class Cl_mLaboratorio {
         const entrega = horaPrometida.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         return { registro, entrega };
     }
+    // Metodo que permite obtener el reporte detallado de examenes con filtros
+    obtenerReporteExamenes(filtros) {
+        let filtradas = this._ordenes;
+        const nombreNormalizado = filtros.examen.trim().toLowerCase();
+        // Agrupar examenes de todas las ordenes (no prefiltramos las ordenes por examen, 
+        // sino que filtramos los examenes resultantes al final para que el total de 
+        // esa orden no contamine otros estudios).
+        const conteoExamenes = {};
+        filtradas.forEach(orden => {
+            const desgloses = orden.desglosarExamenes();
+            desgloses.forEach(item => {
+                // Filtrar solo si coincide con la búsqueda
+                if (!nombreNormalizado || item.examen.toLowerCase().includes(nombreNormalizado)) {
+                    conteoExamenes[item.examen] = (conteoExamenes[item.examen] || 0) + item.cantidad;
+                }
+            });
+        });
+        // Convertir el objeto a array para renderizarlo
+        return Object.keys(conteoExamenes).map(examen => ({
+            examen: examen,
+            cantidad: conteoExamenes[examen]
+        })).sort((a, b) => b.cantidad - a.cantidad); // Ordenar por cantidad descendente
+    }
 }
 //# sourceMappingURL=Cl_mLaboratorio.js.map

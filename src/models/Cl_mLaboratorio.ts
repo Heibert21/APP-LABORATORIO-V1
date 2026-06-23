@@ -191,4 +191,33 @@ export default class Cl_mLaboratorio {
     return { registro, entrega };
   }
 
+  // Metodo que permite obtener el reporte detallado de examenes con filtros
+  public obtenerReporteExamenes(filtros: { examen: string, fechaDesde: string, fechaHasta: string, paciente: string }): any[] {
+    let filtradas = this._ordenes;
+
+    const nombreNormalizado = filtros.examen.trim().toLowerCase();
+    
+    // Agrupar examenes de todas las ordenes (no prefiltramos las ordenes por examen, 
+    // sino que filtramos los examenes resultantes al final para que el total de 
+    // esa orden no contamine otros estudios).
+    
+    const conteoExamenes: { [key: string]: number } = {};
+
+    filtradas.forEach(orden => {
+      const desgloses = orden.desglosarExamenes();
+      desgloses.forEach(item => {
+        // Filtrar solo si coincide con la búsqueda
+        if (!nombreNormalizado || item.examen.toLowerCase().includes(nombreNormalizado)) {
+          conteoExamenes[item.examen] = (conteoExamenes[item.examen] || 0) + item.cantidad;
+        }
+      });
+    });
+
+    // Convertir el objeto a array para renderizarlo
+    return Object.keys(conteoExamenes).map(examen => ({
+      examen: examen,
+      cantidad: conteoExamenes[examen]
+    })).sort((a, b) => b.cantidad - a.cantidad); // Ordenar por cantidad descendente
+  }
+
 }

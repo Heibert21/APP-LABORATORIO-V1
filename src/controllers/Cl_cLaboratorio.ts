@@ -24,6 +24,28 @@ export default class Cl_cLaboratorio {
     this.vista.onCambioChecks(() => this.recalcularTotalesEnTiempoReal());
 
     this.vista.onBuscarCedulaPaciente((cedula) => this.buscarPacientePorCedula(cedula));
+    this.vista.onInputCedula((valor) => {
+      this.vista.setCedula(valor.replace(/\D/g, ""));
+    });
+    this.vista.onInputCedulaRep((valor) => {
+      // Remover caracteres que no sean letras V E o numeros
+      this.vista.setCedulaRep(valor.replace(/[^vVeE0-9-]/g, ""));
+    });
+    
+    // UI events delegating to controller
+    this.vista.onCambioEsMenor((esMenor) => {
+      this.vista.mostrarBloqueRepresentante(esMenor);
+      this.vista.limpiarCamposCedula();
+    });
+    this.vista.onFiltrarEstudiosBusqueda((texto) => {
+      const idsAocultar = this.catalogoEstudiosCoche
+        .filter(estudio => {
+          const contenidoBuscable = `${estudio.codigo || estudio.id} ${estudio.nombre}`.toLowerCase();
+          return !contenidoBuscable.includes(texto.toLowerCase());
+        })
+        .map(e => String(e.id));
+      this.vista.ocultarTarjetasEstudio(idsAocultar);
+    });
 
     this.vista.onExportarCaja(() => this.procesarExportarCaja());
 
@@ -34,6 +56,10 @@ export default class Cl_cLaboratorio {
 
     // REFACTORIZACIÓN MVC: El controlador se suscribe al evento de filtrado de búsqueda de la vista
     this.vista.onFiltrarBandeja((texto) => this.procesarFiltradoBandeja(texto));
+
+    if ((this.vista as any).onFiltrosReporteGralCambio) {
+      (this.vista as any).onFiltrosReporteGralCambio((filtros: any) => this.procesarReporteGeneral(filtros));
+    }
   }
   // Metodo que permite cancelar la edicion actual
   private cancelarEdicionActual() {
@@ -82,6 +108,7 @@ export default class Cl_cLaboratorio {
         estudioMasSolicitado: this.modeloGlobal.obtenerEstudioMasSolicitado(),
       });
       this.procesarCambioFiltrosExamen(this.vista.nombreReporteExamen, this.vista.fechaReporteExamen);
+      this.procesarReporteGeneral({ examen: "", fechaDesde: "", fechaHasta: "", paciente: "" });
     } catch (error) {
       console.error("Error al actualizar monitores del laboratorio:", error);
     }
@@ -105,6 +132,15 @@ export default class Cl_cLaboratorio {
     this.vista.renderizarOrdenesEspera(pendientes);
     this.vista.renderizarOrdenesListas(listas);
   }
+
+  // Metodo que procesa y envia el reporte general de examenes a la vista
+  private procesarReporteGeneral(filtros: { examen: string, fechaDesde: string, fechaHasta: string, paciente: string }) {
+    const datosReporte = this.modeloGlobal.obtenerReporteExamenes(filtros);
+    if ((this.vista as any).renderizarReporteExamenes) {
+      (this.vista as any).renderizarReporteExamenes(datosReporte);
+    }
+  }
+
   // Metodo que permite recalcular los totales en tiempo real
   private recalcularTotalesEnTiempoReal() {
     const codigosSeleccionados = this.vista.getEstudiosSeleccionados();
@@ -359,6 +395,17 @@ export default class Cl_cLaboratorio {
     if (!ordenActual) return;
 
     this.ordenEnEdicionId = id;
+    
+    const esMenor = (ordenActual.cedula === "MENOR" || ordenActual.cedula.startsWith("CR")) && !!ordenActual.cedulaRepresentante;
+    this.vista.autocompletarPaciente(ordenActual, esMenor);
+    
+    const examenesSolicitadosArray = ordenActual.examenesSolicitados.split(", ").map(e => e.trim().toLowerCase());
+    const idsASeleccionar = this.catalogoEstudiosCoche
+      .filter(e => examenesSolicitadosArray.some(ex => e.nombre.toLowerCase().includes(ex)))
+      .map(e => String(e.id));
+      
+    this.vista.marcarEstudiosPorId(idsASeleccionar);
+    
     this.vista.prepararEdicionOrden(ordenActual);
   }
   // Metodo que permite ejecutar el despacho final de una orden
@@ -401,7 +448,8 @@ export default class Cl_cLaboratorio {
       o => String(o.id).trim().toLowerCase() === terminoNorm
     );
     if (ordenPorId) {
-      this.vista.autocompletarPaciente(ordenPorId);
+      const esMenorPorId = (ordenPorId.cedula === "MENOR" || ordenPorId.cedula.startsWith("CR")) && !!ordenPorId.cedulaRepresentante;
+      this.vista.autocompletarPaciente(ordenPorId, esMenorPorId);
       // Si se buscó por orden, mostramos el historial completo de ese paciente (por cédula)
       const cedulaDeLaOrden = ordenPorId.cedula.trim().toLowerCase();
       const historialDelPaciente = this.modeloGlobal.ordenes.filter(
@@ -423,7 +471,8 @@ export default class Cl_cLaboratorio {
     }
     // Tomamos la orden más reciente para autocompletar (la última del array)
     const ordenMasReciente = ordenesDelPaciente[ordenesDelPaciente.length - 1];
-    this.vista.autocompletarPaciente(ordenMasReciente);
+    const esMenor = (ordenMasReciente.cedula === "MENOR" || ordenMasReciente.cedula.startsWith("CR")) && !!ordenMasReciente.cedulaRepresentante;
+    this.vista.autocompletarPaciente(ordenMasReciente, esMenor);
     // Mostramos todo el historial de visitas del paciente
     this.vista.mostrarHistorialPaciente(ordenesDelPaciente);
   }

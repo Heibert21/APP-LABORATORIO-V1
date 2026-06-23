@@ -23,6 +23,9 @@ export default class Cl_cLaboratorio {
         this.vista.onCambioFiltrosReporteExamen((nombre, fecha) => this.procesarCambioFiltrosExamen(nombre, fecha));
         // REFACTORIZACIÓN MVC: El controlador se suscribe al evento de filtrado de búsqueda de la vista
         this.vista.onFiltrarBandeja((texto) => this.procesarFiltradoBandeja(texto));
+        if (this.vista.onFiltrosReporteGralCambio) {
+            this.vista.onFiltrosReporteGralCambio((filtros) => this.procesarReporteGeneral(filtros));
+        }
     }
     // Metodo que permite cancelar la edicion actual
     cancelarEdicionActual() {
@@ -70,6 +73,7 @@ export default class Cl_cLaboratorio {
                 estudioMasSolicitado: this.modeloGlobal.obtenerEstudioMasSolicitado(),
             });
             this.procesarCambioFiltrosExamen(this.vista.nombreReporteExamen, this.vista.fechaReporteExamen);
+            this.procesarReporteGeneral({ examen: "", fechaDesde: "", fechaHasta: "", paciente: "" });
         }
         catch (error) {
             console.error("Error al actualizar monitores del laboratorio:", error);
@@ -91,6 +95,13 @@ export default class Cl_cLaboratorio {
         const listas = this.modeloGlobal.ordenes.filter((o) => o.status === "Listo para Despacho" && o.coincideConFiltro(textoFiltro));
         this.vista.renderizarOrdenesEspera(pendientes);
         this.vista.renderizarOrdenesListas(listas);
+    }
+    // Metodo que procesa y envia el reporte general de examenes a la vista
+    procesarReporteGeneral(filtros) {
+        const datosReporte = this.modeloGlobal.obtenerReporteExamenes(filtros);
+        if (this.vista.renderizarReporteExamenes) {
+            this.vista.renderizarReporteExamenes(datosReporte);
+        }
     }
     // Metodo que permite recalcular los totales en tiempo real
     recalcularTotalesEnTiempoReal() {
