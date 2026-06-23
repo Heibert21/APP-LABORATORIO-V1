@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -10,10 +10,10 @@
 
 <body>
 
-  <!-- Contenedor de toasts flotantes. Se inyectan dinámicamente desde la vista. -->
+  
   <div id="toast-container"></div>
 
-  <!-- Overlay de carga (spinner). Se muestra/oculta desde el controlador durante peticiones a la API. -->
+  
   <div id="spinner-overlay" class="oculto">
     <div class="spinner-caja">
       <div class="spinner-rueda"></div>
@@ -21,17 +21,17 @@
     </div>
   </div>
 
-  <!-- Encabezado Clínico Corporativo -->
+  
   <header class="header-app">
     <h1>🏢 Lab GitForce <small>| Recepción y Control</small></h1>
     <p>Gestión Integral de Facturación, Catálogos y Despacho Inmediato</p>
   </header>
 
-  <!-- Contenedor Principal en Formato Dashboard de Dos Columnas -->
+  
   <main class="dashboard-container">
     <aside class="sidebar-panel">
 
-      <!-- Mini Tarjeta de Tasa de Cambio (Compacta) -->
+      
       <section class="tarjeta-modulo mini-card">
         <h3>💵 Tasa del Dia</h3>
         <div class="formulario-linea compact-row">
@@ -40,7 +40,7 @@
         </div>
       </section>
 
-      <!-- Resumen Estadístico Global (Cierre de Caja) -->
+      
       <section class="tarjeta-modulo">
         <div class="modulo-cabecera-simple">
           <h3>📊 Cierre de Caja Global</h3>
@@ -53,26 +53,35 @@
               $</strong></div>
           <div class="indicador-item"><span>Total de Bs:</span> <strong id="rep_totalBs" class="txt-primario">0.00
               Bs</strong></div>
-          <div class="indicador-item">
-            <!-- NUEVO: Sección de Reporte Dinámico de Exámenes (permite escribir un nombre y elegir fecha para ver la cantidad) -->
-            <span style="display: flex; flex-direction: column; gap: 4px;">
-              Reporte Específico:
-              <div style="display:flex; gap:4px; align-items:center;">
-                <input type="text" id="rep_nombre_examen" placeholder="Ej. Creatinina"
-                  style="padding: 2px 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; outline: none; width:90px;"
-                  title="Nombre del Examen">
-                <input type="date" id="rep_fecha_examen"
-                  style="padding: 2px 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; outline: none;"
-                  title="Fecha del Examen">
+          <div class="indicador-item reporte-caja-container" style="flex-direction: column; align-items: stretch; margin-top: 15px; border-top: 1px dashed #cbd5e1; padding-top: 15px;">
+            <h4 style="margin-bottom: 10px; color: var(--primario); font-size: 0.95rem;">📋 Reporte de Exámenes</h4>
+            
+            <div class="filtros-reporte-grid sidebar-filtros" style="display: flex; flex-direction: column; gap: 10px; padding: 10px; margin-bottom: 15px;">
+              <div class="grupo-input" style="margin-bottom: 0;">
+                <label for="rep_filtro_examen" style="font-size: 0.8rem;">🔍 Nombre del Examen:</label>
+                <input type="text" id="rep_filtro_examen" placeholder="Ej. Creatinina..." style="padding: 6px; font-size: 0.8rem;" />
               </div>
-            </span>
-            <strong id="rep_cantidad_examen" style="font-size: 1.2rem; color: #0ea5e9;">0</strong>
+            </div>
+
+            <div class="tabla-reporte-contenedor sidebar-tabla" style="max-height: 250px;">
+              <table class="tabla-reporte" style="font-size: 0.8rem; width: 100%;">
+                <thead>
+                  <tr>
+                    <th>Examen</th>
+                    <th>Cant.</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody_reporte_examenes">
+                  
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
         <button id="btn_exportarCaja" class="btn-exportar-caja">📄 Exportar Cierre del Día</button>
       </section>
 
-      <!-- Sección Colapsable para Cargar Nuevos Estudios -->
+      
       <section class="tarjeta-modulo">
         <button type="button" id="btnToggleFormEstudio" class="btn-toggle-accordion">➕ Abrir Carga de Estudios</button>
 
@@ -96,13 +105,13 @@
         </div>
       </section>
 
-      <!-- Lista Scrollable de Catálogo Activo -->
+      
       <section class="tarjeta-modulo">
         <button type="button" id="btnToggleCatalogo" class="btn-toggle-accordion">➕ Abrir Estudios Disponibles</button>
 
         <div id="seccionCatalogo" class="oculto accordion-content">
           <ul id="adm_listaEstudiosCatalogo" class="lista-catalogo-scroll">
-            <!-- Inyectado dinámicamente -->
+            
           </ul>
         </div>
       </section>
@@ -110,14 +119,14 @@
 
     <div class="main-content-panel">
 
-      <!-- Bloque de Admisión / Registro de Pacientes -->
+      
       <section class="tarjeta-modulo">
         <button type="button" id="btnToggleFormPaciente" class="btn-toggle-accordion active-btn">➖ Cerrar Registro de
           Paciente</button>
 
         <div id="seccionFormPaciente" class="accordion-content">
           <form id="form_registroPaciente" class="grid-paciente-formulario">
-            <!-- Checkbox para Menores de Edad -->
+            
             <div class="grupo-input full-row">
               <label
                 style="display: flex; gap: 8px; align-items: center; cursor: pointer; text-transform: none; font-size: 0.95rem; background: #e0f2fe; padding: 10px; border-radius: 6px; border: 1px solid #bae6fd;">
@@ -126,7 +135,7 @@
               </label>
             </div>
 
-            <!-- Bloque del Representante (Oculto por defecto) -->
+            
             <div id="adm_bloqueRepresentante" class="full-row oculto"
               style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px dashed #cbd5e1; margin-bottom: 10px;">
               <h4 style="margin-top: 0; margin-bottom: 15px; color: #334155; font-size: 0.9rem;">👨‍👩‍👧 Datos del
@@ -147,7 +156,7 @@
               </div>
             </div>
 
-            <!-- Campo de cédula principal (Se oculta si es menor) -->
+            
             <div class="grupo-input" id="adm_bloqueCedulaPrincipal">
               <label for="pac_cedula">Cédula Paciente:</label>
               <div style="display:flex; gap:4px;">
@@ -156,7 +165,7 @@
                   title="Buscar paciente por cédula">🔍</button>
               </div>
             </div>
-            <!--  Panel de historial de visitas del paciente (oculto hasta que se busque) -->
+            
             <div id="panel-historial-paciente" class="oculto"></div>
 
             <div class="grupo-input"><label for="pac_nombre">Nombre:</label><input type="text" id="pac_nombre"
@@ -178,11 +187,11 @@
                 required /></div>
             <div class="grupo-input full-row"><label for="pac_correo">Correo Electrónico:</label><input type="email"
                 id="pac_correo" required /></div>
-            <!--Grilla de Selección de Exámenes Inteligente con Buscador Integrado-->
+            
             <div class="full-row estudios-selector-box">
               <h3>🔬 Estudios Disponibles para el Paciente</h3>
 
-              <!--BARRA DE BÚSQUEDA CLÍNICA-->
+              
               <div class="buscador-estudios-contenedor"
                 style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center;">
                 <span style="font-size: 1.1rem;">🔍</span>
@@ -192,12 +201,11 @@
               </div>
 
               <div id="adm_contenedorEstudiosDisponibles" class="grid-checkboxes-resultados">
-                <!-- Inyectado dinámicamente -->
+                
               </div>
             </div>
 
-
-            <!-- Bloque de Cierre Presupuestario (Pre-Pago Integrado) -->
+            
             <div class="full-row factura-pre-pago">
               <div class="factura-header">
                 <h3>🛒 Desglose del Presupuesto (Pre-Pago)</h3>
@@ -231,7 +239,7 @@
         </div>
       </section>
 
-      <!-- Monitor Operativo de Control de Órdenes (Bandejas de Flujo) -->
+      
       <section class="tarjeta-modulo">
         <div class="modulo-cabecera">
           <h2>📥 Monitor Operativo y Despacho Médico</h2>
@@ -246,35 +254,74 @@
           <input type="text" id="input_buscarBandeja" placeholder="Buscar por nombre, cédula o N° de orden..." />
         </div>
         <div id="adm_listaEspera" class="bandeja-scroll-monitor">
-          <!-- Inyectado dinámicamente -->
+          
         </div>
 
         <div id="adm_listaListos" class="bandeja-scroll-monitor oculto">
-          <!-- Inyectado dinámicamente -->
+          
+        </div>
+      </section>
+
+      
+      <section class="tarjeta-modulo" id="seccion_reporte_semana">
+        <div class="modulo-cabecera">
+          <h2>🗓️ Reporte: Órdenes con más de una semana en el sistema</h2>
+        </div>
+        <p class="instruccion" style="margin-bottom: 14px;">
+          Registros cuya <strong>fecha de registro</strong> supera los <strong>7 días</strong> respecto a la fecha actual del sistema.
+        </p>
+
+        
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+          <div class="indicador-item" style="min-width:160px;">
+            <span>Órdenes encontradas:</span>
+            <strong id="rep_semana_total" style="color:var(--error, #ef4444); font-size:1.3rem;">0</strong>
+          </div>
+          <button id="btn_reporte_semana_imprimir" class="btn-exportar-caja" style="margin-left:auto;">
+            📄 Exportar Reporte
+          </button>
+        </div>
+
+        
+        <div class="tabla-reporte-contenedor" style="max-height: 400px; overflow-y:auto;">
+          <table class="tabla-reporte" style="width:100%;">
+            <thead>
+              <tr>
+                <th>N° Orden</th>
+                <th>Paciente</th>
+                <th>C.I.</th>
+                <th>Fecha Registro</th>
+                <th>Días en Sistema</th>
+                <th>Exámenes</th>
+                <th>Estatus</th>
+              </tr>
+            </thead>
+            <tbody id="tbody_reporte_semana">
+              
+            </tbody>
+          </table>
         </div>
       </section>
 
     </div>
   </main>
 
-  <!-- Créditos Institucionales (Misma Identidad del Grupo Git Force) -->
+  
   <footer class="footer-creditos">
     <p>© 2026 UCLA DCyT - Proyecto Final</p>
     <p class="autor-info">Designe By <strong>Git Force</strong> | Todos los derechos reservados © 2026</p>
   </footer>
 
-  <!-- SCRIPT DE ACOPLAMIENTO MODULAR COMPLETO CON TU VISTA ADMINISTRATIVA -->
+  
   <script type="module">
-    // Importamos las tres capas necesarias
+
     import Cl_mLaboratorio from "./dist/models/Cl_mLaboratorio.js";
     import Cl_vLaboratorio from "./dist/views/Cl_vLaboratorio.js";
     import Cl_cLaboratorio from "./dist/controllers/Cl_cLaboratorio.js";
 
-    // Instanciamos el Modelo Global contenedor (arranca con tasa 0) y la Vista Administrativa
     const modelo = new Cl_mLaboratorio(0);
     const vista = new Cl_vLaboratorio();
 
-    // Los inyectamos empaquetados en un objeto, tal cual como el ejemplo del profesor: { modelo, vista }
     new Cl_cLaboratorio({ modelo, vista });
   </script>
 

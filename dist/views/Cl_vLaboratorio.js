@@ -1,5 +1,4 @@
 export default class Cl_vLaboratorio {
-    // --- Elementos del DOM (Formulario Registro de Pacientes) ---
     chkEsMenor;
     inCedulaRep;
     inNombreRep;
@@ -16,7 +15,6 @@ export default class Cl_vLaboratorio {
     formPaciente;
     btnProcesarOrden;
     btnCancelarEdicion;
-    // --- Elementos del DOM (Configuración y Catálogo de Exámenes) ---
     inTasa;
     btTasa;
     inEstId;
@@ -27,7 +25,6 @@ export default class Cl_vLaboratorio {
     inEstRango;
     formEstudio;
     listaCatalogo;
-    // --- Elementos del DOM (Bandejas de Monitoreo y Facturación) ---
     tablaEspera;
     tablaListos;
     lblTotalUSD;
@@ -35,18 +32,20 @@ export default class Cl_vLaboratorio {
     lblHoraEntrega;
     toastContainer;
     spinnerOverlay;
-    // --- Elementos del DOM (Reportes Específicos Dinámicos) ---
-    // Inputs para nombre y fecha del examen, y etiqueta de resultado numérico
     inFechaReporteExamen;
     inNombreReporteExamen;
     lblCantidadExamen;
+    repFiltroExamen;
+    repFiltroFechaDesde;
+    repFiltroFechaHasta;
+    repFiltroPaciente;
+    tbodyReporteExamenes;
     manejadorEliminarEstudio;
     manejadorDespacharOrden;
     manejadorCambioChecks;
     cbCambioFiltro;
     manejadorEliminarOrdenEspera;
     manejadorEditarOrdenEspera;
-    // Se usa para filtrar la bandeja
     manejadorFiltrarBandeja;
     constructor() {
         this.chkEsMenor = document.getElementById("pac_chkEsMenor");
@@ -85,38 +84,17 @@ export default class Cl_vLaboratorio {
         this.inFechaReporteExamen = document.getElementById("rep_fecha_examen");
         this.inNombreReporteExamen = document.getElementById("rep_nombre_examen");
         this.lblCantidadExamen = document.getElementById("rep_cantidad_examen");
-        // Set default date to today for the report
-        if (this.inFechaReporteExamen) {
+        this.repFiltroExamen = document.getElementById("rep_filtro_examen");
+        this.repFiltroFechaDesde = document.getElementById("rep_filtro_fecha_desde");
+        this.repFiltroFechaHasta = document.getElementById("rep_filtro_fecha_hasta");
+        this.repFiltroPaciente = document.getElementById("rep_filtro_paciente");
+        this.tbodyReporteExamenes = document.getElementById("tbody_reporte_examenes");
+        this.inFechaReporteExamen && (() => {
             const today = new Date();
             const offset = today.getTimezoneOffset() * 60000;
             const localISOTime = (new Date(today.getTime() - offset)).toISOString().split('T')[0];
             this.inFechaReporteExamen.value = localISOTime;
-        }
-        this.inCedula.addEventListener("input", () => {
-            this.inCedula.value = this.inCedula.value.replace(/\D/g, "");
-        });
-        this.inCedulaRep.addEventListener("input", () => {
-            // Remover caracteres que no sean letras V E o numeros
-            this.inCedulaRep.value = this.inCedulaRep.value.replace(/[^vVeE0-9-]/g, "");
-        });
-        // --- Lógica del Checkbox de Menor de Edad ---
-        this.chkEsMenor.addEventListener("change", () => {
-            const bloqueRep = document.getElementById("adm_bloqueRepresentante");
-            const bloqueCedula = document.getElementById("adm_bloqueCedulaPrincipal");
-            if (this.chkEsMenor.checked) {
-                bloqueRep.classList.remove("oculto");
-                bloqueCedula.classList.add("oculto");
-                this.inCedula.value = "";
-            }
-            else {
-                bloqueRep.classList.add("oculto");
-                bloqueCedula.classList.remove("oculto");
-                this.inCedulaRep.value = "";
-                this.inNombreRep.value = "";
-                this.inApellidoRep.value = "";
-            }
-        });
-        //mostrar formulario de estudios disponibles
+        })();
         const btnToggleEstudio = document.getElementById("btnToggleFormEstudio");
         const seccionFormEstudio = document.getElementById("seccionFormEstudio");
         btnToggleEstudio.onclick = () => {
@@ -125,7 +103,6 @@ export default class Cl_vLaboratorio {
                 ? " Abrir Carga de Estudios"
                 : " Cerrar Carga de Estudios";
         };
-        //mostrar lista de estudios disponibles (catálogo)
         const btnToggleCatalogo = document.getElementById("btnToggleCatalogo");
         const seccionCatalogo = document.getElementById("seccionCatalogo");
         btnToggleCatalogo.onclick = () => {
@@ -134,7 +111,6 @@ export default class Cl_vLaboratorio {
                 ? "➕ Abrir Estudios Disponibles"
                 : "➖ Cerrar Estudios Disponibles";
         };
-        //mostrar formulario de pacientes
         const btnTogglePaciente = document.getElementById("btnToggleFormPaciente");
         const seccionFormPaciente = document.getElementById("seccionFormPaciente");
         btnTogglePaciente.onclick = () => {
@@ -143,36 +119,22 @@ export default class Cl_vLaboratorio {
                 ? " Abrir Registro de Paciente"
                 : " Cerrar Registro de Paciente";
         };
-        //despachar ordenes
         this.tablaListos.addEventListener("click", (e) => {
             const target = e.target;
-            if (target.classList.contains("btn-despacho") && this.manejadorDespacharOrden) {
-                const id = target.dataset.id;
-                const metodo = target.dataset.metodo;
-                this.manejadorDespacharOrden(id, metodo);
-            }
+            (target.classList.contains("btn-despacho") && this.manejadorDespacharOrden) &&
+                this.manejadorDespacharOrden(target.dataset.id, target.dataset.metodo);
         });
-        //eliminar orden de espera y editar orden de espera
         this.tablaEspera.addEventListener("click", (e) => {
             const target = e.target.closest("button");
-            if (!target)
-                return;
-            const id = target.dataset.id;
-            if (!id)
-                return;
-            if (target.classList.contains("btn-eliminar-orden") && this.manejadorEliminarOrdenEspera) {
-                this.manejadorEliminarOrdenEspera(id);
-            }
-            else if (target.classList.contains("btn-editar-orden") && this.manejadorEditarOrdenEspera) {
-                this.manejadorEditarOrdenEspera(id);
-            }
+            target && target.dataset.id && (() => {
+                const id = target.dataset.id;
+                target.classList.contains("btn-eliminar-orden") && this.manejadorEliminarOrdenEspera && this.manejadorEliminarOrdenEspera(id);
+                target.classList.contains("btn-editar-orden") && this.manejadorEditarOrdenEspera && this.manejadorEditarOrdenEspera(id);
+            })();
         });
-        //cambio de checks en estudios disponibles
         this.contenedorEstudios.addEventListener("change", () => {
-            if (this.manejadorCambioChecks)
-                this.manejadorCambioChecks();
+            this.manejadorCambioChecks && this.manejadorCambioChecks();
         });
-        //cambio de filtro en estudios disponibles
         const btnEspera = document.getElementById("btnVerEspera");
         const btnListos = document.getElementById("btnVerListos");
         btnEspera.onclick = () => {
@@ -187,41 +149,60 @@ export default class Cl_vLaboratorio {
             this.tablaListos.classList.remove("oculto");
             this.tablaEspera.classList.add("oculto");
         };
-        //buscar estudio
         const inputBuscar = document.getElementById("pac_buscarEstudioInput");
-        if (inputBuscar) {
-            inputBuscar.addEventListener("input", () => {
-                const texto = inputBuscar.value.trim().toLowerCase();
-                const tarjetas = this.contenedorEstudios.querySelectorAll(".chk-wrapper");
-                tarjetas.forEach((tarjeta) => {
-                    tarjeta.classList.toggle("oculto", !tarjeta.textContent.toLowerCase().includes(texto));
-                });
+        inputBuscar && inputBuscar.addEventListener("input", () => {
+            const texto = inputBuscar.value.trim().toLowerCase();
+            const tarjetas = this.contenedorEstudios.querySelectorAll(".chk-wrapper");
+            tarjetas.forEach((tarjeta) => {
+                tarjeta.classList.toggle("oculto", !tarjeta.textContent.toLowerCase().includes(texto));
             });
-        }
-        //buscar ordenes en espera
-        const inputBandeja = document.getElementById("input_buscarBandeja");
-        if (inputBandeja) {
-            inputBandeja.addEventListener("input", () => {
-                if (this.manejadorFiltrarBandeja) {
-                    this.manejadorFiltrarBandeja(inputBandeja.value);
-                }
-            });
-        }
-        //cambio de sexo en pacientes
-        this.inSexo.addEventListener("change", () => {
-            if (this.manejadorCambioChecks)
-                this.manejadorCambioChecks();
-            if (this.cbCambioFiltro)
-                this.cbCambioFiltro();
         });
-        //exportar caja
+        const inputBandeja = document.getElementById("input_buscarBandeja");
+        inputBandeja && inputBandeja.addEventListener("input", () => {
+            this.manejadorFiltrarBandeja && this.manejadorFiltrarBandeja(inputBandeja.value);
+        });
+        this.inSexo.addEventListener("change", () => {
+            this.manejadorCambioChecks && this.manejadorCambioChecks();
+            this.cbCambioFiltro && this.cbCambioFiltro();
+        });
         const btnExportar = document.getElementById("btn_exportarCaja");
-        if (btnExportar) {
-            btnExportar.addEventListener("click", () => {
-                if (this._cbExportarCaja)
-                    this._cbExportarCaja();
-            });
-        }
+        btnExportar && btnExportar.addEventListener("click", () => {
+            this._cbExportarCaja && this._cbExportarCaja();
+        });
+    }
+    setCedula(valor) {
+        this.inCedula && (this.inCedula.value = valor);
+    }
+    setCedulaRep(valor) {
+        this.inCedulaRep && (this.inCedulaRep.value = valor);
+    }
+    onCambioEsMenor(callback) {
+        this.chkEsMenor.addEventListener("change", () => callback(this.chkEsMenor.checked));
+    }
+    mostrarBloqueRepresentante(esMenor) {
+        const bloqueRep = document.getElementById("adm_bloqueRepresentante");
+        const bloqueCedula = document.getElementById("adm_bloqueCedulaPrincipal");
+        bloqueRep && bloqueRep.classList.toggle("oculto", !esMenor);
+        bloqueCedula && bloqueCedula.classList.toggle("oculto", esMenor);
+    }
+    limpiarCamposCedula() {
+        this.inCedula.value = "";
+        this.inCedulaRep.value = "";
+        this.inNombreRep.value = "";
+        this.inApellidoRep.value = "";
+    }
+    ocultarTarjetasEstudio(idsAocultar) {
+        const tarjetas = this.contenedorEstudios.querySelectorAll(".chk-wrapper");
+        tarjetas.forEach((tarjeta) => {
+            const input = tarjeta.querySelector(".chk-estudio");
+            tarjeta.classList.toggle("oculto", !!(input && idsAocultar.includes(input.value)));
+        });
+    }
+    marcarEstudiosPorId(ids) {
+        const checkboxes = this.contenedorEstudios.querySelectorAll(".chk-estudio");
+        checkboxes.forEach(chk => {
+            chk.checked = ids.includes(chk.value);
+        });
     }
     get isMenor() {
         return this.chkEsMenor.checked;
@@ -242,7 +223,6 @@ export default class Cl_vLaboratorio {
         this.inCedula.value = this.inCedula.value.trim();
         return this.inCedula.value;
     }
-    // Getters
     get pacNombre() {
         return this.inNombre.value.trim();
     }
@@ -285,141 +265,91 @@ export default class Cl_vLaboratorio {
     get estRango() {
         return this.inEstRango.value.trim();
     }
-    // Getters Reportes específicos
-    // Getter de la fecha del selector (formato yyyy-mm-dd)
     get fechaReporteExamen() {
         return this.inFechaReporteExamen ? this.inFechaReporteExamen.value : "";
     }
-    // Getter del texto ingresado para buscar el examen (insensible a mayúsculas/minúsculas en el modelo)
     get nombreReporteExamen() {
         return this.inNombreReporteExamen ? this.inNombreReporteExamen.value : "";
     }
-    // Listener que se detona tanto si se tipea el nombre del examen ("input") como si se cambia la fecha ("change")
     onCambioFiltrosReporteExamen(callback) {
         const handler = () => callback(this.nombreReporteExamen, this.fechaReporteExamen);
-        if (this.inFechaReporteExamen) {
-            this.inFechaReporteExamen.addEventListener("change", handler);
-        }
-        if (this.inNombreReporteExamen) {
-            this.inNombreReporteExamen.addEventListener("input", handler);
-        }
+        this.inFechaReporteExamen && this.inFechaReporteExamen.addEventListener("change", handler);
+        this.inNombreReporteExamen && this.inNombreReporteExamen.addEventListener("input", handler);
     }
-    // Función para re-escribir el contador numérico en el cuadro estadístico
     setCantidadExamen(cantidad) {
-        if (this.lblCantidadExamen) {
-            this.lblCantidadExamen.innerText = cantidad.toString();
-        }
+        this.lblCantidadExamen && (this.lblCantidadExamen.innerText = cantidad.toString());
     }
-    //obtener estudios seleccionados
     getEstudiosSeleccionados() {
         const checkboxes = this.contenedorEstudios.querySelectorAll(".chk-estudio:checked");
         return Array.from(checkboxes).map(chk => chk.value);
     }
-    //actualizar tasa
     onActualizarTasa(callback) {
         this.btTasa.onclick = callback;
     }
-    //obtener url originales
     onOriginalesUrl(callback) { callback(); }
-    //agregar estudio
     onAgregarEstudio(callback) {
         this.formEstudio.onsubmit = (e) => { e.preventDefault(); callback(); };
     }
-    //registrar orden
     onRegistrarOrden(callback) {
         this.formPaciente.onsubmit = (e) => { e.preventDefault(); callback(); };
     }
-    //eliminar estudio
     onEliminarEstudio(callback) {
         this.manejadorEliminarEstudio = callback;
     }
-    //despachar orden
     onDespacharOrden(callback) {
         this.manejadorDespacharOrden = callback;
     }
-    //cambio de checks
     onCambioChecks(callback) {
         this.manejadorCambioChecks = callback;
     }
-    //buscar cedula paciente o representante
     onBuscarCedulaPaciente(callback) {
         const btn = document.getElementById("btn_buscarCedula");
-        if (btn) {
-            btn.onclick = () => {
-                const cedula = this.inCedula.value.trim();
-                if (!cedula) {
-                    this.mostrarToast("Escriba una Cédula antes de buscar.", "advertencia");
-                    return;
-                }
-                callback(cedula);
-            };
-        }
+        btn && (btn.onclick = () => callback(this.inCedula.value.trim()));
         const btnRep = document.getElementById("btn_buscarCedulaRep");
-        if (btnRep) {
-            btnRep.onclick = () => {
-                const cedulaRep = this.inCedulaRep.value.trim();
-                if (!cedulaRep) {
-                    this.mostrarToast("Escriba la Cédula del representante antes de buscar.", "advertencia");
-                    return;
-                }
-                callback(cedulaRep);
-            };
-        }
-        // Permitir buscar con Enter
+        btnRep && (btnRep.onclick = () => callback(this.inCedulaRep.value.trim()));
         this.inCedula.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
+            (e.key === "Enter") && (() => {
                 e.preventDefault();
-                const cedula = this.inCedula.value.trim();
-                if (cedula)
-                    callback(cedula);
-            }
+                callback(this.inCedula.value.trim());
+            })();
         });
         this.inCedulaRep.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
+            (e.key === "Enter") && (() => {
                 e.preventDefault();
-                const cedulaRep = this.inCedulaRep.value.trim();
-                if (cedulaRep)
-                    callback(cedulaRep);
-            }
+                callback(this.inCedulaRep.value.trim());
+            })();
         });
     }
-    //eliminar orden en espera
+    onInputCedula(callback) {
+        this.inCedula.addEventListener("input", () => callback(this.inCedula.value));
+    }
+    onInputCedulaRep(callback) {
+        this.inCedulaRep.addEventListener("input", () => callback(this.inCedulaRep.value));
+    }
     onEliminarOrdenEspera(callback) {
         this.manejadorEliminarOrdenEspera = callback;
     }
-    //editar orden en espera
     onEditarOrdenEspera(callback) {
         this.manejadorEditarOrdenEspera = callback;
     }
     onCancelarEdicion(callback) {
         this.btnCancelarEdicion.addEventListener("click", callback);
     }
-    //exportar caja
     onExportarCaja(callback) {
         this._cbExportarCaja = callback;
     }
-    //establecer tasa actual
     setTasaActual(tasa) {
-        if (this.inTasa)
-            this.inTasa.value = tasa.toString();
+        this.inTasa && (this.inTasa.value = tasa.toString());
         const lbl = document.getElementById("pedido_lblTasa");
-        if (lbl)
-            lbl.innerText = tasa.toFixed(2);
+        lbl && (lbl.innerText = tasa.toFixed(2));
     }
-    //establecer totales de factura
     setTotalesFactura(totalUsd, totalBs, horaRetiro) {
         this.lblTotalUSD.innerText = totalUsd.toFixed(2);
         this.lblTotalBs.innerText = totalBs.toFixed(2);
         this.lblHoraEntrega.innerText = horaRetiro;
     }
-    //renderizar estudios disponibles
     renderizarEstudiosDisponibles(estudios) {
-        this.contenedorEstudios.innerHTML = "";
-        if (estudios.length === 0) {
-            this.contenedorEstudios.innerHTML = "<div>No hay estudios en catálogo.</div>";
-            return;
-        }
-        //optimizar renderizado
+        this.contenedorEstudios.innerHTML = estudios.length === 0 ? "<div>No hay estudios en catálogo.</div>" : "";
         const fragmento = document.createDocumentFragment();
         estudios.forEach(e => {
             const div = document.createElement("div");
@@ -434,13 +364,8 @@ export default class Cl_vLaboratorio {
         });
         this.contenedorEstudios.appendChild(fragmento);
     }
-    //renderizar lista de estudios
     renderizarListaCatalogo(estudios) {
-        this.listaCatalogo.innerHTML = "";
-        if (estudios.length === 0) {
-            this.listaCatalogo.innerHTML = "<li>Catálogo vacío.</li>";
-            return;
-        }
+        this.listaCatalogo.innerHTML = estudios.length === 0 ? "<li>Catálogo vacío.</li>" : "";
         const fragmento = document.createDocumentFragment();
         estudios.forEach(e => {
             const li = document.createElement("li");
@@ -450,71 +375,63 @@ export default class Cl_vLaboratorio {
         <button class="btn-del" data-id="${e.id}">🗑️</button>
       `;
             fragmento.appendChild(li);
-            li.querySelector(".btn-del")?.addEventListener("click", () => this.manejadorEliminarEstudio(e.id));
+            li.querySelector(".btn-del")?.addEventListener("click", () => this.manejadorEliminarEstudio?.(e.id));
         });
         this.listaCatalogo.appendChild(fragmento);
     }
-    //renderizar ordenes en espera (REFACTORIZACIÓN MVC: Ya no almacena datos en caché local)
     renderizarOrdenesEspera(ordenes) {
         this._renderizarTarjetasEspera(ordenes);
     }
-    //renderizar tarjetas de espera
     _renderizarTarjetasEspera(ordenes) {
-        this.tablaEspera.innerHTML = "";
-        if (ordenes.length === 0) {
-            this.tablaEspera.innerHTML = "No hay órdenes en espera.";
-            return;
-        }
-        const fragmento = document.createDocumentFragment();
-        ordenes.forEach(o => {
-            const cedulaAPintar = (!o.cedula || o.cedula.trim() === "") ? "MENOR" : o.cedula;
-            let badgeEspera = "";
-            if (o.fechaRegistro) {
-                const minutos = o.obtenerMinutosEspera();
-                if (minutos >= 0) {
-                    const esUrgente = minutos >= 60;
-                    const textoTiempo = minutos < 60 ? `${minutos} min` : `${Math.floor(minutos / 60)}h ${minutos % 60}m`;
-                    badgeEspera = `<span class="badge-espera ${esUrgente ? "urgente" : ""}">⏱️ ${textoTiempo}</span>`;
-                }
-            }
-            //crear div para cada orden en espera
-            const div = document.createElement("div");
-            div.className = "resultado-busqueda";
-            div.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-          <div>
-            <b>Orden ${o.id}</b> - C.I: ${cedulaAPintar} ${badgeEspera}
-            <br><small>${o.apellido} ${o.nombre} [${o.examenesSolicitados}]</small>
-            <br><span class="badge">EN ESPERA</span>
+        this.tablaEspera.innerHTML = ordenes.length === 0 ? "No hay órdenes en espera." : "";
+        ordenes.length > 0 && (() => {
+            const fragmento = document.createDocumentFragment();
+            ordenes.forEach(o => {
+                const cedulaAPintar = (!o.cedula || o.cedula.trim() === "") ? "MENOR" : o.cedula;
+                let badgeEspera = "";
+                o.fechaRegistro && (() => {
+                    const minutos = o.obtenerMinutosEspera();
+                    (minutos >= 0) && (() => {
+                        const esUrgente = minutos >= 60;
+                        const textoTiempo = minutos < 60 ? `${minutos} min` : `${Math.floor(minutos / 60)}h ${minutos % 60}m`;
+                        badgeEspera = `<span class="badge-espera ${esUrgente ? "urgente" : ""}">⏱️ ${textoTiempo}</span>`;
+                    })();
+                })();
+                const div = document.createElement("div");
+                div.className = "resultado-busqueda";
+                div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <b>Orden ${o.id}</b> - C.I: ${cedulaAPintar} ${badgeEspera}
+              <br><small>${o.apellido} ${o.nombre} [${o.examenesSolicitados}]</small>
+              <br><span class="badge">EN ESPERA</span>
+            </div>
+            <div style="display:flex; gap:5px;">
+              <button class="btn-editar-orden" data-id="${o.id}" style="cursor:pointer; background:none; border:none; font-size:16px;" title="Editar Teléfono y Correo">✏️</button>
+              <button class="btn-eliminar-orden" data-id="${o.id}" style="cursor:pointer; background:none; border:none; font-size:16px;" title="Eliminar Orden">🗑️</button>
+            </div>
           </div>
-          <div style="display:flex; gap:5px;">
-            <button class="btn-editar-orden" data-id="${o.id}" style="cursor:pointer; background:none; border:none; font-size:16px;" title="Editar Teléfono y Correo">✏️</button>
-            <button class="btn-eliminar-orden" data-id="${o.id}" style="cursor:pointer; background:none; border:none; font-size:16px;" title="Eliminar Orden">🗑️</button>
-          </div>
-        </div>
-      `;
-            fragmento.appendChild(div);
-        });
-        this.tablaEspera.appendChild(fragmento);
-        //eventos de botones de editar y eliminar orden en espera
-        this.tablaEspera.querySelectorAll(".btn-editar-orden").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const id = btn.dataset.id;
-                this.manejadorEditarOrdenEspera(id);
+        `;
+                fragmento.appendChild(div);
             });
-        });
-        this.tablaEspera.querySelectorAll(".btn-eliminar-orden").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const id = btn.dataset.id;
-                this.manejadorEliminarOrdenEspera(id);
+            this.tablaEspera.appendChild(fragmento);
+            this.tablaEspera.querySelectorAll(".btn-editar-orden").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const id = btn.dataset.id;
+                    this.manejadorEditarOrdenEspera?.(id);
+                });
             });
-        });
+            this.tablaEspera.querySelectorAll(".btn-eliminar-orden").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const id = btn.dataset.id;
+                    this.manejadorEliminarOrdenEspera?.(id);
+                });
+            });
+        })();
     }
-    //renderizar ordenes listas (REFACTORIZACIÓN MVC: Ya no almacena datos en caché local)
     renderizarOrdenesListas(ordenes) {
         this._renderizarTarjetasListas(ordenes);
     }
-    //renderizar tarjetas listas
     _renderizarTarjetasListas(ordenes) {
         this.tablaListos.innerHTML = ordenes.length === 0 ? "<p class='vacio-texto'>No hay resultados listos.</p>" : "";
         ordenes.forEach(o => {
@@ -540,81 +457,55 @@ export default class Cl_vLaboratorio {
       `;
             this.tablaListos.appendChild(div);
         });
-        //eventos de botones de despacho de orden
         this.tablaListos.querySelectorAll(".btn-despacho").forEach(btn => {
             btn.addEventListener("click", () => {
                 const id = btn.dataset.id;
                 const metodo = btn.dataset.metodo;
-                this.manejadorDespacharOrden(id, metodo);
+                this.manejadorDespacharOrden?.(id, metodo);
             });
         });
     }
-    //renderizar estadisticas
     renderizarEstadisticas(datos) {
         document.getElementById("rep_totalPacientes").innerText = datos.totalPacientes.toString();
         document.getElementById("rep_totalUSD").innerText = `${datos.totalUsd.toFixed(2)} $`;
         document.getElementById("rep_totalBs").innerText = `${datos.totalBs.toFixed(2)} Bs`;
         document.getElementById("rep_estudioTop").innerText = datos.estudioMasSolicitado;
     }
-    //mostrar toast
     mostrarToast(mensaje, tipo) {
         const iconos = { exito: "✓", error: "✗", info: "i", advertencia: "!" };
         const toast = document.createElement("div");
         toast.className = `toast ${tipo}`;
         toast.innerHTML = `<span>${iconos[tipo]}</span><span>${mensaje}</span>`;
         this.toastContainer.appendChild(toast);
-        // Forzar reflow para que la animación CSS se ejecute desde el estado inicial
         void toast.offsetWidth;
         toast.classList.add("visible");
         setTimeout(() => {
             toast.classList.remove("visible");
             toast.addEventListener("transitionend", () => toast.remove());
-            // Fallback por si falla transitionend (ej: pestaña inactiva)
             setTimeout(() => toast.remove(), 400);
         }, 3500);
     }
-    //mostrar spinner
     mostrarSpinner() {
         this.spinnerOverlay.classList.remove("oculto");
     }
-    //ocultar spinner
     ocultarSpinner() {
         this.spinnerOverlay.classList.add("oculto");
     }
-    //autocompletar paciente
-    autocompletarPaciente(orden) {
-        // Si la orden viene de un representante (Cédula empieza por CR o es MENOR)
-        if ((orden.cedula === "MENOR" || orden.cedula.startsWith("CR")) && orden.cedulaRepresentante) {
-            this.chkEsMenor.checked = true;
-            document.getElementById("adm_bloqueRepresentante")?.classList.remove("oculto");
-            document.getElementById("adm_bloqueCedulaPrincipal")?.classList.add("oculto");
-            this.inCedulaRep.value = orden.cedulaRepresentante;
-            this.inNombreRep.value = orden.nombreRepresentante;
-            this.inApellidoRep.value = orden.apellidoRepresentante;
-            this.inCedula.value = "";
-            this.inNombre.value = ""; // Dejar en blanco para el nuevo hijo
-            this.inApellido.value = orden.apellido; // Asumir mismo apellido
-            this.inFechaNac.value = ""; // Dejar en blanco para el nuevo hijo
-        }
-        else {
-            this.chkEsMenor.checked = false;
-            document.getElementById("adm_bloqueRepresentante")?.classList.add("oculto");
-            document.getElementById("adm_bloqueCedulaPrincipal")?.classList.remove("oculto");
-            this.inCedulaRep.value = "";
-            this.inNombreRep.value = "";
-            this.inApellidoRep.value = "";
-            this.inCedula.value = orden.cedula;
-            this.inNombre.value = orden.nombre;
-            this.inApellido.value = orden.apellido;
-            this.inFechaNac.value = orden.fechaRegistroISO;
-        }
-        // Autocompletar datos de contacto compartidos
+    autocompletarPaciente(orden, esMenor) {
+        this.chkEsMenor.checked = esMenor;
+        this.mostrarBloqueRepresentante(esMenor);
+        this.inCedulaRep.value = esMenor ? orden.cedulaRepresentante : "";
+        this.inNombreRep.value = esMenor ? orden.nombreRepresentante : "";
+        this.inApellidoRep.value = esMenor ? orden.apellidoRepresentante : "";
+        this.inCedula.value = esMenor ? "" : orden.cedula;
+        this.inNombre.value = esMenor ? "" : orden.nombre;
+        this.inApellido.value = orden.apellido;
+        this.inFechaNac.value = esMenor ? "" : orden.fechaRegistroISO;
         this.inSexo.value = orden.sexo;
         this.inTelefono.value = orden.telefono;
         this.inCorreo.value = orden.correo;
         this.inMetodoPago.value = orden.metodoPago;
     }
-    // Método privado para bloquear/desbloquear datos del paciente
     bloquearInputsPaciente(bloquear) {
         this.chkEsMenor.disabled = bloquear;
         this.inCedula.disabled = bloquear;
@@ -629,90 +520,61 @@ export default class Cl_vLaboratorio {
         this.inCorreo.disabled = bloquear;
         this.inMetodoPago.disabled = bloquear;
         const btnBuscar = document.getElementById("btn_buscarCedula");
-        if (btnBuscar)
-            btnBuscar.disabled = bloquear;
+        btnBuscar && (btnBuscar.disabled = bloquear);
         const btnBuscarRep = document.getElementById("btn_buscarCedulaRep");
-        if (btnBuscarRep)
-            btnBuscarRep.disabled = bloquear;
+        btnBuscarRep && (btnBuscarRep.disabled = bloquear);
     }
-    // Preparar la orden para su edición exclusiva de exámenes
     prepararEdicionOrden(orden) {
-        // Llenar todos los datos personales usando el historial
-        this.autocompletarPaciente(orden);
-        // Bloquear inputs para que solo se editen los exámenes
         this.bloquearInputsPaciente(true);
-        // Marcar los checkboxes correspondientes a los exámenes actuales
-        const examenesSolicitadosArray = orden.examenesSolicitados.split(", ").map(e => e.trim().toLowerCase());
-        const checkboxes = this.contenedorEstudios.querySelectorAll(".chk-estudio");
-        checkboxes.forEach(chk => {
-            const nombreExamenSpan = chk.nextElementSibling?.textContent?.toLowerCase() || "";
-            // Verificamos si el nombre del examen está en el array de exámenes de la orden
-            const debeEstarMarcado = examenesSolicitadosArray.some(ex => nombreExamenSpan.includes(ex));
-            chk.checked = debeEstarMarcado;
-        });
-        // Forzamos el recalculo de totales simulando que se cambiaron los checks
-        if (this.manejadorCambioChecks) {
-            this.manejadorCambioChecks();
-        }
-        // Cambiar botones al modo edición (azul)
+        this.manejadorCambioChecks && this.manejadorCambioChecks();
         this.btnProcesarOrden.innerText = "💾 Guardar Cambios";
         this.btnProcesarOrden.classList.add("modo-edicion");
         this.btnCancelarEdicion.classList.remove("oculto");
-        // Hacer scroll hacia arriba al formulario
         window.scrollTo({ top: 0, behavior: 'smooth' });
         this.mostrarToast(`Modo edición activado para la Orden #${orden.id}`, "info");
     }
-    //mostrar historial del paciente
     mostrarHistorialPaciente(ordenes) {
         const panel = document.getElementById("panel-historial-paciente");
-        if (!panel)
-            return;
-        if (ordenes.length === 0) {
-            panel.classList.add("oculto");
-            return;
-        }
-        //mostrar historial
-        panel.classList.remove("oculto");
-        panel.innerHTML = `<h4>📋 Historial del paciente (${ordenes.length} visita${ordenes.length > 1 ? "s" : ""})</h4>`;
-        ordenes.forEach(o => {
-            const item = document.createElement("div");
-            item.className = "historial-item";
-            item.innerHTML = `
-        <span class="historial-fecha">${o.fechaRegistro ? o.fechaRegistro.split(" ")[0] : "-"}</span>
-        <span>🔬 ${o.examenesSolicitados}</span>
-        <span style="margin-left:auto; font-weight:700;">$${o.montoTotal$.toFixed(2)}</span>
-      `;
-            panel.appendChild(item);
-        });
+        panel && (() => {
+            panel.classList.toggle("oculto", ordenes.length === 0);
+            ordenes.length > 0 && (() => {
+                panel.innerHTML = `<h4>📋 Historial del paciente (${ordenes.length} visita${ordenes.length > 1 ? "s" : ""})</h4>`;
+                ordenes.forEach(o => {
+                    const item = document.createElement("div");
+                    item.className = "historial-item";
+                    item.innerHTML = `
+            <span class="historial-fecha">${o.fechaRegistro ? o.fechaRegistro.split(" ")[0] : "-"}</span>
+            <span>🔬 ${o.examenesSolicitados}</span>
+            <span style="margin-left:auto; font-weight:700;">$${o.montoTotal$.toFixed(2)}</span>
+          `;
+                    panel.appendChild(item);
+                });
+            })();
+        })();
     }
-    //imprimir resultados
     imprimirReporteResultados(orden) {
         const html = this.generarHtmlReporteResultados(orden);
         this.abrirVentanaEImprimir(html);
     }
-    //imprimir reporte de caja
     imprimirReporteCaja(laboratorio) {
         const html = this.generarHtmlReporteCaja(laboratorio);
         this.abrirVentanaEImprimir(html);
     }
-    //abrir ventana e imprimir
     abrirVentanaEImprimir(html) {
         const ventana = window.open("", "_blank");
-        if (!ventana)
-            return;
-        ventana.document.write(html);
-        ventana.document.close();
-        ventana.focus();
-        ventana.print();
-        setTimeout(() => ventana.close(), 500);
+        ventana && (() => {
+            ventana.document.write(html);
+            ventana.document.close();
+            ventana.focus();
+            ventana.print();
+            setTimeout(() => ventana.close(), 500);
+        })();
     }
-    //generar html reporte resultados
     generarHtmlReporteResultados(orden) {
         const titulo = `Reporte de Resultados - Orden #${orden.id}`;
-        let cedulaFormateada = orden.cedula;
-        if (cedulaFormateada !== "MENOR" && !cedulaFormateada.startsWith("V-") && !cedulaFormateada.startsWith("CR")) {
-            cedulaFormateada = "V-" + cedulaFormateada;
-        }
+        const cedulaFormateada = (orden.cedula !== "MENOR" && !orden.cedula.startsWith("V-") && !orden.cedula.startsWith("CR"))
+            ? "V-" + orden.cedula
+            : orden.cedula;
         return `
 <!DOCTYPE html>
 <html lang="es">
@@ -805,7 +667,6 @@ export default class Cl_vLaboratorio {
 </body>
 </html>`;
     }
-    //generar html reporte caja
     generarHtmlReporteCaja(laboratorio) {
         const fecha = new Date().toLocaleDateString();
         const hora = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -854,105 +715,244 @@ export default class Cl_vLaboratorio {
 </body>
 </html>`;
     }
-    //limpiar formulario paciente
     limpiarFormPaciente() {
         this.formPaciente.reset();
         this.setTotalesFactura(0, 0, "");
         const panel = document.getElementById("panel-historial-paciente");
-        if (panel)
-            panel.classList.add("oculto");
+        panel && panel.classList.add("oculto");
         document.getElementById("adm_bloqueRepresentante")?.classList.add("oculto");
         document.getElementById("adm_bloqueCedulaPrincipal")?.classList.remove("oculto");
         const checkboxes = this.contenedorEstudios.querySelectorAll(".chk-estudio");
         checkboxes.forEach(chk => {
             chk.checked = false;
         });
-        // Desbloquear inputs (por si veníamos de una edición)
         this.bloquearInputsPaciente(false);
-        // Restaurar botones a modo creación
-        if (this.btnProcesarOrden) {
+        this.btnProcesarOrden && (() => {
             this.btnProcesarOrden.innerText = "💳 Confirmar Facturación y Procesar Orden";
-            this.btnProcesarOrden.classList.remove("modo-edicion"); // Restaurar color verde
-        }
-        if (this.btnCancelarEdicion) {
-            this.btnCancelarEdicion.classList.add("oculto");
-        }
+            this.btnProcesarOrden.classList.remove("modo-edicion");
+        })();
+        this.btnCancelarEdicion && this.btnCancelarEdicion.classList.add("oculto");
     }
-    //limpiar formulario estudio
     limpiarFormEstudio() {
         this.formEstudio.reset();
     }
-    //filtrar estudios busqueda
     onFiltrarEstudiosBusqueda(callback) {
         const inputBuscar = document.getElementById("pac_buscarEstudioInput");
-        if (inputBuscar)
-            inputBuscar.oninput = () => callback(inputBuscar.value.trim());
+        inputBuscar && (inputBuscar.oninput = () => callback(inputBuscar.value.trim()));
     }
-    //obtener texto busqueda bandeja
     get textoBusquedaBandeja() {
         const input = document.getElementById("input_buscarBandeja");
         return input ? input.value.trim() : "";
     }
-    //filtrar bandeja
     onFiltrarBandeja(callback) {
         this.manejadorFiltrarBandeja = callback;
     }
-    //confirmar accion
     confirmarAccion(mensaje) {
         return new Promise((resolve) => {
-            // Prevención de doble clic: Si ya hay un modal abierto, no abrimos otro.
-            if (document.querySelector(".modal-overlay")) {
-                return resolve(false);
-            }
-            const overlay = document.createElement("div");
-            overlay.className = "modal-overlay";
-            const modal = document.createElement("div");
-            modal.className = "modal-confirm modal-enter";
-            modal.innerHTML = `
-        <div class="modal-icon">⚠️</div>
-        <div class="modal-body">
-          <p class="modal-text">${mensaje}</p>
-        </div>
-        <div class="modal-actions">
-          <button class="btn-modal-cancel">Cancelar</button>
-          <button class="btn-modal-confirm">Aceptar</button>
-        </div>
-      `;
-            overlay.appendChild(modal);
-            document.body.appendChild(overlay);
-            void modal.offsetWidth;
-            modal.classList.remove("modal-enter");
-            // Función interna para cerrar el modal y disparar la animación de salida
-            const cerrarModal = (resultado) => {
-                btnConfirm.disabled = true;
-                btnCancel.disabled = true;
-                modal.classList.add("modal-leave"); // Activa la animación de "achicarse" y desvanecerse
-                overlay.classList.add("modal-leave-overlay");
-                let transicionCompletada = false;
-                const finalizar = () => {
-                    if (transicionCompletada)
-                        return;
-                    transicionCompletada = true;
-                    if (document.body.contains(overlay)) {
-                        document.body.removeChild(overlay); // Se limpia el DOM para no dejar basura
-                    }
-                    resolve(resultado); // Se resuelve la Promesa avisándole al Controlador la decisión
-                };
-                // Esperamos a que la animación CSS de salida termine
-                modal.addEventListener("transitionend", finalizar);
-                // Fallback de seguridad por si falla el evento transitionend del navegador
-                setTimeout(finalizar, 300);
-            };
-            const btnConfirm = modal.querySelector(".btn-modal-confirm");
-            const btnCancel = modal.querySelector(".btn-modal-cancel");
-            btnConfirm.addEventListener("mousedown", () => cerrarModal(true));
-            btnCancel.addEventListener("mousedown", () => cerrarModal(false));
-            overlay.addEventListener("mousedown", (e) => {
-                if (e.target === overlay) {
-                    cerrarModal(false);
-                }
-            });
+            document.querySelector(".modal-overlay")
+                ? resolve(false)
+                : (() => {
+                    const overlay = document.createElement("div");
+                    overlay.className = "modal-overlay";
+                    const modal = document.createElement("div");
+                    modal.className = "modal-confirm modal-enter";
+                    modal.innerHTML = `
+              <div class="modal-icon">⚠️</div>
+              <div class="modal-body">
+                <p class="modal-text">${mensaje}</p>
+              </div>
+              <div class="modal-actions">
+                <button class="btn-modal-cancel">Cancelar</button>
+                <button class="btn-modal-confirm">Aceptar</button>
+              </div>
+            `;
+                    overlay.appendChild(modal);
+                    document.body.appendChild(overlay);
+                    void modal.offsetWidth;
+                    modal.classList.remove("modal-enter");
+                    const cerrarModal = (resultado) => {
+                        btnConfirm.disabled = true;
+                        btnCancel.disabled = true;
+                        modal.classList.add("modal-leave");
+                        overlay.classList.add("modal-leave-overlay");
+                        let transicionCompletada = false;
+                        const finalizar = () => {
+                            !transicionCompletada && (() => {
+                                transicionCompletada = true;
+                                document.body.contains(overlay) && document.body.removeChild(overlay);
+                                resolve(resultado);
+                            })();
+                        };
+                        modal.addEventListener("transitionend", finalizar);
+                        setTimeout(finalizar, 300);
+                    };
+                    const btnConfirm = modal.querySelector(".btn-modal-confirm");
+                    const btnCancel = modal.querySelector(".btn-modal-cancel");
+                    btnConfirm.addEventListener("mousedown", () => cerrarModal(true));
+                    btnCancel.addEventListener("mousedown", () => cerrarModal(false));
+                    overlay.addEventListener("mousedown", (e) => {
+                        (e.target === overlay) && cerrarModal(false);
+                    });
+                })();
         });
+    }
+    onFiltrosReporteGralCambio(callback) {
+        const handler = () => {
+            callback({
+                examen: this.repFiltroExamen?.value || "",
+                fechaDesde: this.repFiltroFechaDesde?.value || "",
+                fechaHasta: this.repFiltroFechaHasta?.value || "",
+                paciente: this.repFiltroPaciente?.value || ""
+            });
+        };
+        this.repFiltroExamen && this.repFiltroExamen.addEventListener("input", handler);
+        this.repFiltroFechaDesde && this.repFiltroFechaDesde.addEventListener("change", handler);
+        this.repFiltroFechaHasta && this.repFiltroFechaHasta.addEventListener("change", handler);
+        this.repFiltroPaciente && this.repFiltroPaciente.addEventListener("input", handler);
+    }
+    renderizarReporteExamenes(datos) {
+        this.tbodyReporteExamenes && (() => {
+            this.tbodyReporteExamenes.innerHTML = datos.length === 0
+                ? `<tr><td colspan="2" style="text-align:center; padding:15px;">No se encontraron exámenes.</td></tr>`
+                : "";
+            datos.length > 0 && (() => {
+                const fragmento = document.createDocumentFragment();
+                datos.forEach(row => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+            <td>${row.examen}</td>
+            <td style="text-align:center;"><strong>${row.cantidad}</strong></td>
+          `;
+                    fragmento.appendChild(tr);
+                });
+                this.tbodyReporteExamenes.appendChild(fragmento);
+            })();
+        })();
+    }
+    renderizarReporteSemana(ordenes) {
+        const tbody = document.getElementById("tbody_reporte_semana");
+        const lblTotal = document.getElementById("rep_semana_total");
+        if (!tbody)
+            return;
+        if (lblTotal)
+            lblTotal.innerText = ordenes.length.toString();
+        if (ordenes.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px; color:#64748b;">✅ No hay órdenes con más de una semana en el sistema.</td></tr>`;
+            return;
+        }
+        const ahora = new Date();
+        const fragmento = document.createDocumentFragment();
+        ordenes.forEach((o) => {
+            const cedulaAPintar = (!o.cedula || o.cedula.trim() === "") ? "MENOR" : o.cedula;
+            let diasTexto = "-";
+            try {
+                const normalizado = o.fechaRegistro.replace(",", "").trim();
+                const partes = normalizado.split(" ");
+                const seg = partes[0].split("/");
+                const dia = parseInt(seg[0], 10);
+                const mes = parseInt(seg[1], 10) - 1;
+                const anio = parseInt(seg[2], 10);
+                const fechaOrden = new Date(anio, mes, dia);
+                const diffMs = ahora.getTime() - fechaOrden.getTime();
+                const dias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                diasTexto = `${dias} día${dias !== 1 ? "s" : ""}`;
+            }
+            catch { }
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+        <td><strong>#${o.id}</strong></td>
+        <td>${o.apellido} ${o.nombre}</td>
+        <td>${cedulaAPintar}</td>
+        <td>${o.fechaRegistro ? o.fechaRegistro.split(" ")[0] : "-"}</td>
+        <td style="color:#ef4444; font-weight:700;">${diasTexto}</td>
+        <td style="font-size:0.82rem;">${o.examenesSolicitados}</td>
+        <td><span class="badge" style="${o.status === 'Listo para Despacho' ? 'background:#059669;color:#fff;' : ''}">${o.status}</span></td>
+      `;
+            fragmento.appendChild(tr);
+        });
+        tbody.innerHTML = "";
+        tbody.appendChild(fragmento);
+    }
+    onExportarReporteSemana(callback) {
+        const btn = document.getElementById("btn_reporte_semana_imprimir");
+        btn && (btn.onclick = callback);
+    }
+    imprimirReporteSemana(ordenes) {
+        const html = this.generarHtmlReporteSemana(ordenes);
+        this.abrirVentanaEImprimir(html);
+    }
+    generarHtmlReporteSemana(ordenes) {
+        const fecha = new Date().toLocaleDateString();
+        const hora = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        const ahora = new Date();
+        const filas = ordenes.map((o) => {
+            const cedulaAPintar = (!o.cedula || o.cedula.trim() === "") ? "MENOR" : o.cedula;
+            let diasTexto = "-";
+            try {
+                const normalizado = o.fechaRegistro.replace(",", "").trim();
+                const partes = normalizado.split(" ");
+                const seg = partes[0].split("/");
+                const dia = parseInt(seg[0], 10);
+                const mes = parseInt(seg[1], 10) - 1;
+                const anio = parseInt(seg[2], 10);
+                const fechaOrden = new Date(anio, mes, dia);
+                const dias = Math.floor((ahora.getTime() - fechaOrden.getTime()) / (1000 * 60 * 60 * 24));
+                diasTexto = `${dias} día${dias !== 1 ? "s" : ""}`;
+            }
+            catch { }
+            return `
+        <tr>
+          <td>#${o.id}</td>
+          <td>${o.apellido} ${o.nombre}</td>
+          <td>${cedulaAPintar}</td>
+          <td>${o.fechaRegistro ? o.fechaRegistro.split(" ")[0] : "-"}</td>
+          <td style="color:#dc2626; font-weight:700;">${diasTexto}</td>
+          <td>${o.examenesSolicitados}</td>
+          <td>${o.status}</td>
+        </tr>`;
+        }).join("");
+        return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <title>Reporte - Órdenes con más de una semana</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    body { padding: 50px; color: #000; font-size: 13px; }
+    h1 { font-size: 24px; font-weight: 900; font-style: italic; }
+    .subtitulo { font-size: 12px; color: #64748b; margin-bottom: 6px; }
+    .alerta-criterio { font-size: 12px; background:#fef2f2; border:1px solid #fecaca; color:#991b1b; padding:8px 12px; border-radius:6px; margin-bottom:20px; display:inline-block; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    th { background: #0f172a; color: white; padding: 9px 12px; text-align: left; font-size: 11px; text-transform: uppercase; }
+    td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 12px; }
+    tr:nth-child(even) td { background: #f8fafc; }
+    .pie { margin-top: 30px; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Git Force <span style="font-size:13px;font-style:normal;">C.A.</span></h1>
+  <p class="subtitulo">Reporte de Órdenes con más de una semana en el sistema — ${fecha} a las ${hora}</p>
+  <p class="alerta-criterio">⚠️ Criterio: fecha de registro anterior a hace 7 días (> ${fecha})</p>
+  <p style="margin-bottom:10px; font-size:13px;"><strong>Total de registros: ${ordenes.length}</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>N° Orden</th>
+        <th>Paciente</th>
+        <th>C.I.</th>
+        <th>Fecha Registro</th>
+        <th>Días en Sistema</th>
+        <th>Exámenes Solicitados</th>
+        <th>Estatus</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${filas}
+    </tbody>
+  </table>
+  <p class="pie">Generado por el Sistema de Laboratorio Git Force C.A. — © 2026 UCLA DCyT</p>
+</body>
+</html>`;
     }
 }
 //# sourceMappingURL=Cl_vLaboratorio.js.map

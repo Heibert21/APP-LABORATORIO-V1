@@ -1,32 +1,31 @@
-/* ================================================================= */
-/* 🎨 CONFIGURACIÓN GENERAL Y PALETA CLÍNICA PREMIUM                  */
-/* ================================================================= */
+﻿
+
 :root {
   --bg-app: #f4f7fa;
-  /* Gris hospitalario suave */
+  
   --blanco: #ffffff;
   --texto-oscuro: #0f172a;
-  /* Azul pizarra corporativo */
+  
   --texto-mutado: #64748b;
   --color-borde: #cbd5e1;
   --color-foco: #3b82f6;
 
-  /* Identidad de Marca Unificada GitForce */
+  
   --primario: #0284c7;
-  /* Azul Clínico / Celeste Claro */
+  
   --primario-hover: #0369a1;
   --secundario: #475569;
   --exito: #10b981;
   --exito-hover: #059669;
 
-  /* NUEVO: Bloques de Firma y Alertas en Tonos Cálidos Profesionales */
+  
   --pago-bg: #0f172a;
-  /* Azul Marino Profundo */
+  
   --pago-borde: #1e293b;
   --alerta-calida-bg: #fff7ed;
-  /* Naranja/Crema Pastel Sutil (Fuera de Rango) */
+  
   --alerta-calida-texto: #c2410c;
-  /* Texto Óxido de alto contraste */
+  
   --alerta-calida-borde: #ffedd5;
 }
 
@@ -43,7 +42,6 @@ body {
   line-height: 1.5;
 }
 
-/* Header Premium */
 .header-app {
   background: linear-gradient(135deg, #0b1528 0%, #1e3a8a 100%);
   color: var(--blanco);
@@ -64,9 +62,6 @@ body {
   font-size: 0.95rem;
 }
 
-/* ================================================================= */
-/* 🗂️ MAQUETACIÓN DASHBOARD SIDEBAR + MAIN CONTENT                  */
-/* ================================================================= */
 .dashboard-container {
   display: grid;
   grid-template-columns: 340px 1fr;
@@ -112,7 +107,6 @@ body {
   border-top: 2px dashed #e2e8f0;
 }
 
-/* Lista de Muestras en Espera Técnico */
 .bandeja-scroll-monitor {
   max-height: 280px;
   overflow-y: auto;
@@ -181,15 +175,11 @@ body {
   font-size: 0.75rem;
 }
 
-/* ================================================================= */
-/* 🔬 COLUMNA MATRIZ MÉDICA (FILAS EN COLUMNAS ALINEADAS PERFECTAS)  */
-/* ================================================================= */
 .main-content-panel {
   display: flex;
   flex-direction: column;
 }
 
-/* Cabecera Demográfica */
 .grid-form {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -214,7 +204,6 @@ body {
   margin-top: 15px;
 }
 
-/* Fila médica estructurada en 3 columnas rígidas alineadas de forma impecable */
 .fila-medica {
   display: grid;
   grid-template-columns: 1fr 160px 140px;
@@ -268,14 +257,11 @@ body {
   font-weight: 600;
 }
 
-/* ================================================================= */
-/* 🚨 REQUERIMIENTO CLAVE: RESALTADO CÁLIDO PASTEL FUERA DE RANGO    */
-/* ================================================================= */
 .border-pago {
   background-color: var(--alerta-calida-bg) !important;
   border: 1px solid var(--alerta-calida-borde) !important;
   border-left: 6px solid var(--alerta-border) !important;
-  /* Resaltado naranja clínico */
+  
 }
 
 .border-pago .label-medico {
@@ -286,9 +272,6 @@ body {
   color: var(--alerta-calida-texto);
 }
 
-/* ================================================================= */
-/* ✍️ PANEL DE VALIDACIÓN Y FIRMA (AZUL MARINO IGUAL AL LAB)         */
-/* ================================================================= */
 .area-firma-profesional {
   background-color: var(--pago-bg) !important;
   border: 1px solid var(--pago-borde) !important;
@@ -334,7 +317,6 @@ body {
   border-color: var(--primario);
 }
 
-/* Estado Vacio */
 .estado-vacio-panel {
   text-align: center;
   padding: 50px 20px;
@@ -361,7 +343,6 @@ body {
   max-width: 400px;
 }
 
-/* Botonería */
 .btn-bloque {
   width: 100%;
   padding: 12px;
@@ -409,9 +390,6 @@ body {
   display: none !important;
 }
 
-/* ================================================================= */
-/* 📱 le agregamos el RESPONSIVE DESIGN para las vistas de celulares y tabletas                          */
-/* ================================================================= */
 @media (max-width: 992px) {
   .dashboard-container {
     grid-template-columns: 1fr;

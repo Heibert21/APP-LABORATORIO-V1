@@ -1,4 +1,4 @@
-import { IResultadoExamen } from "../interfaces/IResultadoExamen.js";
+﻿import { IResultadoExamen } from "../interfaces/IResultadoExamen.js";
 
 export default class Cl_mOrdenBio {
   private _id: string = "";
@@ -22,18 +22,18 @@ export default class Cl_mOrdenBio {
   private _resultados: IResultadoExamen[] = [];
 
   constructor(datos: any) {
-    // Convertir edad numérica a formato string si es necesario antes de hidratar
+
     if (typeof datos.edad === "number") {
       datos.edad = `${datos.edad} Año(s)`;
     }
-    // Hidratar masivamente todos los campos
+
     this.hidratarDesde(datos);
-    // Manejo especial de cédula para menores
+
     const edadAnios = Cl_mOrdenBio.convertirEdadAAños(this._edad);
     const cedulaInput = String(datos.cedula || "").trim();
     this._cedula = (edadAnios <= 9 && cedulaInput === "") ? "MENOR" : cedulaInput;
   }
-  // GETTERS Y SETTERS
+
   public get id(): string {
     return this._id;
   }
@@ -148,35 +148,35 @@ export default class Cl_mOrdenBio {
   public set resultados(value: IResultadoExamen[]) {
     this._resultados = value;
   }
-  // --- LÓGICA Para Calcular la Edad de los Pacientes
+
   public static calcularEdad(fechaNacimientoStr: string): string {
     if (!fechaNacimientoStr) return "0 Años";
     const fechaNac = new Date(fechaNacimientoStr);
     const fechaActual = new Date();
-    // SI LA FECHA DE NACIMIENTO ES MAYOR A LA FECHA ACTUAL, RETORNAR 0 AÑOS
+
     if (fechaNac > fechaActual) return "0 Años";
     let anos = fechaActual.getFullYear() - fechaNac.getFullYear();
     let meses = fechaActual.getMonth() - fechaNac.getMonth();
     let dias = fechaActual.getDate() - fechaNac.getDate();
-    // Si los dias son negativos, se resta 1 mes y se suma el ultimo dia del mes anterior
+
     if (dias < 0) {
       meses--;
       const ultimoDiaMesAnterior = new Date(fechaActual.getFullYear(), fechaActual.getMonth(), 0).getDate();
       dias += ultimoDiaMesAnterior;
     }
-    // Si los meses son negativos, se resta 1 año y se suma 12 meses
+
     if (meses < 0) {
       anos--;
       meses += 12;
     }
-    // SI TIENE 1 AÑO O MAS SE MOSTRARAN AÑOS Y MESES
+
     if (anos >= 1) {
       if (meses > 0) {
         return `${anos} Año${anos > 1 ? "s" : ""} y ${meses} Mes${meses > 1 ? "es" : ""}`;
       }
       return `${anos} Año${anos > 1 ? "s" : ""}`;
     }
-    // Si tiene menos de 1 año pero al menos 1 mes
+
     if (meses >= 1) {
       const semanas = Math.floor(dias / 7);
       const diasRestantes = dias % 7;
@@ -186,49 +186,49 @@ export default class Cl_mOrdenBio {
       }
       return resultado;
     }
-    // Si tiene menos de 1 mes (calculamos semanas y días)
+
     const totalDias = dias;
     const semanas = Math.floor(totalDias / 7);
     const diasRestantes = totalDias % 7;
-    // SI TIENE 1 SEMANA O MAS SE MOSTRARAN SEMANAS Y DIAS
+
     if (semanas >= 1) {
       if (diasRestantes > 0) {
         return `${semanas} Semana${semanas > 1 ? "s" : ""} y ${diasRestantes} Día${diasRestantes > 1 ? "s" : ""}`;
       }
       return `${semanas} Semana${semanas > 1 ? "s" : ""}`;
     }
-    // Si tiene menos de 1 semana se mostraran dias
+
     return `${totalDias} Día${totalDias !== 1 ? "s" : ""}`;
   }
-  // metodo para calcular la edad en años
+
   public static convertirEdadAAños(edad: string | number): number {
     if (typeof edad === "number") return edad;
     if (!edad) return 0;
-    // si la edad esta en años, meses, semanas o dias, se convierte a años
+
     const matchAnios = edad.match(/^(\d+(?:\.\d+)?)\s*Año/i);
     if (matchAnios) {
       return parseFloat(matchAnios[1]);
     }
-    // si la edad esta en meses, se convierte a años
+
     const matchMeses = edad.match(/^(\d+(?:\.\d+)?)\s*Mes/i);
     if (matchMeses) {
       return parseFloat(matchMeses[1]) / 12;
     }
-    // si la edad esta en semanas, se convierte a años
+
     const matchSemanas = edad.match(/^(\d+(?:\.\d+)?)\s*Semana/i);
     if (matchSemanas) {
       return parseFloat(matchSemanas[1]) / 52.1786;
     }
-    // si la edad esta en dias, se convierte a años
+
     const matchDias = edad.match(/^(\d+(?:\.\d+)?)\s*Día/i);
     if (matchDias) {
       return parseFloat(matchDias[1]) / 365.25;
     }
-    // si la edad no esta en años, meses, semanas o dias, se convierte a años
+
     const num = parseFloat(edad);
     return isNaN(num) ? 0 : num;
   }
-  // Metodo que permite desglosar los examenes solicitados
+
   public desglosarExamenes(): { examen: string; cantidad: number }[] {
     const listado: { examen: string; cantidad: number }[] = [];
     if (!this._examenesSolicitados) {
@@ -243,7 +243,7 @@ export default class Cl_mOrdenBio {
     });
     return listado;
   }
-  // Regla del Bioanalista integrada aquí
+
   public registrarValorResultado(parametro: string, valor: string): void {
     const item = this._resultados.find(r => r.parametro === parametro);
     if (item) {
@@ -257,7 +257,7 @@ export default class Cl_mOrdenBio {
       item.resultado = valorLimpio;
     }
   }
-  //Metodo que permite validar el rango de referencia de un parametro
+
   public static validarRangoTexto(valor: string, rangoTexto: string): boolean {
     const rangoLimpio = rangoTexto.replace("Ref:", "").trim();
     const partesRango = rangoLimpio.split("-");
@@ -269,7 +269,7 @@ export default class Cl_mOrdenBio {
     }
     return false;
   }
-  //Metodo que permite convertir un objeto a JSON
+
   public toJSON() {
     return {
       id: this.id,
@@ -293,7 +293,7 @@ export default class Cl_mOrdenBio {
       resultados: this.resultados
     };
   }
-  // Metodo que permite hidratar los datos del modelo
+
   public hidratarDesde(datos: any): void {
     this._id = String(datos.id ?? "");
     this._cedula = datos.cedula ?? "";
@@ -315,16 +315,16 @@ export default class Cl_mOrdenBio {
     this._licBioanalista = datos.licBioanalista ?? "";
     this._resultados = datos.resultados ?? [];
   }
-  // Metodo que permite generar la cedula de un paciente menor
+
   public static generarCedulaMenor(cedulaRep: string): string {
     const randomNum = Math.floor(Math.random() * 900) + 100;
     return `CR${cedulaRep}-${randomNum}`;
   }
-  // Metodo que permite filtrar los datos del modelo
+
   public coincideConFiltro(textoBusqueda: string): boolean {
     const textoFiltro = textoBusqueda.trim().toLowerCase();
     if (!textoFiltro) return true;
-    //  Se convierte a texto y se busca el valor
+
     return Boolean(
       String(this._id).toLowerCase().includes(textoFiltro) ||
       this._nombre.toLowerCase().includes(textoFiltro) ||
@@ -335,7 +335,7 @@ export default class Cl_mOrdenBio {
       (this._apellidoRepresentante && this._apellidoRepresentante.toLowerCase().includes(textoFiltro))
     );
   }
-  // Metodo que permite obtener los minutos de espera
+
   public obtenerMinutosEspera(): number {
     if (!this._fechaRegistro) return -1;
     try {
@@ -357,7 +357,7 @@ export default class Cl_mOrdenBio {
       return -1;
     }
   }
-  // Metodo que permite obtener la fecha de registro en formato ISO
+
   public get fechaRegistroISO(): string {
     if (!this._fechaRegistro) return "";
     try {
@@ -371,15 +371,15 @@ export default class Cl_mOrdenBio {
           return `${anio}-${mes}-${dia}`;
         }
       }
-      // Se silencia el error y se retorna vacío si ocurre algún error de formato o parseo
+
     } catch { }
     return "";
   }
-  // Metodo que permite obtener el titulo del reporte
+
   public obtenerTituloReporte(): string {
     return `Reporte de Resultados - Orden #${this.id}`;
   }
-  // Metodo que permite obtener el contenido del reporte
+
   public obtenerContenidoReporte(): string {
     let cedulaFormateada = this.cedula;
     if (cedulaFormateada !== "MENOR" && !cedulaFormateada.startsWith("V-") && !cedulaFormateada.startsWith("CR")) {

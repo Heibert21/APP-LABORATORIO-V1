@@ -1,18 +1,40 @@
-import Cl_sMockApi from "./Cl_sMockApi.js";
+﻿import Cl_sMockApi from "./Cl_sMockApi.js";
 
 export default class Cl_sOrdenBio extends Cl_sMockApi {
 
-  private static urlOrdenes = "https://6a1866f21878294b597d0b1b.mockapi.io/ordenes";
-  // --- Métodos Requeridos exactamente por Cl_cOrdenBio ---
+  
   static async obtenerOrdenes(): Promise<any[]> {
-    return await this.get(this.urlOrdenes);
+    const resultado = await super.getTabla({ tabla: "ordenes" });
+    return resultado.tabla;
   }
-  //obtener orden por id
+
+  
   static async buscarOrdenPorId(id: string): Promise<any> {
-    return await this.get(`${this.urlOrdenes}/${id}`);
+
+    if (!id || id.trim() === "") return null;
+    const resultado = await super.getRegistro({ tabla: "ordenes", id });
+    return resultado.ok ? resultado.data : null;
   }
-  //despachar o cerrar orden
+
+  
   static async despacharOCerrarOrden(id: string, ordenActualizada: any): Promise<{ ok: boolean; mensaje: string }> {
-    return await this.put(`${this.urlOrdenes}/${id}`, ordenActualizada);
+
+    if (!id || id.trim() === "") {
+      return { ok: false, mensaje: "El ID de la orden es obligatorio." };
+    }
+
+    const estadosValidos = ["En Espera", "Listo para Despacho"];
+    if (ordenActualizada.status && !estadosValidos.includes(ordenActualizada.status)) {
+      return { ok: false, mensaje: "Estado de orden no válido." };
+    }
+
+    const uri = `${super.getUri("ordenes")}/${id}`;
+    const respuesta = await super.fetchMockApi({ method: "PUT", uri, body: ordenActualizada });
+
+    if (!respuesta.ok) {
+      return { ok: false, mensaje: "Error al actualizar el estado de la orden." };
+    }
+
+    return { ok: true, mensaje: "Orden actualizada correctamente." };
   }
-}
+}

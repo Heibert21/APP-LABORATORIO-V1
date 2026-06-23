@@ -1,4 +1,4 @@
-import { I_vLaboratorio } from "../interfaces/I_vLaboratorio.js";
+﻿import { I_vLaboratorio } from "../interfaces/I_vLaboratorio.js";
 import Cl_mLaboratorio from "../models/Cl_mLaboratorio.js";
 import Cl_mOrdenBio from "../models/Cl_mOrdenBio.js";
 import Cl_sLaboratorio from "../services/Cl_sLaboratorio.js";
@@ -24,6 +24,28 @@ export default class Cl_cLaboratorio {
     this.vista.onCambioChecks(() => this.recalcularTotalesEnTiempoReal());
 
     this.vista.onBuscarCedulaPaciente((cedula) => this.buscarPacientePorCedula(cedula));
+    this.vista.onInputCedula((valor) => {
+      this.vista.setCedula(valor.replace(/\D/g, ""));
+    });
+    this.vista.onInputCedulaRep((valor) => {
+
+      this.vista.setCedulaRep(valor.replace(/[^vVeE0-9-]/g, ""));
+    });
+    
+
+    this.vista.onCambioEsMenor((esMenor) => {
+      this.vista.mostrarBloqueRepresentante(esMenor);
+      this.vista.limpiarCamposCedula();
+    });
+    this.vista.onFiltrarEstudiosBusqueda((texto) => {
+      const idsAocultar = this.catalogoEstudiosCoche
+        .filter(estudio => {
+          const contenidoBuscable = `${estudio.codigo || estudio.id} ${estudio.nombre}`.toLowerCase();
+          return !contenidoBuscable.includes(texto.toLowerCase());
+        })
+        .map(e => String(e.id));
+      this.vista.ocultarTarjetasEstudio(idsAocultar);
+    });
 
     this.vista.onExportarCaja(() => this.procesarExportarCaja());
 
@@ -32,16 +54,23 @@ export default class Cl_cLaboratorio {
     this.vista.onCancelarEdicion(() => this.cancelarEdicionActual());
     this.vista.onCambioFiltrosReporteExamen((nombre, fecha) => this.procesarCambioFiltrosExamen(nombre, fecha));
 
-    // REFACTORIZACIÓN MVC: El controlador se suscribe al evento de filtrado de búsqueda de la vista
     this.vista.onFiltrarBandeja((texto) => this.procesarFiltradoBandeja(texto));
+
+    if ((this.vista as any).onFiltrosReporteGralCambio) {
+      (this.vista as any).onFiltrosReporteGralCambio((filtros: any) => this.procesarReporteGeneral(filtros));
+    }
+
+    if ((this.vista as any).onExportarReporteSemana) {
+      (this.vista as any).onExportarReporteSemana(() => this.procesarExportarReporteSemana());
+    }
   }
-  // Metodo que permite cancelar la edicion actual
+
   private cancelarEdicionActual() {
     this.ordenEnEdicionId = null;
     this.vista.limpiarFormPaciente();
     this.vista.mostrarToast("Edición de orden cancelada.", "info");
   }
-  // Metodo que permite cargar las configuraciones y listas
+
   private async cargarConfiguracionesYListas() {
     this.vista.mostrarSpinner();
     try {
@@ -54,7 +83,7 @@ export default class Cl_cLaboratorio {
       this.vista.renderizarListaCatalogo(this.catalogoEstudiosCoche);
 
       this.vista.renderizarEstudiosDisponibles(this.catalogoEstudiosCoche);
-      // Se actualiza el monitor y las estadisticas
+
       await this.actualizarMonitorYEstadisticas();
     } catch (error) {
       console.error("Error crítico de inicialización asíncrona:", error);
@@ -63,16 +92,16 @@ export default class Cl_cLaboratorio {
       this.vista.ocultarSpinner();
     }
   }
-  // Metodo que permite actualizar el monitor y las estadisticas
+
   private async actualizarMonitorYEstadisticas() {
     try {
       const ordenesPlanas = await Cl_sLaboratorio.obtenerOrdenes();
       this.modeloGlobal.setOrdenes(ordenesPlanas);
       const textoFiltro = this.vista.textoBusquedaBandeja;
-      // Se filtran las ordenes pendientes y las listas
+
       const pendientes = this.modeloGlobal.ordenes.filter((o) => o.status === "En Espera" && o.coincideConFiltro(textoFiltro));
       const listas = this.modeloGlobal.ordenes.filter((o) => o.status === "Listo para Despacho" && o.coincideConFiltro(textoFiltro));
-      // Se renderizan las ordenes pendientes y las listas
+
       this.vista.renderizarOrdenesEspera(pendientes);
       this.vista.renderizarOrdenesListas(listas);
       this.vista.renderizarEstadisticas({
@@ -82,11 +111,17 @@ export default class Cl_cLaboratorio {
         estudioMasSolicitado: this.modeloGlobal.obtenerEstudioMasSolicitado(),
       });
       this.procesarCambioFiltrosExamen(this.vista.nombreReporteExamen, this.vista.fechaReporteExamen);
+      this.procesarReporteGeneral({ examen: "", fechaDesde: "", fechaHasta: "", paciente: "" });
+
+      const ordenesAntiguas = this.modeloGlobal.obtenerOrdenesAntiguasSemanaMas();
+      if ((this.vista as any).renderizarReporteSemana) {
+        (this.vista as any).renderizarReporteSemana(ordenesAntiguas);
+      }
     } catch (error) {
       console.error("Error al actualizar monitores del laboratorio:", error);
     }
   }
-  // Metodo que permite capturar el cambio de filtros (nombre de examen o fecha), consulta el modelo con ambos datos y actualiza la cantidad en la interfaz
+
   private procesarCambioFiltrosExamen(nombre: string, fecha: string) {
     if (!fecha || !nombre) {
       this.vista.setCantidadExamen(0);
@@ -95,7 +130,7 @@ export default class Cl_cLaboratorio {
     const cantidad = this.modeloGlobal.contarExamenesPorFecha(nombre, fecha);
     this.vista.setCantidadExamen(cantidad);
   }
-  // Metodo que permite filtrar la bandeja de ordenes
+
   private procesarFiltradoBandeja(texto: string) {
     const textoFiltro = texto.trim();
 
@@ -105,7 +140,14 @@ export default class Cl_cLaboratorio {
     this.vista.renderizarOrdenesEspera(pendientes);
     this.vista.renderizarOrdenesListas(listas);
   }
-  // Metodo que permite recalcular los totales en tiempo real
+
+  private procesarReporteGeneral(filtros: { examen: string, fechaDesde: string, fechaHasta: string, paciente: string }) {
+    const datosReporte = this.modeloGlobal.obtenerReporteExamenes(filtros);
+    if ((this.vista as any).renderizarReporteExamenes) {
+      (this.vista as any).renderizarReporteExamenes(datosReporte);
+    }
+  }
+
   private recalcularTotalesEnTiempoReal() {
     const codigosSeleccionados = this.vista.getEstudiosSeleccionados();
     const estudiosElegidos = this.catalogoEstudiosCoche.filter(e => codigosSeleccionados.includes(e.id));
@@ -116,7 +158,7 @@ export default class Cl_cLaboratorio {
     this.vista.setTotalesFactura(calculos.totalUsd, calculos.totalBs, tiempos.entrega);
     this.vista.setTasaActual(this.modeloGlobal.tasaCambio);
   }
-  // Metodo que permite cambiar la tasa
+
   private async procesarCambioTasa() {
     const valorTasa = this.vista.nuevaTasa;
     if (valorTasa <= 0) {
@@ -137,13 +179,13 @@ export default class Cl_cLaboratorio {
       this.vista.ocultarSpinner();
     }
   }
-  // Metodo que permite registrar un nuevo estudio
+
   private async procesarRegistroNuevoEstudio() {
     const id = this.vista.estId;
     const nombre = this.vista.estNombre;
     const precio = this.vista.estPrecio;
     const tiempo = this.vista.estTiempo;
-    const sugerido = "Todos"; // Ya no se usa la sugerencia desde UI
+    const sugerido = "Todos"; 
     const unidad = this.vista.estUnidad || "";
     const rango = this.vista.estRango || "";
 
@@ -155,7 +197,7 @@ export default class Cl_cLaboratorio {
     let parametrosVaciosFinal: any[] = [];
 
     parametrosVaciosFinal = this.modeloGlobal.crearEstructuraResultadosVacios(nombre, unidad, rango);
-    // Se crea la estructura del nuevo estudio
+
     const nuevoEstudioPlano = {
       id: id,
       codigo: id,
@@ -184,10 +226,10 @@ export default class Cl_cLaboratorio {
       this.vista.ocultarSpinner();
     }
   }
-  // Metodo que permite dar de baja un estudio del catálogo
+
   private async procesarBajaEstudioCatálogo(id: string) {
     if (!(await this.vista.confirmarAccion(`¿Está seguro de que desea eliminar el estudio clínico [${id}] del catálogo?`))) return;
-    // Se verifica si el estudio tiene ordenes activas
+
     const tieneOrdenesActivas = this.modeloGlobal.ordenes.some(
       o => o.status === "En Espera" && o.examenesSolicitados.toLowerCase().includes(id.toLowerCase())
     );
@@ -212,7 +254,7 @@ export default class Cl_cLaboratorio {
       this.vista.ocultarSpinner();
     }
   }
-  // Metodo que permite procesar el cierre y facturacion de una orden
+
   private async procesarCierreYFacturacionOrden() {
     const codigosSeleccionados = this.vista.getEstudiosSeleccionados();
     if (codigosSeleccionados.length === 0) {
@@ -233,7 +275,7 @@ export default class Cl_cLaboratorio {
       await this._procesarCreacionOrden(datosComunes);
     }
   }
-  // Metodo que permite editar una orden
+
   private async _procesarEdicionOrden(idOrden: string, datos: any) {
     this.vista.mostrarSpinner();
     try {
@@ -253,7 +295,7 @@ export default class Cl_cLaboratorio {
       this.vista.ocultarSpinner();
     }
   }
-  // Metodo que permite crear una orden
+
   private async _procesarCreacionOrden(datos: any) {
     const edadCalculada = Cl_mOrdenBio.calcularEdad(this.vista.pacFechaNac);
     const edadAnios = Cl_mOrdenBio.convertirEdadAAños(edadCalculada);
@@ -264,7 +306,6 @@ export default class Cl_cLaboratorio {
     const nombreRep = this.vista.pacNombreRep.trim();
     const apellidoRep = this.vista.pacApellidoRep.trim();
 
-    // Validacion de cedula segun si es menor o no
     if (esMenor) {
       if (!cedulaRep || !nombreRep) {
         this.vista.mostrarToast("Debe ingresar la cédula y nombre del representante legal para un menor.", "advertencia");
@@ -277,10 +318,8 @@ export default class Cl_cLaboratorio {
       }
     }
 
-    // La generación del ID del menor fue trasladada al modelo Cl_mOrdenBio.
     const cedulaFinal = esMenor ? Cl_mOrdenBio.generarCedulaMenor(cedulaRep) : cedulaEscrita;
 
-    // Validacion de cedula + nombre unicos por paciente
     const esDuplicado = this.modeloGlobal.validarDuplicadoPaciente(
       cedulaFinal,
       this.vista.pacNombre,
@@ -297,7 +336,7 @@ export default class Cl_cLaboratorio {
       );
       return;
     }
-    // Se crea la estructura de la nueva orden
+
     const nuevaOrden = {
       cedula: cedulaFinal,
       cedulaRepresentante: esMenor ? cedulaRep : "",
@@ -323,11 +362,11 @@ export default class Cl_cLaboratorio {
     try {
       const respuesta = await Cl_sLaboratorio.registrarNuevaOrden(nuevaOrden);
       if (respuesta.ok) {
-        // Se muestra toast de exito
+
         this.vista.mostrarToast(`¡Orden procesada! Retiro estimado: ${datos.tiemposEntrega.entrega}.`, "exito");
-        // Se limpia el formulario
+
         this.vista.limpiarFormPaciente();
-        // Se actualiza el monitor y las estadisticas
+
         await this.actualizarMonitorYEstadisticas();
       }
     } catch (error) {
@@ -337,7 +376,7 @@ export default class Cl_cLaboratorio {
       this.vista.ocultarSpinner();
     }
   }
-  // Metodo que permite eliminar una orden en espera
+
   private async procesarEliminarOrdenEspera(id: string) {
     if (await this.vista.confirmarAccion(`¿Estás seguro de que deseas eliminar la Orden #${id}? Se perderán todos los datos.`)) {
       this.vista.mostrarSpinner();
@@ -353,15 +392,26 @@ export default class Cl_cLaboratorio {
       }
     }
   }
-  // Metodo que permite editar una orden en espera
+
   private async procesarEditarOrdenEspera(id: string) {
     const ordenActual = this.modeloGlobal.ordenes.find(o => o.id === id);
     if (!ordenActual) return;
 
     this.ordenEnEdicionId = id;
+    
+    const esMenor = (ordenActual.cedula === "MENOR" || ordenActual.cedula.startsWith("CR")) && !!ordenActual.cedulaRepresentante;
+    this.vista.autocompletarPaciente(ordenActual, esMenor);
+    
+    const examenesSolicitadosArray = ordenActual.examenesSolicitados.split(", ").map(e => e.trim().toLowerCase());
+    const idsASeleccionar = this.catalogoEstudiosCoche
+      .filter(e => examenesSolicitadosArray.some(ex => e.nombre.toLowerCase().includes(ex)))
+      .map(e => String(e.id));
+      
+    this.vista.marcarEstudiosPorId(idsASeleccionar);
+    
     this.vista.prepararEdicionOrden(ordenActual);
   }
-  // Metodo que permite ejecutar el despacho final de una orden
+
   private async ejecutarDespachoFinalPaciente(id: string, metodo: "Impreso" | "WhatsApp" | "Correo") {
     try {
       const datosPlanos = await Cl_sLaboratorio.buscarOrdenPorId(id);
@@ -382,27 +432,28 @@ export default class Cl_cLaboratorio {
       console.error("Error al procesar la salida del despacho:", error);
     }
   }
-  // Metodo que permite buscar un paciente por cedula
+
   private buscarPacientePorCedula(termino: string): void {
     const terminoNorm = termino.trim().toLowerCase();
-    // Validación Evitar búsquedas vacías
+
     if (!terminoNorm) {
       this.vista.mostrarToast("Por favor, ingrese una cédula o número de orden para buscar.", "advertencia");
       return;
     }
-    // Validación Evitar buscar pacientes con la cédula genérica "MENOR"
+
     if (terminoNorm === "menor") {
       this.vista.mostrarToast("No se puede autocompletar el historial con la cédula genérica 'MENOR'.", "advertencia");
       this.vista.mostrarHistorialPaciente([]);
       return;
     }
-    // Se busca por numero de orden
+
     const ordenPorId = this.modeloGlobal.ordenes.find(
       o => String(o.id).trim().toLowerCase() === terminoNorm
     );
     if (ordenPorId) {
-      this.vista.autocompletarPaciente(ordenPorId);
-      // Si se buscó por orden, mostramos el historial completo de ese paciente (por cédula)
+      const esMenorPorId = (ordenPorId.cedula === "MENOR" || ordenPorId.cedula.startsWith("CR")) && !!ordenPorId.cedulaRepresentante;
+      this.vista.autocompletarPaciente(ordenPorId, esMenorPorId);
+
       const cedulaDeLaOrden = ordenPorId.cedula.trim().toLowerCase();
       const historialDelPaciente = this.modeloGlobal.ordenes.filter(
         o => o.cedula.trim().toLowerCase() === cedulaDeLaOrden ||
@@ -411,24 +462,32 @@ export default class Cl_cLaboratorio {
       this.vista.mostrarHistorialPaciente(historialDelPaciente);
       return;
     }
-    // Se busca por cedula del paciente o representante
+
     const ordenesDelPaciente = this.modeloGlobal.ordenes.filter(
       o => o.cedula.trim().toLowerCase() === terminoNorm || o.cedulaRepresentante.trim().toLowerCase() === terminoNorm
     );
-    // Si no se encuentra ningun paciente
+
     if (ordenesDelPaciente.length === 0) {
       this.vista.mostrarToast("No se encontró ningún paciente con esa cédula o número de orden.", "info");
       this.vista.mostrarHistorialPaciente([]);
       return;
     }
-    // Tomamos la orden más reciente para autocompletar (la última del array)
+
     const ordenMasReciente = ordenesDelPaciente[ordenesDelPaciente.length - 1];
-    this.vista.autocompletarPaciente(ordenMasReciente);
-    // Mostramos todo el historial de visitas del paciente
+    const esMenor = (ordenMasReciente.cedula === "MENOR" || ordenMasReciente.cedula.startsWith("CR")) && !!ordenMasReciente.cedulaRepresentante;
+    this.vista.autocompletarPaciente(ordenMasReciente, esMenor);
+
     this.vista.mostrarHistorialPaciente(ordenesDelPaciente);
   }
-  // Metodo que permite exportar el cierre de caja
+
   private procesarExportarCaja(): void {
     this.vista.imprimirReporteCaja(this.modeloGlobal);
+  }
+
+  private procesarExportarReporteSemana(): void {
+    const ordenesAntiguas = this.modeloGlobal.obtenerOrdenesAntiguasSemanaMas();
+    if ((this.vista as any).imprimirReporteSemana) {
+      (this.vista as any).imprimirReporteSemana(ordenesAntiguas);
+    }
   }
 }

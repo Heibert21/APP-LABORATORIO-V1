@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -6,67 +6,67 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lab GitForce - Panel del Bioanalista</title>
   <link rel="stylesheet" href="style-Bioanalista.css" />
-  <!-- Importamos los estilos de toast y spinner definidos en style-Laboratorio.css -->
+  
   <link rel="stylesheet" href="style-Laboratorio.css" />
 </head>
 
 <body>
 
-  <!-- Contenedor de toasts flotantes (misma implementación que en Recepción) -->
+  
   <div id="toast-container"></div>
 
-  <!-- Encabezado Clínico Unificado con el Laboratorio -->
+  
   <header class="header-app">
     <h1>🔬 Lab GitForce <small>| Área Técnica</small></h1>
     <p>Módulo de Transcripción, Validación y Auditoría Clínica de Resultados</p>
   </header>
 
-  <!-- Contenedor Principal en Formato Dashboard de Dos Columnas Compresivo -->
+  
   <main class="dashboard-container">
     <aside class="sidebar-panel">
 
-      <!-- Bandeja de Entrada de Casos Pendientes -->
+      
       <section class="tarjeta-modulo">
         <div class="modulo-cabecera-simple">
           <h3>⏳ Muestras en Espera</h3>
         </div>
         <p class="instruccion">Muestras listas por procesar ordenadas secuencialmente:</p>
         <div id="bio_listaEspera" class="bandeja-scroll-monitor">
-          <!-- Inyectado dinámicamente -->
+          
         </div>
       </section>
 
-      <!-- Histórico de Casos Validados en el Turno -->
+      
       <section class="tarjeta-modulo">
         <div class="modulo-cabecera-simple">
           <h3>✅ Historial del Turno</h3>
         </div>
         <ul id="bio_listaAtendidos" class="lista-catalogo-scroll">
-          <!-- Inyectado dinámicamente -->
+          
         </ul>
       </section>
 
     </aside>
     <div class="main-content-panel">
 
-      <!-- Panel Dinámico de Transcripción (Se activa al seleccionar paciente) -->
+      
       <section id="bio_panelFormulario" class="tarjeta-modulo oculto">
         <div class="modulo-cabecera">
           <h2>🧫 Carga de Resultados Clínicos</h2>
         </div>
 
-        <!-- Ficha de Datos Filiatorios Inyectada de la Nube -->
+        
         <div id="bio_cabeceraPaciente"></div>
 
         <hr class="divisor-dashed" />
 
-        <!-- Formulario Técnico Generador de Columnas Reales -->
+        
         <form id="form_cargaResultados" onsubmit="event.preventDefault();">
           <div id="bio_tablaInputs" class="contenedor-filas-medicas">
-            <!-- Filas dinámicas inyectadas con unidades y rangos reales -->
+            
           </div>
 
-          <!-- Cuadro Inferior de Firma Digital y Autorización -->
+          
           <div class="factura-pre-pago area-firma-profesional">
             <div class="factura-header">
               <h3>✍️ Validación Jurídica del Informe</h3>
@@ -83,7 +83,7 @@
         </form>
       </section>
 
-      <!-- Pantalla de Bienvenida Inicial Vacía -->
+      
       <section id="bio_panelVacio" class="tarjeta-modulo estado-vacio-panel">
         <div class="icono-vacio">🔬</div>
         <h3>Bandeja de Trabajo Inactiva</h3>
@@ -93,25 +93,21 @@
     </div>
   </main>
 
-  <!-- Créditos Institucionales Unificados Git Force -->
+  
   <footer class="footer-creditos">
     <p>© 2026 UCLA DCyT - Proyecto Final</p>
     <p class="autor-info">Designe By <strong>Git Force</strong> | Todos los derechos reservados © 2026</p>
   </footer>
 
-  <!-- SCRIPT DE ACOPLAMIENTO MODULAR COMPLETO CON TU VISTA ORDENBIO -->
+  
   <script type="module">
-    import Cl_mOrdenBio from "./dist/models/Cl_mOrdenBio.js";
+    import Cl_mLaboratorio from "./dist/models/Cl_mLaboratorio.js";
     import Cl_vOrdenBio from "./dist/views/Cl_vOrdenBio.js";
     import Cl_cOrdenBio from "./dist/controllers/Cl_cOrdenBio.js";
 
-    // Instanciamos la Vista y el Modelo vacío que servirá de contenedor de datos
     const vista = new Cl_vOrdenBio();
-    const modelo = new Cl_mOrdenBio({
-      id: "", cedula: "", nombre: "", apellido: "", edad: 0, sexo: "", fechaRegistro: "", examenesSolicitados: ""
-    });
+    const modelo = new Cl_mLaboratorio();
 
-    //Los inyectamos juntos siguiendo el formato exacto del profesor: { modelo, vista }
     new Cl_cOrdenBio({ modelo, vista });
   </script>
 

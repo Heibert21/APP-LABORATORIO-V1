@@ -1,37 +1,36 @@
-/* ================================================================= */
-/* 🎨 PALETA DE COLORES CLÍNICA PREMIUM (AZULES, GRISES Y BLANCO)    */
-/* ================================================================= */
+﻿
+
 :root {
   --bg-app: #f4f7fa;
-  /* Gris clínico muy claro */
+  
   --blanco: #ffffff;
-  /* Blanco puro */
+  
   --texto-oscuro: #0f172a;
-  /* Azul pizarra casi negro */
+  
   --texto-mutado: #64748b;
-  /* Gris intermedio para leyendas */
+  
   --color-borde: #cbd5e1;
-  /* Gris suave para separadores */
+  
   --color-foco: #3b82f6;
-  /* Azul brillante para foco */
+  
 
-  /* Identidad del Laboratorio */
+  
   --primario: #0284c7;
-  /* Azul Clínico Claro / Celeste Médico */
+  
   --primario-hover: #0369a1;
   --secundario: #475569;
-  /* Gris Neutro Profesional */
+  
   --exito: #10b981;
-  /* Verde Esmeralda Suave */
+  
   --exito-hover: #059669;
 
-  /* NUEVO: Contenedor de Pago en Azul Oscuro Profundo */
+  
   --pago-bg: #0f172a;
-  /* Azul Marino Profundo (Fondo) */
+  
   --pago-borde: #1e293b;
-  /* Borde unificado */
+  
   --pago-texto-resaltado: #38bdf8;
-  /* Celeste neón para los totales */
+  
 }
 
 * {
@@ -47,12 +46,9 @@ body {
   line-height: 1.5;
 }
 
-/* ================================================================= */
-/* 🏢 ENCABEZADO Y PIE DE PÁGINA (IDENTIDAD DEL GRUPO)               */
-/* ================================================================= */
 .header-app {
   background: linear-gradient(135deg, #0b1528 0%, #1e3a8a 100%);
-  /* Degradado de azul marino a azul profundo */
+  
   color: var(--blanco);
   text-align: center;
   padding: 30px 20px;
@@ -68,7 +64,7 @@ body {
 
 .header-app p {
   color: #bae6fd;
-  /* Texto en azul celeste claro legible */
+  
   font-size: 0.95rem;
 }
 
@@ -87,9 +83,6 @@ body {
   color: #94a3b8;
 }
 
-/* ================================================================= */
-/* 🗂️ DISTRIBUCIÓN HORIZONTAL EN FORMATO DASHBOARD                   */
-/* ================================================================= */
 .dashboard-container {
   display: grid;
   grid-template-columns: 320px 1fr;
@@ -109,7 +102,6 @@ body {
   margin-bottom: 20px;
 }
 
-/* Panel Lateral Izquierdo (Sidebar) */
 .sidebar-panel {
   display: flex;
   flex-direction: column;
@@ -118,7 +110,7 @@ body {
 .mini-card {
   padding: 15px;
   background-color: #f1f5f9;
-  /* Gris suave de fondo */
+  
 }
 
 .mini-card h3 {
@@ -158,14 +150,11 @@ body {
 }
 .btn-icon:active { transform: translateY(1px); }
 
-/* ================================================================= */
-/* 📊 CONTADORES DE CIERRE DE CAJA Y LISTADOS DEL SIDEBAR            */
-/* ================================================================= */
 .modulo-cabecera-simple h3 {
   font-size: 0.95rem;
   font-weight: 700;
   color: #0369a1;
-  /* Azul intermedio médico */
+  
   margin-bottom: 12px;
   text-transform: uppercase;
 }
@@ -208,9 +197,6 @@ body {
   gap: 10px;
 }
 
-/* ================================================================= */
-/* 📝 REJILLAS Y COMPONENTES FORMULARIO PACIENTE (MAIN PANEL)        */
-/* ================================================================= */
 .main-content-panel {
   display: flex;
   flex-direction: column;
@@ -255,7 +241,6 @@ select:focus {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
-/* Checkboxes de Selección de Estudios (Tonos Celeste Médico) */
 .grid-checkboxes-resultados {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -288,20 +273,17 @@ select:focus {
 
 .sugerido-resaltado {
   background-color: #f0f9ff;
-  /* Celeste muy suave */
+  
   border-color: #bae6fd;
   color: #0369a1;
   font-weight: bold;
 }
 
-/* ================================================================= */
-/* 💳 NUEVO: DISEÑO DE FACTURACIÓN EN AZUL MARINO PROFUNDOO          */
-/* ================================================================= */
 .factura-pre-pago {
   background-color: var(--pago-bg) !important;
   border: 1px solid var(--pago-borde) !important;
   border-left: 6px solid var(--primario) !important;
-  /* Detalle en celeste */
+  
   padding: 18px;
   border-radius: 10px;
   margin-top: 10px;
@@ -320,7 +302,7 @@ select:focus {
 .factura-header h3 {
   font-size: 1rem;
   color: var(--blanco);
-  /* Texto blanco para resaltar */
+  
   font-weight: 600;
 }
 
@@ -345,7 +327,7 @@ select:focus {
   display: flex;
   flex-direction: column;
   background: #1e293b;
-  /* Cajas internas grisáceas oscuras */
+  
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #334155;
@@ -365,7 +347,6 @@ select:focus {
   margin-top: 4px;
 }
 
-/* Resaltado de cifras en celeste neón e indicadores claros */
 .text-blue strong {
   color: var(--pago-texto-resaltado) !important;
 }
@@ -391,9 +372,6 @@ select:focus {
   border-color: #334155;
 }
 
-/* ================================================================= */
-/* 📥 MONITOR DE BANDAS Y BOTONES ACORDEÓN                           */
-/* ================================================================= */
 .modulo-cabecera {
   display: flex;
   justify-content: space-between;
@@ -525,7 +503,6 @@ select:focus {
 }
 .btn-whatsapp:active { transform: translateY(1px); }
 
-/* Acordeones */
 .btn-toggle-accordion {
   width: 100%;
   padding: 10px;
@@ -551,28 +528,23 @@ select:focus {
   color: white;
 }
 
-/* ================================================================= */
-/* 🛑 MODAL DE CONFIRMACIÓN ANIMADO (Reemplazo de confirm)            */
-/* ================================================================= */
-/* .modal-overlay: Es la capa de fondo oscura y difuminada que bloquea el resto de la interfaz. */
 .modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(4px); /* Efecto de desenfoque premium */
+  backdrop-filter: blur(4px); 
   z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 1;
-  transition: opacity 0.3s ease; /* Transición suave de entrada/salida para el fondo */
+  transition: opacity 0.3s ease; 
 }
 
 .modal-leave-overlay {
   opacity: 0;
 }
 
-/* .modal-confirm: Es la caja blanca que contiene el mensaje de alerta. */
 .modal-confirm {
   background: white;
   border-radius: 12px;
@@ -581,9 +553,9 @@ select:focus {
   width: 90%;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   text-align: center;
-  transform: scale(1); /* Escala normal cuando el modal ya está visible */
+  transform: scale(1); 
   opacity: 1;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); /* Curva de animación tipo rebote/resorte (spring) */
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
 }
 
 .modal-confirm.modal-enter {
@@ -647,7 +619,6 @@ select:focus {
   margin-top: 15px;
 }
 
-/* Sub-lista visual de paquetes */
 .sub-lista-paquete {
   background: #f1f5f9;
   padding: 10px;
@@ -686,7 +657,6 @@ select:focus {
   cursor: pointer;
 }
 
-/* Utilidades */
 .btn-bloque {
   width: 100%;
   padding: 10px;
@@ -771,9 +741,6 @@ select:focus {
   display: none !important;
 }
 
-/* ================================================================= */
-/* 📢 TOASTS: Notificaciones flotantes (reemplazo de alert)           */
-/* ================================================================= */
 #toast-container {
   position: fixed;
   top: 20px;
@@ -828,9 +795,6 @@ select:focus {
   border-left: 5px solid #fef3c7;
 }
 
-/* ================================================================= */
-/* ⏳ SPINNER de Carga Global                                         */
-/* ================================================================= */
 #spinner-overlay {
   position: fixed;
   inset: 0;
@@ -876,9 +840,6 @@ select:focus {
   letter-spacing: 0.5px;
 }
 
-/* ================================================================= */
-/* 📊 HISTORIAL DEL PACIENTE                                          */
-/* ================================================================= */
 #panel-historial-paciente {
   grid-column: span 3;
   background: #f0f9ff;
@@ -913,9 +874,6 @@ select:focus {
   color: #0284c7;
 }
 
-/* ================================================================= */
-/* ⏱️ BADGE DE TIEMPO EN ESPERA                                       */
-/* ================================================================= */
 .badge-espera {
   font-size: 0.75rem;
   font-weight: 700;
@@ -944,9 +902,6 @@ select:focus {
   }
 }
 
-/* ================================================================= */
-/* 🔍 BUSCADOR EN BANDEJA DE ESPERA                                  */
-/* ================================================================= */
 .buscador-bandeja {
   display: flex;
   gap: 8px;
@@ -962,9 +917,6 @@ select:focus {
   border: 1px solid var(--color-borde);
 }
 
-/* ================================================================= */
-/* 💼 Botón Exportar Caja y botones de despacho rediseñados           */
-/* ================================================================= */
 .btn-exportar-caja {
   width: 100%;
   padding: 10px;
@@ -1086,13 +1038,10 @@ select:focus {
   opacity: 0.55;
 }
 
-/* ================================================================= */
-/* 📱 Le agregamos el RESPONSIVE DESIGN para las vistas de celulares y tabletas */
-/* ================================================================= */
 @media (max-width: 992px) {
   .dashboard-container {
     grid-template-columns: 1fr;
-    /* Colapsa a una sola columna */
+    
   }
 }
 
@@ -1101,7 +1050,7 @@ select:focus {
   .grid-paciente-formulario,
   .factura-totales {
     grid-template-columns: 1fr;
-    /* Colapsa grillas a 1 columna */
+    
   }
 
   .full-row {
@@ -1133,9 +1082,6 @@ select:focus {
   }
 }
 
-/* ================================================================= */
-/* 💳 GRUPO DE BOTONES DE PAGO / GUARDAR / CANCELAR                  */
-/* ================================================================= */
 .grupo-botones-pago {
   display: flex;
   gap: 12px;
@@ -1155,9 +1101,6 @@ select:focus {
   text-align: center;
 }
 
-/* ================================================================= */
-/* ✨ BOTONES PREMIUM ANIMADOS                                        */
-/* ================================================================= */
 .btn-procesar-pago {
   background: linear-gradient(135deg, var(--exito) 0%, #047857 100%);
   color: white;
@@ -1183,7 +1126,6 @@ select:focus {
   box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
 }
 
-/* Brillo interior */
 .btn-procesar-pago::after, .btn-cancelar-edicion::after {
   content: '';
   position: absolute;
@@ -1201,7 +1143,6 @@ select:focus {
   transition: all 0.75s ease;
 }
 
-/* Estado cuando está en modo edición (Azul igual que cancelar) */
 .btn-procesar-pago.modo-edicion {
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
@@ -1212,7 +1153,6 @@ select:focus {
   box-shadow: 0 8px 25px rgba(59, 130, 246, 0.45);
 }
 
-/* Botón Cancelar Edición */
 .btn-cancelar-edicion {
   background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
   color: white;
@@ -1235,3 +1175,71 @@ select:focus {
   transform: translateY(1px);
   box-shadow: 0 2px 10px rgba(239, 68, 68, 0.3);
 }
+
+.filtros-reporte-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px dashed var(--color-borde);
+  margin-bottom: 20px;
+}
+
+.tabla-reporte-contenedor {
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--color-borde);
+  background: var(--blanco);
+}
+
+.tabla-reporte {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.tabla-reporte th,
+.tabla-reporte td {
+  padding: 10px 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.tabla-reporte th {
+  background-color: var(--pago-bg);
+  color: var(--blanco);
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tabla-reporte tbody tr:nth-child(even) {
+  background-color: #f1f5f9;
+}
+
+.tabla-reporte tbody tr:hover {
+  background-color: #e2e8f0;
+}
+
+.badge-estado {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: white;
+  display: inline-block;
+  text-align: center;
+}
+
+.badge-estado.espera {
+  background-color: #f59e0b; 
+}
+
+.badge-estado.listo {
+  background-color: #10b981; 
+}

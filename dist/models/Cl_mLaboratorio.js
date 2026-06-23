@@ -17,7 +17,7 @@ export default class Cl_mLaboratorio {
     setOrdenes(arrayPlanos) {
         this._ordenes = [];
         arrayPlanos.forEach((o) => {
-            this._ordenes.push(new Cl_mOrdenBio(o)); // Rehidrata directamente usando el modelo único
+            this._ordenes.push(new Cl_mOrdenBio(o));
         });
     }
     determinarSugerenciaMedica(fechaNacimiento, sexo) {
@@ -33,7 +33,6 @@ export default class Cl_mLaboratorio {
             return "Hombre";
         return "Todos";
     }
-    // Metodo que permite crear una estructura vacia para los resultados de los examenes
     crearEstructuraResultadosVacios(nombre, unidad, rango) {
         return [{
                 parametro: nombre,
@@ -42,16 +41,6 @@ export default class Cl_mLaboratorio {
                 rangoReferencia: rango.trim() !== "" ? rango.trim() : "Normal"
             }];
     }
-    /**
-     *  - Misma cédula + DISTINTO nombre/apellido → BLOQUEADO (posible error o suplantación).
-     *  - Misma cédula + MISMO nombre/apellido    → SIEMPRE PERMITIDO.
-     *    El paciente puede hacerse exámenes las veces que quiera, el mismo día
-     *    a distintas horas, semanalmente, mensualmente, etc.
-     @param cedula   Cédula del paciente a registrar.
-     @param nombre   Nombre del paciente a registrar.
-     @param apellido Apellido del paciente a registrar.
-     @returns `true` si la cédula ya está registrada con un nombre diferente (conflicto).
-     */
     validarDuplicadoPaciente(cedula, nombre, apellido, isMenor = false, cedulaRep = "", nombreRep = "", apellidoRep = "") {
         if (isMenor && cedulaRep.trim() !== "") {
             return this._validarDuplicadoMenor(cedulaRep, nombreRep, apellidoRep);
@@ -71,15 +60,12 @@ export default class Cl_mLaboratorio {
             return mismaCedulaRep && !(mismoNombreRep && mismoApellidoRep);
         });
     }
-    // Metodo que permite validar el duplicado de un paciente adulto
     _validarDuplicadoAdulto(cedula, nombre, apellido) {
         const cedulaNorm = cedula.trim().toLowerCase();
         const nombreNorm = nombre.trim().toLowerCase();
         const apellidoNorm = apellido.trim().toLowerCase();
-        // Si la cedula es menor o es una cedula de representante, no se valida
         if (cedulaNorm === "menor" || cedulaNorm.startsWith("cr"))
             return false;
-        // Se recorre la lista de ordenes para validar el duplicado
         return this._ordenes.some(orden => {
             if (orden.cedula.trim().toLowerCase() === "menor" || orden.cedula.trim().toLowerCase().startsWith("cr"))
                 return false;
@@ -89,33 +75,28 @@ export default class Cl_mLaboratorio {
             return mismaCedula && !(mismoNombre && mismoApellido);
         });
     }
-    // Metodo que permite obtener las ordenes en espera ordenadas cronológicamente
     obtenerOrdenesEnEsperaOrdenadas() {
         return this._ordenes
             .filter(o => o.status === "En Espera")
             .sort((a, b) => {
-            // Usar obtenerMinutosEspera: más minutos = más antiguo = primero en la lista
             const minsA = a.obtenerMinutosEspera();
             const minsB = b.obtenerMinutosEspera();
             if (minsA === -1)
                 return 1;
             if (minsB === -1)
                 return -1;
-            return minsB - minsA; // Mayor espera primero
+            return minsB - minsA;
         });
     }
-    // Metodo que permite calcular el total de pacientes atendidos
     calcularTotalPacientesAtendidos() {
         return this._ordenes.length;
     }
-    // Metodo que permite calcular el monto total en dolares
     calcularMontoTotalUsd() {
         return this._ordenes.reduce((acum, o) => acum + o.montoTotal$, 0);
     }
     calcularMontoTotalBs() {
         return this.calcularMontoTotalUsd() * this._tasaCambio;
     }
-    // Metodo que permite obtener el estudio mas solicitado
     obtenerEstudioMasSolicitado() {
         const conteoGlobal = {};
         this._ordenes.forEach(orden => {
@@ -134,7 +115,6 @@ export default class Cl_mLaboratorio {
         }
         return maxCantidad > 0 ? `${estudioMasVendido} (${maxCantidad} sols)` : "Ninguno";
     }
-    // Metodo que permite calcular la estructura de la factura
     calcularEstructuraFactura(estudiosElegidos) {
         let totalUsd = 0;
         let tiempoMaxHoras = 0;
@@ -155,7 +135,6 @@ export default class Cl_mLaboratorio {
         const totalBs = totalUsd * this._tasaCambio;
         return { totalUsd, totalBs, tiempoMaxHoras, matrizResultados };
     }
-    // Metodo que permite contar la cantidad de veces que un examen especifico fue solicitado durante un dia particular
     contarExamenesPorFecha(nombreExamen, fechaFiltroYMD) {
         if (!fechaFiltroYMD)
             return 0;
@@ -184,13 +163,61 @@ export default class Cl_mLaboratorio {
         });
         return conteo;
     }
-    // Metodo que permite calcular los tiempos de entrega
     calcularTiemposEntrega(horasProcesamiento) {
         const ahora = new Date();
         const horaPrometida = new Date(ahora.getTime() + horasProcesamiento * 60 * 60 * 1000);
         const registro = ahora.toLocaleDateString() + " " + ahora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         const entrega = horaPrometida.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         return { registro, entrega };
+    }
+    obtenerOrdenesAntiguasSemanaMas() {
+        const ahora = new Date();
+        const limiteMs = 7 * 24 * 60 * 60 * 1000;
+        return this._ordenes.filter(orden => {
+            if (!orden.fechaRegistro)
+                return false;
+            try {
+                const normalizado = orden.fechaRegistro.replace(",", "").trim();
+                const partes = normalizado.split(" ");
+                if (partes.length < 1)
+                    return false;
+                const segmentosFecha = partes[0].split("/");
+                if (segmentosFecha.length !== 3)
+                    return false;
+                const dia = parseInt(segmentosFecha[0], 10);
+                const mes = parseInt(segmentosFecha[1], 10) - 1;
+                const anio = parseInt(segmentosFecha[2], 10);
+                let hh = 0, mm = 0;
+                if (partes.length >= 2) {
+                    const horaParts = partes[1].split(":");
+                    hh = parseInt(horaParts[0], 10) || 0;
+                    mm = parseInt(horaParts[1], 10) || 0;
+                }
+                const fechaOrden = new Date(anio, mes, dia, hh, mm);
+                const diffMs = ahora.getTime() - fechaOrden.getTime();
+                return diffMs > limiteMs;
+            }
+            catch {
+                return false;
+            }
+        });
+    }
+    obtenerReporteExamenes(filtros) {
+        let filtradas = this._ordenes;
+        const nombreNormalizado = filtros.examen.trim().toLowerCase();
+        const conteoExamenes = {};
+        filtradas.forEach(orden => {
+            const desgloses = orden.desglosarExamenes();
+            desgloses.forEach(item => {
+                if (!nombreNormalizado || item.examen.toLowerCase().includes(nombreNormalizado)) {
+                    conteoExamenes[item.examen] = (conteoExamenes[item.examen] || 0) + item.cantidad;
+                }
+            });
+        });
+        return Object.keys(conteoExamenes).map(examen => ({
+            examen: examen,
+            cantidad: conteoExamenes[examen]
+        })).sort((a, b) => b.cantidad - a.cantidad);
     }
 }
 //# sourceMappingURL=Cl_mLaboratorio.js.map
