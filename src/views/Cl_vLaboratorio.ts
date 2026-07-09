@@ -106,16 +106,13 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
     this.repFiltroPaciente = document.getElementById("rep_filtro_paciente") as HTMLInputElement;
     this.tbodyReporteExamenes = document.getElementById("tbody_reporte_examenes") as HTMLElement;
 
-    // Set default date to today for the report
+    // Se setea la fecha actual para el reporte
     this.inFechaReporteExamen && (() => {
       const today = new Date();
       const offset = today.getTimezoneOffset() * 60000;
       const localISOTime = (new Date(today.getTime() - offset)).toISOString().split('T')[0];
       this.inFechaReporteExamen.value = localISOTime;
     })();
-
-    // REFACTORIZACIÓN MVC: Se elimina el formateo regex de aquí, se delega mediante onInputCedula y onInputCedulaRep
-    // REFACTORIZACIÓN MVC: La lógica de chkEsMenor ahora se hace en el controlador mediante eventos.
     //mostrar formulario de estudios disponibles
     const btnToggleEstudio = document.getElementById("btnToggleFormEstudio") as HTMLElement;
     const seccionFormEstudio = document.getElementById("seccionFormEstudio") as HTMLElement;
@@ -177,15 +174,6 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
       this.tablaListos.classList.remove("oculto");
       this.tablaEspera.classList.add("oculto");
     };
-    //buscar estudio
-    const inputBuscar = document.getElementById("pac_buscarEstudioInput") as HTMLInputElement;
-    inputBuscar && inputBuscar.addEventListener("input", () => {
-      const texto = inputBuscar.value.trim().toLowerCase();
-      const tarjetas = this.contenedorEstudios.querySelectorAll(".chk-wrapper");
-      tarjetas.forEach((tarjeta: any) => {
-        tarjeta.classList.toggle("oculto", !tarjeta.textContent.toLowerCase().includes(texto));
-      });
-    });
     //buscar ordenes en espera
     const inputBandeja = document.getElementById("input_buscarBandeja") as HTMLInputElement;
     inputBandeja && inputBandeja.addEventListener("input", () => {
@@ -213,18 +201,21 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
     this.chkEsMenor.addEventListener("change", () => callback(this.chkEsMenor.checked));
   }
 
+  // Metodo que permite mostrar el bloque de representante
   public mostrarBloqueRepresentante(esMenor: boolean): void {
     const bloqueRep = document.getElementById("adm_bloqueRepresentante") as HTMLElement;
     const bloqueCedula = document.getElementById("adm_bloqueCedulaPrincipal") as HTMLElement;
     bloqueRep && bloqueRep.classList.toggle("oculto", !esMenor);
     bloqueCedula && bloqueCedula.classList.toggle("oculto", esMenor);
   }
+  // Metodo que permite limpiar los campos de cedula
   public limpiarCamposCedula(): void {
     this.inCedula.value = "";
     this.inCedulaRep.value = "";
     this.inNombreRep.value = "";
     this.inApellidoRep.value = "";
   }
+  // Metodo que permite ocultar las tarjetas de estudio
   public ocultarTarjetasEstudio(idsAocultar: string[]): void {
     const tarjetas = this.contenedorEstudios.querySelectorAll(".chk-wrapper");
     tarjetas.forEach((tarjeta) => {
@@ -232,6 +223,7 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
       tarjeta.classList.toggle("oculto", !!(input && idsAocultar.includes(input.value)));
     });
   }
+  // Metodo que permite marcar los estudios por ID
   public marcarEstudiosPorId(ids: string[]): void {
     const checkboxes = this.contenedorEstudios.querySelectorAll(".chk-estudio") as NodeListOf<HTMLInputElement>;
     checkboxes.forEach(chk => {
@@ -854,13 +846,13 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
       document.querySelector(".modal-overlay")
         ? resolve(false)
         : (() => {
-            const overlay = document.createElement("div");
-            overlay.className = "modal-overlay";
+          const overlay = document.createElement("div");
+          overlay.className = "modal-overlay";
 
-            const modal = document.createElement("div");
-            modal.className = "modal-confirm modal-enter";
+          const modal = document.createElement("div");
+          modal.className = "modal-confirm modal-enter";
 
-            modal.innerHTML = `
+          modal.innerHTML = `
               <div class="modal-icon">⚠️</div>
               <div class="modal-body">
                 <p class="modal-text">${mensaje}</p>
@@ -871,40 +863,40 @@ export default class Cl_vLaboratorio implements I_vLaboratorio {
               </div>
             `;
 
-            overlay.appendChild(modal);
-            document.body.appendChild(overlay);
-            void modal.offsetWidth;
-            modal.classList.remove("modal-enter");
-            // Función interna para cerrar el modal y disparar la animación de salida
-            const cerrarModal = (resultado: boolean) => {
-              btnConfirm.disabled = true;
-              btnCancel.disabled = true;
+          overlay.appendChild(modal);
+          document.body.appendChild(overlay);
+          void modal.offsetWidth;
+          modal.classList.remove("modal-enter");
+          // Función interna para cerrar el modal y disparar la animación de salida
+          const cerrarModal = (resultado: boolean) => {
+            btnConfirm.disabled = true;
+            btnCancel.disabled = true;
 
-              modal.classList.add("modal-leave"); // Activa la animación de "achicarse" y desvanecerse
-              overlay.classList.add("modal-leave-overlay");
+            modal.classList.add("modal-leave"); // Activa la animación de "achicarse" y desvanecerse
+            overlay.classList.add("modal-leave-overlay");
 
-              let transicionCompletada = false;
-              const finalizar = () => {
-                !transicionCompletada && (() => {
-                  transicionCompletada = true;
-                  document.body.contains(overlay) && document.body.removeChild(overlay); // Se limpia el DOM para no dejar basura
-                  resolve(resultado); // Se resuelve la Promesa avisándole al Controlador la decisión
-                })();
-              };
-
-              // Esperamos a que la animación CSS de salida termine
-              modal.addEventListener("transitionend", finalizar);
-              // Fallback de seguridad por si falla el evento transitionend del navegador
-              setTimeout(finalizar, 300);
+            let transicionCompletada = false;
+            const finalizar = () => {
+              !transicionCompletada && (() => {
+                transicionCompletada = true;
+                document.body.contains(overlay) && document.body.removeChild(overlay); // Se limpia el DOM para no dejar basura
+                resolve(resultado); // Se resuelve la Promesa avisándole al Controlador la decisión
+              })();
             };
-            const btnConfirm = modal.querySelector(".btn-modal-confirm") as HTMLButtonElement;
-            const btnCancel = modal.querySelector(".btn-modal-cancel") as HTMLButtonElement;
-            btnConfirm.addEventListener("mousedown", () => cerrarModal(true));
-            btnCancel.addEventListener("mousedown", () => cerrarModal(false));
-            overlay.addEventListener("mousedown", (e) => {
-              (e.target === overlay) && cerrarModal(false);
-            });
-          })();
+
+            // Esperamos a que la animación CSS de salida termine
+            modal.addEventListener("transitionend", finalizar);
+            // Fallback de seguridad por si falla el evento transitionend del navegador
+            setTimeout(finalizar, 300);
+          };
+          const btnConfirm = modal.querySelector(".btn-modal-confirm") as HTMLButtonElement;
+          const btnCancel = modal.querySelector(".btn-modal-cancel") as HTMLButtonElement;
+          btnConfirm.addEventListener("mousedown", () => cerrarModal(true));
+          btnCancel.addEventListener("mousedown", () => cerrarModal(false));
+          overlay.addEventListener("mousedown", (e) => {
+            (e.target === overlay) && cerrarModal(false);
+          });
+        })();
     });
   }
 

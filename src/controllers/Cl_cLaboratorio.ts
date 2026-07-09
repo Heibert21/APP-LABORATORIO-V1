@@ -478,6 +478,14 @@ export default class Cl_cLaboratorio {
   }
   // Metodo que permite exportar el cierre de caja
   private procesarExportarCaja(): void {
-    this.vista.imprimirReporteCaja(this.modeloGlobal);
+    // REFACTORIZACIÓN MVC: El controlador calcula los datos y pasa un objeto plano a la vista
+    const datosCaja = {
+      totalPacientes: this.modeloGlobal.calcularTotalPacientesAtendidos(),
+      estudioTop: this.modeloGlobal.obtenerEstudioMasSolicitado(),
+      tasa: this.modeloGlobal.tasaCambio,
+      totalUsd: this.modeloGlobal.calcularMontoTotalUsd(),
+      totalBs: this.modeloGlobal.calcularMontoTotalBs()
+    };
+    this.vista.imprimirReporteCaja(datosCaja);
   }
 }

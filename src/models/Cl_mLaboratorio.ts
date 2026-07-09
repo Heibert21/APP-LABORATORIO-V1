@@ -41,22 +41,14 @@ export default class Cl_mLaboratorio {
       rangoReferencia: rango.trim() !== "" ? rango.trim() : "Normal"
     }];
   }
-  /**
-   *  - Misma cédula + DISTINTO nombre/apellido → BLOQUEADO (posible error o suplantación).
-   *  - Misma cédula + MISMO nombre/apellido    → SIEMPRE PERMITIDO.
-   *    El paciente puede hacerse exámenes las veces que quiera, el mismo día
-   *    a distintas horas, semanalmente, mensualmente, etc.
-   @param cedula   Cédula del paciente a registrar.
-   @param nombre   Nombre del paciente a registrar.
-   @param apellido Apellido del paciente a registrar.
-   @returns `true` si la cédula ya está registrada con un nombre diferente (conflicto).
-   */
+  // Metodo que permite validar el duplicado de un paciente
   public validarDuplicadoPaciente(cedula: string, nombre: string, apellido: string, isMenor: boolean = false, cedulaRep: string = "", nombreRep: string = "", apellidoRep: string = ""): boolean {
     if (isMenor && cedulaRep.trim() !== "") {
       return this._validarDuplicadoMenor(cedulaRep, nombreRep, apellidoRep);
     }
     return this._validarDuplicadoAdulto(cedula, nombre, apellido);
   }
+  // Metodo que permite validar el duplicado de un paciente menor de edad
   private _validarDuplicadoMenor(cedulaRep: string, nombreRep: string, apellidoRep: string): boolean {
     const cedulaRepNorm = cedulaRep.trim().toLowerCase();
     const nombreRepNorm = nombreRep.trim().toLowerCase();
@@ -196,11 +188,7 @@ export default class Cl_mLaboratorio {
     let filtradas = this._ordenes;
 
     const nombreNormalizado = filtros.examen.trim().toLowerCase();
-    
-    // Agrupar examenes de todas las ordenes (no prefiltramos las ordenes por examen, 
-    // sino que filtramos los examenes resultantes al final para que el total de 
-    // esa orden no contamine otros estudios).
-    
+    // Conteo de examenes
     const conteoExamenes: { [key: string]: number } = {};
 
     filtradas.forEach(orden => {

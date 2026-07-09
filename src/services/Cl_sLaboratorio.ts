@@ -2,30 +2,23 @@ import Cl_sMockApi from "./Cl_sMockApi.js";
 
 export default class Cl_sLaboratorio extends Cl_sMockApi {
 
-  /**
-   * Obtiene todos los estudios del catálogo
-   */
+  // Metodo que permite obtener todos los estudios del catálogo
   static async obtenerEstudios(): Promise<any[]> {
     const resultado = await super.getTabla({ tabla: "estudios" });
     return resultado.tabla;
   }
-
-  /**
-   * Registra un nuevo estudio en el catálogo con validación básica
-   */
+  // Metodo que permite obtener todos los pacientes del catálogo
   static async registrarEstudioCatalogo(nuevoEstudio: any): Promise<{ ok: boolean; mensaje: string }> {
-    // ✅ VALIDACIÓN: Datos básicos obligatorios
+    // VALIDACIÓN: Datos básicos obligatorios
     if (!nuevoEstudio.nombre || String(nuevoEstudio.nombre).trim() === "") {
       return { ok: false, mensaje: "El nombre del estudio es obligatorio." };
     }
     return super.agregar(nuevoEstudio, "estudios");
   }
 
-  /**
-   * Elimina un estudio del catálogo por su ID de MockAPI
-   */
+  // Metodo que permite eliminar un estudio del catálogo
   static async eliminarEstudioCatalogo(id: string): Promise<{ ok: boolean; mensaje: string }> {
-    // ✅ VALIDACIÓN: ID obligatorio
+    // VALIDACIÓN: ID obligatorio
     if (!id || id.trim() === "") {
       return { ok: false, mensaje: "El ID del estudio es obligatorio para eliminarlo." };
     }
@@ -36,11 +29,7 @@ export default class Cl_sLaboratorio extends Cl_sMockApi {
       : { ok: false, mensaje: "No se pudo eliminar el estudio." };
   }
 
-  // --- Métodos de Configuración Financiera ---
-
-  /**
-   * Obtiene la tasa de cambio dinámica desde la configuración remota
-   */
+  // Metodos de Configuración Financiera
   static async obtenerTasaDinamica(): Promise<number> {
     const resultado = await super.getRegistro({ tabla: "config", id: 1 });
     if (resultado.ok && resultado.data && resultado.data.tasaCambio) {
@@ -49,11 +38,9 @@ export default class Cl_sLaboratorio extends Cl_sMockApi {
     return 40.50;
   }
 
-  /**
-   * Actualiza la tasa de cambio dinámica con validación
-   */
+  // Metodo que permite actualizar la tasa de cambio dinámica con validación
   static async actualizarTasaDinamica(nuevaTasa: number): Promise<{ ok: boolean; mensaje: string }> {
-    // ✅ VALIDACIÓN: Tasa debe ser número positivo
+    // VALIDACIÓN: Tasa debe ser número positivo
     if (isNaN(nuevaTasa) || nuevaTasa <= 0) {
       return { ok: false, mensaje: "La tasa de cambio debe ser un número positivo." };
     }
@@ -64,30 +51,22 @@ export default class Cl_sLaboratorio extends Cl_sMockApi {
       : { ok: false, mensaje: "Error al actualizar la tasa de cambio." };
   }
 
-  // --- Métodos de Órdenes ---
-
-  /**
-   * Obtiene todas las órdenes registradas
-   */
+  // Metodos de Órdenes
   static async obtenerOrdenes(): Promise<any[]> {
     const resultado = await super.getTabla({ tabla: "ordenes" });
     return resultado.tabla;
   }
 
-  /**
-   * Busca una orden por su ID de MockAPI
-   */
+  // Metodo que permite buscar una orden por su ID de MockAPI
   static async buscarOrdenPorId(id: string): Promise<any> {
     if (!id || id.trim() === "") return null;
     const resultado = await super.getRegistro({ tabla: "ordenes", id });
     return resultado.ok ? resultado.data : null;
   }
 
-  /**
-   * Registra una nueva orden con validaciones
-   */
+  // Metodo que permite registrar una nueva orden con validaciones
   static async registrarNuevaOrden(orden: any): Promise<{ ok: boolean; mensaje: string }> {
-    // ✅ VALIDACIÓN: Datos básicos obligatorios
+    // VALIDACIÓN: Datos básicos obligatorios
     if (!orden.nombre || String(orden.nombre).trim() === "") {
       return { ok: false, mensaje: "El nombre del paciente es obligatorio." };
     }
@@ -100,9 +79,7 @@ export default class Cl_sLaboratorio extends Cl_sMockApi {
     return super.agregar(orden, "ordenes");
   }
 
-  /**
-   * Elimina una orden por su ID de MockAPI
-   */
+  // Metodo que permite eliminar una orden por su ID de MockAPI
   static async eliminarOrden(id: string): Promise<{ ok: boolean; mensaje: string }> {
     if (!id || id.trim() === "") {
       return { ok: false, mensaje: "El ID de la orden es obligatorio para eliminarla." };
@@ -114,9 +91,7 @@ export default class Cl_sLaboratorio extends Cl_sMockApi {
       : { ok: false, mensaje: "No se pudo eliminar la orden." };
   }
 
-  /**
-   * Actualiza una orden existente por su ID de MockAPI
-   */
+  // Metodo que permite actualizar una orden existente por su ID de MockAPI
   static async actualizarOrden(id: string, datos: any): Promise<{ ok: boolean; mensaje: string }> {
     if (!id || id.trim() === "") {
       return { ok: false, mensaje: "El ID de la orden es obligatorio para actualizarla." };

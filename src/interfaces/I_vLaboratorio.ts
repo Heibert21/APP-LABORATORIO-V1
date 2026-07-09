@@ -72,7 +72,7 @@ export interface I_vLaboratorio {
 
   // --- Impresión ---
   imprimirReporteResultados(orden: Cl_mOrdenBio): void;
-  imprimirReporteCaja(laboratorio: any): void;
+  imprimirReporteCaja(datos: { totalPacientes: number; estudioTop: string; tasa: number; totalUsd: number; totalBs: number }): void;
   onFiltrarEstudiosBusqueda(callback: (texto: string) => void): void;
 
   // --- Lógica de UI delegada al Controlador ---
@@ -91,7 +91,5 @@ export interface I_vLaboratorio {
   mostrarToast(mensaje: string, tipo: "exito" | "error" | "info" | "advertencia"): void;
   mostrarSpinner(): void;
   ocultarSpinner(): void;
-  // REFACTORIZACIÓN MVC: confirm() es una función nativa del navegador (DOM) y no debe llamarse
-  // desde el controlador. La vista es la única capa autorizada a interactuar con el entorno del navegador.
   confirmarAccion(mensaje: string): Promise<boolean>;
 }
