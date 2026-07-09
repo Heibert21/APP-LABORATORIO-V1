@@ -18,32 +18,23 @@ export default class Cl_vBioanalista {
         // Listener para seleccionar y procesar un paciente de la lista de espera
         this.listaEspera.addEventListener("click", (e) => {
             const target = e.target;
-            if (target.classList.contains("btn-atender") && this.manejadorSeleccionarPaciente) {
-                const idOrden = target.dataset.id;
-                this.manejadorSeleccionarPaciente(idOrden);
-            }
+            (target.classList.contains("btn-atender") && this.manejadorSeleccionarPaciente) &&
+                this.manejadorSeleccionarPaciente(target.dataset.id);
         });
         // ALERTA VISUAL EN TIEMPO REAL (Resalta en rojo si el valor ingresado está fuera de los rangos de referencia)
         const panelInputs = document.getElementById("bio_tablaInputs");
         panelInputs.addEventListener("input", (e) => {
             const target = e.target;
-            if (target.classList.contains("input-resultado")) {
+            target.classList.contains("input-resultado") && (() => {
                 const valor = target.value.trim();
                 const fila = target.closest(".fila-medica");
                 const rangoTexto = fila.querySelector(".referencia-texto")?.textContent || "";
                 // REFACTORIZACIÓN MVC: Delegación de la validación al handler provisto por el controlador
                 const esInvalido = this.validadorRangoTexto ? this.validadorRangoTexto(valor, rangoTexto) : false;
-                if (esInvalido) {
-                    fila.classList.add("border-pago");
-                    target.style.color = "red";
-                    target.style.fontWeight = "bold";
-                }
-                else {
-                    fila.classList.remove("border-pago");
-                    target.style.color = "";
-                    target.style.fontWeight = "";
-                }
-            }
+                fila.classList.toggle("border-pago", esInvalido);
+                target.style.color = esInvalido ? "red" : "";
+                target.style.fontWeight = esInvalido ? "bold" : "";
+            })();
         });
     }
     //obtener id de la orden seleccionada
@@ -65,47 +56,43 @@ export default class Cl_vBioanalista {
     }
     //renderizar pacientes en espera
     renderizarPacientesEnEspera(ordenes) {
-        this.listaEspera.innerHTML = "";
-        if (ordenes.length === 0) {
-            this.listaEspera.innerHTML = `<div class="vacio-texto">⏳ No hay muestras pendientes en este momento.</div>`;
-            return;
-        }
-        // REFACTORIZACIÓN CLEAN CODE: Optimización de Renderizado DOM (Evita Reflows)
-        const fragmento = document.createDocumentFragment();
-        ordenes.forEach(o => {
-            const div = document.createElement("div");
-            div.className = "paciente-tarjeta espera";
-            div.innerHTML = `
-        <div>
-          <strong>📋 Orden #${o.id} - 👤 ${o.apellido} ${o.nombre}</strong><br>
-          <small>⏱️ Registro: ${o.fechaRegistro}</small><br>
-          <small>🔬 Estudios: ${o.examenesSolicitados}</small>
-        </div>
-        <button type="button" class="btn-atender" data-id="${o.id}">Procesar</button>
-      `;
-            fragmento.appendChild(div);
-        });
-        this.listaEspera.appendChild(fragmento);
+        this.listaEspera.innerHTML = ordenes.length === 0 ? `<div class="vacio-texto">⏳ No hay muestras pendientes en este momento.</div>` : "";
+        ordenes.length > 0 && (() => {
+            // REFACTORIZACIÓN CLEAN CODE: Optimización de Renderizado DOM (Evita Reflows)
+            const fragmento = document.createDocumentFragment();
+            ordenes.forEach(o => {
+                const div = document.createElement("div");
+                div.className = "paciente-tarjeta espera";
+                div.innerHTML = `
+          <div>
+            <strong>📋 Orden #${o.id} - 👤 ${o.apellido} ${o.nombre}</strong><br>
+            <small>⏱️ Registro: ${o.fechaRegistro}</small><br>
+            <small>🔬 Estudios: ${o.examenesSolicitados}</small>
+          </div>
+          <button type="button" class="btn-atender" data-id="${o.id}">Procesar</button>
+        `;
+                fragmento.appendChild(div);
+            });
+            this.listaEspera.appendChild(fragmento);
+        })();
     }
     //renderizar pacientes atendidos
     renderizarPacientesAtendidos(ordenes) {
-        this.listaAtendidos.innerHTML = "";
-        if (ordenes.length === 0) {
-            this.listaAtendidos.innerHTML = `<li class="vacio-texto">✅ No has procesado órdenes en este turno.</li>`;
-            return;
-        }
-        // REFACTORIZACIÓN CLEAN CODE: Optimización de Renderizado DOM
-        const fragmento = document.createDocumentFragment();
-        ordenes.forEach(o => {
-            const li = document.createElement("li");
-            li.className = "item-atendido";
-            li.innerHTML = `
-        <span>📋 <b>Orden #${o.id}</b> - 👤 ${o.cedula} ${o.apellido} (🔬 ${o.examenesSolicitados})</span>
-        <span class="badge status-listo">✔ ENVIADO</span>
-      `;
-            fragmento.appendChild(li);
-        });
-        this.listaAtendidos.appendChild(fragmento);
+        this.listaAtendidos.innerHTML = ordenes.length === 0 ? `<li class="vacio-texto">✅ No has procesado órdenes en este turno.</li>` : "";
+        ordenes.length > 0 && (() => {
+            // REFACTORIZACIÓN CLEAN CODE: Optimización de Renderizado DOM
+            const fragmento = document.createDocumentFragment();
+            ordenes.forEach(o => {
+                const li = document.createElement("li");
+                li.className = "item-atendido";
+                li.innerHTML = `
+          <span>📋 <b>Orden #${o.id}</b> - 👤 ${o.cedula} ${o.apellido} (🔬 ${o.examenesSolicitados})</span>
+          <span class="badge status-listo">✔ ENVIADO</span>
+        `;
+                fragmento.appendChild(li);
+            });
+            this.listaAtendidos.appendChild(fragmento);
+        })();
     }
     //mostrar formulario de carga de examenes
     mostrarFormularioCarga(orden) {
@@ -160,26 +147,75 @@ export default class Cl_vBioanalista {
     //mostrar toast
     mostrarToast(mensaje, tipo) {
         const container = document.getElementById("toast-container");
-        if (!container)
-            return;
-        const iconos = { exito: "✅", error: "❌", info: "ℹ️", advertencia: "⚠️" };
-        const toast = document.createElement("div");
-        toast.className = `toast ${tipo}`;
-        toast.innerHTML = `<span>${iconos[tipo]}</span><span>${mensaje}</span>`;
-        container.appendChild(toast);
-        // Forzar reflow para asegurar la animación
-        void toast.offsetWidth;
-        toast.classList.add("visible");
-        setTimeout(() => {
-            toast.classList.remove("visible");
-            toast.addEventListener("transitionend", () => toast.remove());
-            // Fallback por si falla transitionend (ej: pestaña inactiva)
-            setTimeout(() => toast.remove(), 400);
-        }, 3500);
+        container && (() => {
+            const iconos = { exito: "✅", error: "❌", info: "ℹ️", advertencia: "⚠️" };
+            const toast = document.createElement("div");
+            toast.className = `toast ${tipo}`;
+            toast.innerHTML = `<span>${iconos[tipo]}</span><span>${mensaje}</span>`;
+            container.appendChild(toast);
+            // Forzar reflow para asegurar la animación
+            void toast.offsetWidth;
+            toast.classList.add("visible");
+            setTimeout(() => {
+                toast.classList.remove("visible");
+                toast.addEventListener("transitionend", () => toast.remove());
+                // Fallback por si falla transitionend (ej: pestaña inactiva)
+                setTimeout(() => toast.remove(), 400);
+            }, 3500);
+        })();
     }
     // REFACTORIZACIÓN MVC: Registro del callback de validación inyectado por el controlador
     onValidarRangoTexto(callback) {
         this.validadorRangoTexto = callback;
+    }
+    confirmarAccion(mensaje) {
+        return new Promise((resolve) => {
+            document.querySelector(".modal-overlay")
+                ? resolve(false)
+                : (() => {
+                    const overlay = document.createElement("div");
+                    overlay.className = "modal-overlay";
+                    const modal = document.createElement("div");
+                    modal.className = "modal-confirm modal-enter";
+                    modal.innerHTML = `
+              <div class="modal-icon">⚠️</div>
+              <div class="modal-body">
+                <p class="modal-text">${mensaje}</p>
+              </div>
+              <div class="modal-actions">
+                <button class="btn-modal-cancel">Cancelar</button>
+                <button class="btn-modal-confirm">Aceptar</button>
+              </div>
+            `;
+                    overlay.appendChild(modal);
+                    document.body.appendChild(overlay);
+                    void modal.offsetWidth;
+                    modal.classList.remove("modal-enter");
+                    const cerrarModal = (resultado) => {
+                        btnConfirm.disabled = true;
+                        btnCancel.disabled = true;
+                        modal.classList.add("modal-leave");
+                        overlay.classList.add("modal-leave-overlay");
+                        let transicionCompletada = false;
+                        const finalizar = () => {
+                            !transicionCompletada && (() => {
+                                transicionCompletada = true;
+                                document.body.contains(overlay) && document.body.removeChild(overlay);
+                                resolve(resultado);
+                            })();
+                        };
+                        modal.addEventListener("transitionend", finalizar);
+                        setTimeout(finalizar, 300);
+                    };
+                    const btnConfirm = modal.querySelector(".btn-modal-confirm");
+                    const btnCancel = modal.querySelector(".btn-modal-cancel");
+                    btnConfirm.addEventListener("mousedown", () => cerrarModal(true));
+                    btnCancel.addEventListener("mousedown", () => cerrarModal(false));
+                    overlay.addEventListener("mousedown", (e) => {
+                        (e.target === overlay) && cerrarModal(false);
+                    });
+                })();
+        });
     }
 }
 //# sourceMappingURL=Cl_vOrdenBio.js.map

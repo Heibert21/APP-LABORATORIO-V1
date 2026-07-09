@@ -16,6 +16,27 @@ export default class Cl_cLaboratorio {
         this.vista.onDespacharOrden((id, metodo) => this.ejecutarDespachoFinalPaciente(id, metodo));
         this.vista.onCambioChecks(() => this.recalcularTotalesEnTiempoReal());
         this.vista.onBuscarCedulaPaciente((cedula) => this.buscarPacientePorCedula(cedula));
+        this.vista.onInputCedula((valor) => {
+            this.vista.setCedula(valor.replace(/\D/g, ""));
+        });
+        this.vista.onInputCedulaRep((valor) => {
+            // Remover caracteres que no sean letras V E o numeros
+            this.vista.setCedulaRep(valor.replace(/[^vVeE0-9-]/g, ""));
+        });
+        // UI events delegating to controller
+        this.vista.onCambioEsMenor((esMenor) => {
+            this.vista.mostrarBloqueRepresentante(esMenor);
+            this.vista.limpiarCamposCedula();
+        });
+        this.vista.onFiltrarEstudiosBusqueda((texto) => {
+            const idsAocultar = this.catalogoEstudiosCoche
+                .filter(estudio => {
+                const contenidoBuscable = `${estudio.codigo || estudio.id} ${estudio.nombre}`.toLowerCase();
+                return !contenidoBuscable.includes(texto.toLowerCase());
+            })
+                .map(e => String(e.id));
+            this.vista.ocultarTarjetasEstudio(idsAocultar);
+        });
         this.vista.onExportarCaja(() => this.procesarExportarCaja());
         this.vista.onEliminarOrdenEspera((id) => this.procesarEliminarOrdenEspera(id));
         this.vista.onEditarOrdenEspera((id) => this.procesarEditarOrdenEspera(id));
@@ -341,6 +362,13 @@ export default class Cl_cLaboratorio {
         if (!ordenActual)
             return;
         this.ordenEnEdicionId = id;
+        const esMenor = (ordenActual.cedula === "MENOR" || ordenActual.cedula.startsWith("CR")) && !!ordenActual.cedulaRepresentante;
+        this.vista.autocompletarPaciente(ordenActual, esMenor);
+        const examenesSolicitadosArray = ordenActual.examenesSolicitados.split(", ").map(e => e.trim().toLowerCase());
+        const idsASeleccionar = this.catalogoEstudiosCoche
+            .filter(e => examenesSolicitadosArray.some(ex => e.nombre.toLowerCase().includes(ex)))
+            .map(e => String(e.id));
+        this.vista.marcarEstudiosPorId(idsASeleccionar);
         this.vista.prepararEdicionOrden(ordenActual);
     }
     // Metodo que permite ejecutar el despacho final de una orden
@@ -382,7 +410,8 @@ export default class Cl_cLaboratorio {
         // Se busca por numero de orden
         const ordenPorId = this.modeloGlobal.ordenes.find(o => String(o.id).trim().toLowerCase() === terminoNorm);
         if (ordenPorId) {
-            this.vista.autocompletarPaciente(ordenPorId);
+            const esMenorPorId = (ordenPorId.cedula === "MENOR" || ordenPorId.cedula.startsWith("CR")) && !!ordenPorId.cedulaRepresentante;
+            this.vista.autocompletarPaciente(ordenPorId, esMenorPorId);
             // Si se buscó por orden, mostramos el historial completo de ese paciente (por cédula)
             const cedulaDeLaOrden = ordenPorId.cedula.trim().toLowerCase();
             const historialDelPaciente = this.modeloGlobal.ordenes.filter(o => o.cedula.trim().toLowerCase() === cedulaDeLaOrden ||
@@ -400,13 +429,22 @@ export default class Cl_cLaboratorio {
         }
         // Tomamos la orden más reciente para autocompletar (la última del array)
         const ordenMasReciente = ordenesDelPaciente[ordenesDelPaciente.length - 1];
-        this.vista.autocompletarPaciente(ordenMasReciente);
+        const esMenor = (ordenMasReciente.cedula === "MENOR" || ordenMasReciente.cedula.startsWith("CR")) && !!ordenMasReciente.cedulaRepresentante;
+        this.vista.autocompletarPaciente(ordenMasReciente, esMenor);
         // Mostramos todo el historial de visitas del paciente
         this.vista.mostrarHistorialPaciente(ordenesDelPaciente);
     }
     // Metodo que permite exportar el cierre de caja
     procesarExportarCaja() {
-        this.vista.imprimirReporteCaja(this.modeloGlobal);
+        // REFACTORIZACIÓN MVC: El controlador calcula los datos y pasa un objeto plano a la vista
+        const datosCaja = {
+            totalPacientes: this.modeloGlobal.calcularTotalPacientesAtendidos(),
+            estudioTop: this.modeloGlobal.obtenerEstudioMasSolicitado(),
+            tasa: this.modeloGlobal.tasaCambio,
+            totalUsd: this.modeloGlobal.calcularMontoTotalUsd(),
+            totalBs: this.modeloGlobal.calcularMontoTotalBs()
+        };
+        this.vista.imprimirReporteCaja(datosCaja);
     }
 }
 //# sourceMappingURL=Cl_cLaboratorio.js.map
